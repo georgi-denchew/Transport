@@ -1,0 +1,530 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="./../index.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui">
+
+    <ui:define name="title">Доставки</ui:define>
+
+    <ui:define name="body">
+        <h:form id="insert-form">
+            <h:panelGrid id="new-delivery-grid" columns="8" cellspacing="5" styleClass="insert-form">
+                <f:facet name="header">
+
+                    <h2>Нова доставка</h2>
+                </f:facet>
+
+                <p:outputLabel for="requested-by" value="Заявено от:"/>
+                <p:inputText id="requested-by" value="#{deliveryController.newDelivery.requestedBy}"/>
+
+                <p:outputLabel for="request-date" value="Дата на заявка:"/>
+                <p:calendar id="request-date"  pattern="dd.MM.yyyy" value="#{deliveryController.newDelivery.requestDate}" />
+
+                <p:outputLabel for="pick-up-date" value="Дата на вдигане:"/>
+                <p:calendar id="pick-up-date"  pattern="dd.MM.yyyy" value="#{deliveryController.newDelivery.pickUpDate}"/>
+
+                <p:outputLabel for="delivery-date" value="Дата на доставка:"/>
+                <p:calendar id="delivery-date"  pattern="dd.MM.yyyy" value="#{deliveryController.newDelivery.deliveryDate}"/>
+
+                <p:outputLabel for="state" value="Статус:"/>
+                <p:selectOneMenu id="state" styleClass="state" value="#{deliveryController.newDelivery.state}">
+                    <f:selectItems value="#{deliveryController.deliveryStatusSelectItems}"/>
+                </p:selectOneMenu>                
+
+                <p:outputLabel for="volume" value="Обем:"/>
+                <p:inputText id="volume" value="#{deliveryController.newDelivery.volume}"/>
+
+                <p:outputLabel for="weight" value="Тегло (кг):"/>
+                <p:inputText id="weight" value="#{deliveryController.newDelivery.weight}"/>
+
+                <p:outputLabel for="billing" value="Фактурирано:"/>
+                <p:inputText id="billing" value="#{deliveryController.newDelivery.billing}"/>
+
+                <p:outputLabel for="pick-up-address" value="Адрес на товариране:"/>
+                <p:inputText id="pick-up-address" value="#{deliveryController.newDelivery.pickUpAddress}"/>
+
+                <p:outputLabel for="delivery-address" value="Адрес на доставка:"/>
+                <p:inputText id="delivery-address" value="#{deliveryController.newDelivery.deliveryAddress}"/>
+
+                <p:outputLabel for="executant" value="Изпълнител:"/>
+                <p:inputText id="executant" value="#{deliveryController.newDelivery.executant}"/>
+
+                <p:outputLabel for="driver" value="Шофьор:"/>
+                <p:inputText id="driver" value="#{deliveryController.newDelivery.driver}"/>
+
+                <p:outputLabel for="price-taken" value="Взета цена:"/>
+                <p:inputText id="price-taken" value="#{deliveryController.newDelivery.priceTaken}"/>
+
+                <p:outputLabel for="price-for-us" value="Цена към нас:"/>
+                <p:inputText id="price-for-us" value="#{deliveryController.newDelivery.priceForUs}"/>
+
+                <p:outputLabel for="remarks" value="Особености:"/>
+                <p:inputText id="remarks" value="#{deliveryController.newDelivery.remarks}"/>
+
+                <p:outputLabel for="direction" value="Посока:"/>
+                <p:selectOneMenu id="direction" styleClass="direction" value="#{deliveryController.deliveryDirectionId}">
+                    <f:selectItems value="#{deliveryController.deliveryDirectionsSelectItems}"/>
+                </p:selectOneMenu>
+
+                <f:facet name="footer">
+                    <p:commandButton id="show-new-delivery"  value="Добави"
+                                     action="#{deliveryController.addNewDelivery}" update=":table-form :growl-form @form" />
+                </f:facet>
+
+            </h:panelGrid>
+        </h:form>
+
+        <h:form id="table-form">
+
+            <h:commandLink>
+                <h:outputText value="Извлечи в Excel"/>
+                <p:dataExporter type="xls" target="hiddenDeliveryList" fileName="dostavki" />
+            </h:commandLink>
+
+            <p:dataTable id="deliveryList" style="table-layout: fixed; font-size: 11px;"
+                         value="#{deliveryController.allDeliveries}" var="delivery" 
+                         editable="true"
+                         widgetVar="deliveriesTableWidget"
+                         rowStyleClass="#{delivery.state}"
+                         >
+
+                <p:ajax event="rowEdit" async="false"  class="edit-button" update="deliveryList direction :growl-form"  listener="#{deliveryController.onEdit}" />
+                <p:ajax immediate="true" event="rowEditCancel" listener="#{deliveryController.onCancelEdit}" 
+                        update="deliveryList :table-form:hiddenDeliveryList :growl-form" 
+                        onstart="if(confirm('Откажи промените?')){tryRemoveFirstRow();}else{ return false;}"/>
+
+                <p:column style="width: 2%">
+                    <p:commandButton value="Файлове"
+                                     type="submit"
+                                     update="@form:attchments-dialog"
+                                     onstart="PF('deleteDialog').hide();"
+                                     oncomplete="PF('attachmentsDialog').show();"
+                                     action="#{deliveryController.fillAttachments(delivery)}"
+                                     >
+                        <f:setPropertyActionListener target="#{deliveryController.selectedDelivery}"
+                                                     value="#{delivery}"/>
+                    </p:commandButton>
+                </p:column>
+                
+                <p:column style="width: 2%;">
+                    <p:commandButton title="Изтрий" icon="ui-icon-trash"
+                                     onstart="PF('attachmentsDialog').hide();"
+                                     oncomplete="PF('deleteDialog').show();"
+                                     update=":delete-dialog"
+                                     >
+                        <f:setPropertyActionListener target="#{deliveryController.selectedDelivery}"
+                                                     value="#{delivery}"/>
+                    </p:commandButton>
+                </p:column>
+                
+                <p:column style="width:2%;">
+                    <p:rowEditor  />
+                </p:column>
+
+                <p:column sortBy="requestedBy" headerText="Заявено от">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{delivery.requestedBy}">
+                            </p:outputLabel>
+                        </f:facet>
+
+                        <f:facet name="input">
+                            <p:inputText value="#{delivery.requestedBy}"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column sortBy="requestDate" headerText="Дата на заявка">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{delivery.requestDate}">
+                                <f:convertDateTime pattern="dd.MM.yyyy"/>
+                            </p:outputLabel>
+                        </f:facet>
+
+                        <f:facet name="input">
+                            <p:calendar value="#{delivery.requestDate}" />  
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column sortBy="pickUpDate" headerText="Дата на вдигане">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{delivery.pickUpDate}">
+                                <f:convertDateTime pattern="dd.MM.yyyy"/>
+                            </p:outputLabel>
+                        </f:facet>
+
+                        <f:facet name="input">
+                            <p:calendar value="#{delivery.pickUpDate}"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column sortBy="deliveryDate" headerText="Дата на доставка">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{delivery.deliveryDate}">
+                                <f:convertDateTime pattern="dd.MM.yyyy"/>
+                            </p:outputLabel>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:calendar value="#{delivery.deliveryDate}"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>     
+
+                <p:column sortBy="state" filterBy="#{delivery.state}" 
+                          filterOptions="#{deliveryController.deliveryStatusFilterSelectItems}"
+                          filterMatchMode="exact"
+                          headerText="Статус">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{deliveryController.getDeliveryStatus(delivery.state)}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:selectOneMenu styleClass="state-row" value="#{delivery.state}">
+                                <f:selectItems value="#{deliveryController.deliveryStatusSelectItems}"/>
+                            </p:selectOneMenu>
+
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column sortBy="volume" headerText="Обем">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{delivery.volume}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{delivery.volume}"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column sortBy="weight" headerText="Тегло(кг)">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{delivery.weight}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{delivery.weight}"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column sortBy="billing" headerText="Фактурирано">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{delivery.billing}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{delivery.billing}"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column sortBy="pickUpAddress" headerText="Адрес на товарене">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{delivery.pickUpAddress}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{delivery.pickUpAddress}"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column sortBy="deliveryAddress" headerText="Адрес на доставка">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{delivery.deliveryAddress}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{delivery.deliveryAddress}"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column sortBy="executant" headerText="Изпълнител">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{delivery.executant}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{delivery.executant}"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column headerText="Шофьор">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{delivery.driver}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{delivery.driver}"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column headerText="Взета цена">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{delivery.priceTaken}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{delivery.priceTaken}"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column headerText="Цена към нас">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{delivery.priceForUs}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{delivery.priceForUs}"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column headerText="Особености">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{delivery.remarks}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{delivery.remarks}"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column headerText="Посока" filterBy="#{delivery.deliverydirection.id}" 
+                          filterOptions="#{deliveryController.deliveryDirectionsFilterSelectItems}"
+                          filterMatchMode="exact">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{delivery.deliverydirection.direction}"/>
+                        </f:facet>
+                        <f:facet name="input">
+
+                            <p:selectOneMenu style="width:150px;" id="direction"  value="#{delivery.deliverydirection.id}">
+                                <f:selectItems value="#{deliveryController.deliveryDirectionsSelectItems}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+
+            </p:dataTable>
+
+            <p:dialog id="attchments-dialog"
+                      header="Прикачени Файлове" 
+                      widgetVar="attachmentsDialog" 
+                      showEffect="blind"
+                      hideEffect="blind"
+                      minHeight="40">
+
+                <p:commandButton styleClass="addFile"
+                                 oncomplete="PF('deliveryDialog').show();"
+                                 value="Добави файл">
+                </p:commandButton>
+
+                <h:panelGrid style="width:500px;">
+                    <p:dataTable styleClass="attachments-table"
+                                 value="#{deliveryController.attachments}"
+                                 var="att" >
+                        <f:facet name="header">
+                            Прикачени файлове
+                        </f:facet>
+                        <p:column>
+                            <p:commandLink ajax="false" id="downloadLink" value="#{att.name}">  
+                                <p:fileDownload value="#{deliveryController.getDownloadFile(att)}" />  
+                            </p:commandLink>
+
+                        </p:column>
+                    </p:dataTable>
+                </h:panelGrid>    
+            </p:dialog>            
+
+            <p:dataTable id="hiddenDeliveryList" style="table-layout: fixed; font-size: 11px;"
+                         value="#{deliveryController.allDeliveries}" var="hiddenDelivery" rendered="false"
+                         editable="false"
+                         >
+                <p:column>
+                    <f:facet name="header">
+                        <p:outputLabel value="Заявено от"/>
+                    </f:facet>
+                    <p:outputLabel value="#{hiddenDelivery.requestedBy}"/>
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header">
+                        <p:outputLabel value="Дата на заявка"/>
+                    </f:facet>
+                    <p:outputLabel value="#{hiddenDelivery.requestDate}">
+                        <f:convertDateTime pattern="dd.MM.yyyy"/>
+                    </p:outputLabel>
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header">
+                        <p:outputLabel value="Дата на вдигане"/>
+                    </f:facet>
+                    <p:outputLabel value="#{hiddenDelivery.pickUpDate}">
+                        <f:convertDateTime pattern="dd.MM.yyyy"/>
+                    </p:outputLabel>
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header">
+                        <p:outputLabel value="Дата на доставка"/>
+                    </f:facet>
+                    <p:outputLabel value="#{hiddenDelivery.deliveryDate}">
+                        <f:convertDateTime pattern="dd.MM.yyyy"/>
+                    </p:outputLabel>
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header">
+                        <p:outputLabel value="Статус"/>
+                    </f:facet>
+                    <p:outputLabel value="#{hiddenDelivery.state}"/>
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header">
+                        <p:outputLabel value="Обем"/>
+                    </f:facet>
+                    <p:outputLabel value="#{hiddenDelivery.volume}"/>
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header">
+                        <p:outputLabel value="Тегло(кг)"/>
+                    </f:facet>
+                    <p:outputLabel value="#{hiddenDelivery.weight}"/>
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header">
+                        <p:outputLabel value="фактурирано"/>
+                    </f:facet>
+                    <p:outputLabel value="#{hiddenDelivery.billing}"/>
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header">
+                        <p:outputLabel value="Адрес на товарене"/>
+                    </f:facet>
+                    <p:outputLabel value="#{hiddenDelivery.pickUpAddress}"/>
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header">
+                        <p:outputLabel value="Адрес на доставка"/>
+                    </f:facet>
+                    <p:outputLabel value="#{hiddenDelivery.deliveryAddress}"/>
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header">
+                        <p:outputLabel value="Изпълнител"/>
+                    </f:facet>
+                    <p:outputLabel value="#{hiddenDelivery.executant}"/>
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header">
+                        <p:outputLabel value="Шофьор"/>
+                    </f:facet>
+                    <p:outputLabel value="#{hiddenDelivery.driver}"/>
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header">
+                        <p:outputLabel value="Взета цена"/>
+                    </f:facet>
+                    <p:outputLabel value="#{hiddenDelivery.priceTaken}"/>
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header">
+                        <p:outputLabel value="Цена към нас"/>
+                    </f:facet>
+                    <p:outputLabel value="#{hiddenDelivery.priceForUs}"/>
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header">
+                        <p:outputLabel value="Особености"/>
+                    </f:facet>
+                    <p:outputLabel value="#{hiddenDelivery.remarks}"/>
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header">
+                        <p:outputLabel value="Посока"/>
+                    </f:facet>
+                    <p:outputLabel value="#{hiddenDelivery.deliverydirection.direction}"/>
+                </p:column>
+            </p:dataTable>
+
+        </h:form>
+
+
+        <p:dialog id="delete-dialog"
+                  header="Изтрий Доставка" 
+                  widgetVar="deleteDialog" 
+                  showEffect="blind"
+                  hideEffect="blind"
+                  minHeight="40">
+            <h:form prependId="false">
+                <h:panelGrid style="width:500px;" columns="2">
+                    <p:outputLabel for="entered-password" value="Парола за изтриване:"/>
+                    <p:password id="entered-password" required="true" requiredMessage="Паролата е задължителна!" value="#{deliveryController.enteredPassword}">
+                        <f:validator validatorId="deleteDeliveryValidator"  />
+                    </p:password>
+                    
+                    <f:facet name="footer">
+                        <p:commandButton value="Изтрий" 
+                                         actionListener="#{deliveryController.deleteDelivery}"
+                                         update=":growl-form :table-form"
+                                         onerror="alert('test');"
+                                         onsuccess="PF('deleteDialog').hide(1000);"/>
+                    </f:facet>
+                </h:panelGrid>    
+            </h:form>
+        </p:dialog>
+
+
+        <p:dialog id="dialog" header="Добавяне на файлове" 
+                  widgetVar="deliveryDialog" resizable="true" 
+                  showEffect="fade" hideEffect="fade">
+            <h:form enctype="multipart/form-data" id="upload-form">
+                <h:panelGrid id="display" columns="1" cellpadding="4">
+                    <p:fileUpload fileUploadListener="#{deliveryController.addFile}"
+                                  mode="advanced" dragDropSupport="true" 
+                                  cancelLabel="Затвори" uploadLabel="Прикачи"
+                                  label="Избери файл" multiple="false" 
+                                  oncomplete="setExpander();"/>
+                </h:panelGrid>
+            </h:form>
+        </p:dialog>
+
+        <h:form id="growl-form">
+
+            <p:growl id="messages" />
+        </h:form>
+
+        <h:outputScript name="./js/script.js"/>
+    </ui:define>
+
+</ui:composition>
