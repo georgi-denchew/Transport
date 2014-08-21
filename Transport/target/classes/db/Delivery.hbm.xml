@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated Jul 28, 2014 10:58:21 PM by Hibernate Tools 3.6.0 -->
+<hibernate-mapping>
+    <class name="db.Delivery" table="delivery" catalog="transport">
+        <id name="id" type="java.lang.Integer">
+            <column name="Id" />
+            <generator class="identity" />
+        </id>
+        <many-to-one name="deliverydirection" class="db.Deliverydirection" fetch="select">
+            <column name="DeliveryDirectionId" not-null="true" />
+        </many-to-one>
+        <property name="requestedBy" type="string">
+            <column name="RequestedBy" length="150" />
+        </property>
+        <property name="requestDate" type="date">
+            <column name="RequestDate" length="10" />
+        </property>
+        <property name="pickUpDate" type="date">
+            <column name="PickUpDate" length="10" />
+        </property>
+        <property name="deliveryDate" type="date">
+            <column name="DeliveryDate" length="10" />
+        </property>
+        <property name="uuid" type="string">
+            <column name="Uuid" length="20" not-null="true" />
+        </property>
+        <property name="state" type="string">
+            <column name="State" length="100" />
+        </property>
+        <property name="volume" type="string">
+            <column name="Volume" length="100" />
+        </property>
+        <property name="weight" type="big_decimal">
+            <column name="Weight" precision="7" />
+        </property>
+        <property name="billing" type="string">
+            <column name="Billing" length="1000" />
+        </property>
+        <property name="pickUpAddress" type="string">
+            <column name="PickUpAddress" length="250" />
+        </property>
+        <property name="deliveryAddress" type="string">
+            <column name="DeliveryAddress" length="250" />
+        </property>
+        <property name="driver" type="string">
+            <column name="Driver" length="100" />
+        </property>
+        <property name="executant" type="string">
+            <column name="Executant" length="100" />
+        </property>
+        <property name="priceTaken" type="big_decimal">
+            <column name="PriceTaken" precision="15" />
+        </property>
+        <property name="priceForUs" type="big_decimal">
+            <column name="PriceForUs" precision="15" />
+        </property>
+        <property name="remarks" type="string">
+            <column name="Remarks" length="500" />
+        </property>
+        <set name="attachments" table="attachment" inverse="true" lazy="true" cascade="delete" fetch="select">
+            <key>
+                <column name="DeliveryId" />
+            </key>
+            <one-to-many class="db.Attachment" />
+        </set>
+    </class>
+</hibernate-mapping>
