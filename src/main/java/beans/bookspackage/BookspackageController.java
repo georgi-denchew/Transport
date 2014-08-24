@@ -112,6 +112,7 @@ public class BookspackageController implements Serializable {
 
         try {
             isDeleted = this.dbHelper.bookspackages.deleteBookspackage(this.selectedBookspackage);
+            this.bookspackagesForTransport.remove(this.selectedBookspackage);
             this.selectedBookspackage = new Bookspackage();
         } catch (Exception e) {
             message = new FacesMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), "");
@@ -257,16 +258,16 @@ public class BookspackageController implements Serializable {
 
         // Send an email if the edited package is for the current transportation and 
         // if it's thursday or later that week
-        if (transportationForBookspackage.getWeekNumber() == currentWeek && currentDayOfWeek >= Calendar.THURSDAY) {
+        //if (transportationForBookspackage.getWeekNumber() == currentWeek && currentDayOfWeek >= Calendar.THURSDAY) {
             String messageText = String.format(
-                    "Пратка с номер %s за транспорт %d/%d беше променена.",
+                    "Пратка с номер %s за транспорт %d/%d беше добавена или променена.",
                     bookspackage.getPackageNumber(),
                     transportationForBookspackage.getWeekNumber(),
                     transportationForBookspackage.getYear());
             MailSender.sendMail(messageText);
             
             
-        }
+        //}
 
     }
 }
