@@ -33,15 +33,15 @@ h2{
 }
 
 a:link, a:visited {
-  color: #045491;
-  font-weight : bold;
-  text-decoration: none;
+    color: #045491;
+    font-weight : bold;
+    text-decoration: none;
 }
 
 a:link:hover, a:visited:hover  {
-  color: #045491;
-  font-weight : bold;
-  text-decoration : underline;
+    color: #045491;
+    font-weight : bold;
+    text-decoration : underline;
 }
 
 .delivery-direction-select-menu{
@@ -49,7 +49,7 @@ a:link:hover, a:visited:hover  {
 }
 
 .toLift{
-    background-color:#FFFF5C !important;
+    background-color:#FFA500 !important;
 }
 .lifted{
     background-color:#FFFF5C !important;
@@ -61,8 +61,8 @@ a:link:hover, a:visited:hover  {
     background-color: #6CE26C !important;
 }
 
-.state, .direction {
-    width: 157px !important;
+.dropdown {
+    width: 99% !important;
 }
 
 .state-row {
@@ -91,4 +91,55 @@ a:link:hover, a:visited:hover  {
 
 .ui-selectonemenu-items-wrapper {
     min-width: 50px !important;
+}
+
+.directionFilterClass{
+    font-size: 1.2em !important;
+    /*background-color: #b66;*/
+    color: #000;
+    position: absolute;
+    top: -5px;
+    left: 310px;
+    width: auto !important;
+}
+
+.deliveryDatatableForm{
+    position:relative;
+}
+
+.outputLabelExclamationMark{
+    background: url('../../images/exclamation_mark.png') no-repeat; 
+    background-size: 70%;
+    background-position: center;
+    height: 24px !important;
+    width: 32px !important;
+    display:block;
+}
+
+.inputLabelExclamationMark {
+    background-image: url('../../images/exclamation_mark_transparent.png') !important;
+    background-repeat: no-repeat !important;
+    background-size: 10% !important;
+    background-position: 99% 50% !important;
+    display:block;
+}
+
+.error-messages{
+    left: 0;
+}
+
+.totals {
+    margin-bottom: 10px !important;
+    display: inline-block;
+}
+
+.totalsOutput {
+    font-size: 0.9em !important;
+    margin: 0;
+    text-align: right;
+    width: 140px;
+}
+
+.errorRow{
+    background-color: #FF4444 !important;
 }

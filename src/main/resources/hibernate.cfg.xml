@@ -27,5 +27,7 @@
         <mapping resource="db/Deliverydirection.hbm.xml"/>
         <mapping resource="db/Bookspackage.hbm.xml"/>
         <mapping resource="db/Delivery.hbm.xml"/>
+        <mapping resource="db/Pulsiodetails.hbm.xml"/>
+        <mapping resource="db/Truckgroup.hbm.xml"/>
     </session-factory>
 </hibernate-configuration>

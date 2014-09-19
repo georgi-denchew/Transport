@@ -45,14 +45,18 @@
                             <p:outputLabel for="title-radio-0" value="Ново Заглавие:"/>
                         </h:panelGroup>
 
-                        <p:inputText disabled="#{!booksController.isNewTitle}" value="#{booksController.selectedBook.title}"/>
+                        <p:inputText disabled="#{!booksController.isNewTitle}" 
+                                     required="true" requiredMessage="Заглавието е задължително!" 
+                                     value="#{booksController.selectedBook.title}"/>
 
                         <h:panelGroup>
                             <p:radioButton id="title-radio-1" for="title-radios" itemIndex="1"/>
                             <p:outputLabel for="title-radio-1" value="Съществуващо Заглавие:"/>
                         </h:panelGroup>
 
-                        <p:selectOneMenu disabled="#{booksController.isNewTitle}" style="width: 99%;" value="#{booksController.selectedBookModelBookNumber}">
+                        <p:selectOneMenu disabled="#{booksController.isNewTitle}" style="width: 99%;" 
+                                         required="true" requiredMessage="Заглавието е задължително!" 
+                                         value="#{booksController.selectedBookModelBookNumber}">
                             <f:selectItems value="#{booksController.allBookModels}" var="bookModel" itemLabel="#{bookModel.title}" itemValue="#{bookModel.bookNumber}"/>
                         </p:selectOneMenu>
 
@@ -67,12 +71,14 @@
                         <f:facet name="footer">
                             <p:commandButton value="Добави"
                                              action="#{booksController.addBook}"
-                                             update="@form" />
+                                             update="@form :books-datatable-form" />
                         </f:facet>
                     </h:panelGrid>
                 </h:panelGrid>
             </h:panelGrid>
-
+        </h:form>
+        <h:form id="books-datatable-form">
+            <p:growl id="books-datatable-growl"/>
             <p:dataTable id="books-datatable"
                          value="#{booksController.books}"
                          editable="true"
@@ -82,9 +88,9 @@
                 </p:column>
 
                 <p:ajax event="rowEdit" async="false"  class="edit-button" 
-                        update="books-datatable @form:books-growl"  listener="#{booksController.onEdit}" />
+                        update="books-datatable @form:books-datatable-growl"  listener="#{booksController.onEdit}" />
                 <p:ajax immediate="true" event="rowEditCancel" listener="#{booksController.onCancelEdit}"
-                        update="books-datatable @form:books-growl" 
+                        update="books-datatable @form:books-datatable-growl" 
                         onstart="if(confirm('Откажи промените?')) return true;"/>
 
                 <p:column width="2%;">                    
@@ -116,7 +122,7 @@
                             <p:outputLabel value="#{book.title}"/>
                         </f:facet>
                         <f:facet name="input">
-                            <p:inputText value="#{book.title}"/>
+                            <p:inputText value="#{book.title}" required="true" requiredMessage="Заглавието е задължително!" />
                         </f:facet>
                     </p:cellEditor>              
                 </p:column>
@@ -139,6 +145,16 @@
                         </f:facet>
                         <f:facet name="input">
                             <p:inputText value="#{book.weight}"/>
+                        </f:facet>
+                    </p:cellEditor>                  
+                </p:column>
+                                <p:column headerText="Тегло за бройка">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{book.weightPerBook}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:outputLabel value="#{book.weightPerBook}"/>
                         </f:facet>
                     </p:cellEditor>                  
                 </p:column>

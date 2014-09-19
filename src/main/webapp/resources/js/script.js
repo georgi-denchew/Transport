@@ -5,17 +5,6 @@
  */
 
 
-//$(document).ready(function() {;
-//    var expanderIndex = sessionStorage.getItem("expanderIndex");
-//
-//    if (expanderIndex) {
-//        var allExpanders = $('.ui-row-toggler');
-//        var expander = allExpanders.get(expanderIndex);
-//        expander.click();
-//
-//        sessionStorage.removeItem("expanderIndex");
-//    }
-//});
 
 var expander;
 
@@ -25,14 +14,6 @@ $(document).on('click', '.addFile', function(e) {
             .prev().find('.ui-row-toggler').first();
 });
 
-//$(document).on('click', '.ui-icon-circle-triangle-e', function (e){
-//    e.preventDefault();
-//    console.log('first test');
-//    var clickedToggler = $(e.target);
-//    var allClickedTogglers = $('.ui-icon-circle-triangle-s');
-//    
-//    
-//});
 
 initialTrigger = true;
 
@@ -42,13 +23,12 @@ var ignoreNext;
 
 function start() {
     var clickedTogglers = $('.ui-icon-circle-triangle-s');
-    
-    
+
+
     if (ignoreNext) {
         ignoreNext = false;
         return;
     }
-    console.log('start');
 
     var length = clickedTogglers.length;
     var i;
@@ -69,7 +49,6 @@ function start() {
 }
 
 function success() {
-    console.log('success');
     var allClickedTogglers = $('.ui-row-toggler.ui-icon-circle-triangle-s');
 
     var i;
@@ -88,17 +67,21 @@ function success() {
     }
 }
 
-$(document).on('click', [".ui-icon-pencil", ".ui-icon-check", ".ui-icon-close"], function(e) {
+$(document).on('click', ".ui-icon-pencil", function(e) {
+    setTimeout(function() {
+        debugger;
+        var editButton = $(e.target);
+        var currentRow = editButton.closest(".ui-widget-content");
 
-    var editButton = $(e.target);
-    var currentRow = editButton.closest(".ui-widget-content");
-    var nextRow = currentRow.next();
-    var isAttachmentsRow = nextRow.hasClass("ui-expanded-row-content");
+        var calendarSpans = currentRow.find("span.inputLabelExclamationMark");
+        
+        if (calendarSpans) {
+            var calendarInputs = calendarSpans.find("input");
+            calendarInputs.addClass("inputLabelExclamationMark");
+        }
+    }, 10);
 
-    if (isAttachmentsRow) {
-        var currentRowToggler = currentRow.find('.ui-row-toggler');
-        currentRowToggler.click();
-    }
+
 });
 
 function setExpander() {
@@ -156,4 +139,42 @@ function startEdit() {
     $(".ui-datatable-data tr").first().find(".ui-icon-pencil").each(function() {
         $(this).click();
     });
+}
+
+$(document).on('keyup', function(event) {
+
+    var editingRow = $(".ui-row-editing");
+
+    if (editingRow.size() > 0) {
+        // if key is 'ESCAPE'
+        if (event.keyCode === 27) {
+            event.preventDefault();
+            event.stopPropagation();
+            var closeButton = editingRow.find(".ui-icon-close");
+            closeButton.click();
+        }
+        // ' when 'ENTER' is a pressed in a widget (e.g. Calendar or Dropdown Menu) the 'keypress' event doesn't work - below stands the workaround
+        else if (event.keyCode === 13) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            var keyPressEvent = jQuery.Event('keypress');
+            keyPressEvent.keyCode = 13;
+            editingRow.trigger(keyPressEvent);
+        }
+    }
+});
+
+$(document).on('keypress', '.ui-row-editing', function(event) {
+    // if key is 'ENTER'
+    if (event.keyCode === 13) {
+        event.preventDefault();
+        event.stopPropagation();
+        var checkButton = $(this).find(".ui-icon-check");
+        checkButton.click();
+    }
+});
+
+function addCalendarsBackgroundImage() {
+    debugger;
 }

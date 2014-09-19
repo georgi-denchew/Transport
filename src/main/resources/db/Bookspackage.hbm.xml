@@ -8,11 +8,27 @@
             <column name="Id" />
             <generator class="identity" />
         </id>
+        <version column="Version" name="version"></version>
         <many-to-one name="transportation" class="db.Transportation" fetch="select">
             <column name="TransportationId" not-null="true" />
         </many-to-one>
+        <many-to-one name="truckGroup" class="db.TruckGroup" fetch="select">
+            <column name="TruckGroupId" />
+        </many-to-one>
         <property name="packageNumber" type="string">
             <column name="PackageNumber" length="20" not-null="true" />
+        </property>
+        <property name="country" type="string">
+            <column name="Country" length="25" not-null="true" />
+        </property>
+        <property name="postalCode" type="string">
+            <column name="PostalCode" length="15" not-null="true" />
+        </property>
+        <property name="phoneNumber" type="string">
+            <column name="PhoneNumber" length="15" not-null="true" />
+        </property>
+        <property name="email" type="string">
+            <column name="Email" length="50" not-null="true" />
         </property>
         <property name="merchant" type="string">
             <column name="Merchant" length="30" />
@@ -32,9 +48,35 @@
 
         <property name="totalBooksCount" type="integer" not-null="true">
             <formula>
-                ( select sum(b.BooksCount * b.BoxesCount)
+                (select sum(b.BooksCount * b.BoxesCount)
                 from Box b
                 where b.PackageId = Id)
+            </formula>
+        </property>
+       
+        <property name="totalBooksWeight" type="double" not-null="true">
+            <formula>
+                (select sum(b.BooksCount * b.BoxesCount * book.WeightPerBook)
+                from Box b
+                inner join Book book
+                on book.Id = b.BookId
+                where b.PackageId = Id)
+            </formula>            
+        </property>
+
+        <property name="totalOrderedBooksCount" type="integer" not-null="true">
+            <formula>
+                (select sum(book.Count)
+                from Book book
+                where book.PackageId = Id)
+            </formula>            
+        </property>
+        
+        <property name="totalOrderedBooksWeight" type="double" not-null="true">
+            <formula>
+                (select sum(book.Weight)
+                from Book book
+                where book.PackageId = Id)
             </formula>            
         </property>
 

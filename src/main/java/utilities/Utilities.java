@@ -5,6 +5,9 @@
  */
 package utilities;
 
+import java.util.Calendar;
+import java.util.Date;
+
 /**
  *
  * @author Georgi
@@ -23,26 +26,46 @@ public class Utilities {
      * @param week Week of the parent's <code>Transportation</code> entity
      * @return generated unique number in the context of the parent entity
      */
-    public static String generateUniqueNumber(String biggestNumber, int year, int week) {
+    public static String generateUniqueBookspackageNumber(String biggestNumber, int year, int week) {
         String newNumber;
 
         if (biggestNumber != null) {
             String[] numberParts = biggestNumber.split(BOOKSPACKAGE_NUMBER_SPLITTER);
 
-            int lastPosition = numberParts.length - 1;
-            String toParse = numberParts[lastPosition];
-            int lastNumber = Integer.parseInt(toParse);
-            lastNumber++;
+            int yearPosition = numberParts.length - 1;
+            String toParse = numberParts[0];
+            int incrementalNumber = Integer.parseInt(toParse);
+            incrementalNumber++;
 
-            newNumber = numberParts[0]
+            newNumber
+                    = incrementalNumber
                     + BOOKSPACKAGE_NUMBER_SPLITTER + numberParts[1]
-                    + BOOKSPACKAGE_NUMBER_SPLITTER + lastNumber;
+                    + BOOKSPACKAGE_NUMBER_SPLITTER + numberParts[yearPosition];
         } else {
-            newNumber = year + BOOKSPACKAGE_NUMBER_SPLITTER
-                    + week + BOOKSPACKAGE_NUMBER_SPLITTER
-                    + String.valueOf(FIRST_BOOKSPACKAGE_NUMBER);
+            newNumber
+                    = String.valueOf(FIRST_BOOKSPACKAGE_NUMBER)
+                    + BOOKSPACKAGE_NUMBER_SPLITTER
+                    + week
+                    + BOOKSPACKAGE_NUMBER_SPLITTER
+                    // get last two numbers of the year
+                    + (year - 2000);
         }
 
         return newNumber;
+    }
+
+    public static String generateDeliveryNumber(String dbBiggestDeliveryNumber, int week, int year) {
+        
+        String result = null;
+        if (dbBiggestDeliveryNumber == null) {
+            
+            result = String.format("G-%s-1-%s", year, week);
+        } else {
+            String[] deliveryNumberArray = dbBiggestDeliveryNumber.split("-");
+            int incrementedNumber = Integer.parseInt(deliveryNumberArray[2]) + 1;
+            result = String.format("G-%s-%s-%s", year, incrementedNumber, week);
+        }
+        
+        return result;
     }
 }

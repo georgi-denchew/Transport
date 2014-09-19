@@ -21,7 +21,6 @@
                     <h2>Нов Транспорт</h2>
                 </f:facet>
 
-
                 <p:outputLabel for="year" value="Година:"/>
                 <p:selectOneMenu id="year"  value="#{transportController.newTransport.year}">
                     <f:selectItems value="#{transportController.years}"/>
@@ -46,8 +45,7 @@
             <p:growl id="transportation-datatable-growl"/>
 
             <p:dataTable id="transportation-datatable" 
-                         value="#{transportController.allTransportations}" 
-                         editable="true"
+                         value="#{transportController.allTransportations}"
                          var="transport">
                 <f:facet name="header">
                     Транспорти
@@ -55,9 +53,10 @@
 
                 <p:column headerText="Навигация" width="10%;">
                     <p:commandButton value="Пратки" ajax="false" action="#{transportController.viewBookspackages(transport)}"/>
-                    <p:commandButton value="Книги" ajax="false" action="#{transportController.viewBooks(transport)}"/>
+                    <!-- not rendered! -->
+                    <p:commandButton rendered="false" value="Книги" ajax="false" action="#{transportController.viewBooks(transport)}"/>
                 </p:column>
-              
+
 
                 <p:ajax event="rowEdit" async="false"  class="edit-button" 
                         update="transportation-datatable @form:transportation-datatable-growl"  listener="#{transportController.onEdit}" />
@@ -75,51 +74,20 @@
                     </p:commandButton>
                 </p:column>
 
-                  <p:column width="2%">
-                    <p:rowEditor />
-                </p:column>
-                
                 <p:column sortBy="weekNumber" headerText="Номер на седмица">
-                    <p:cellEditor>
-                        <f:facet name="output">
-                            <p:outputLabel value="#{transport.weekNumber}">
-                            </p:outputLabel>
-                        </f:facet>
-
-                        <f:facet name="input">
-                            <p:selectOneMenu value="#{transport.weekNumber}" styleClass="min-width-fifty">
-                                <f:selectItems value="#{transportController.weekNumbers}"/>
-                            </p:selectOneMenu>
-                        </f:facet>
-                    </p:cellEditor>
+                    <p:outputLabel value="#{transport.weekNumber}">
+                    </p:outputLabel>
                 </p:column>
 
                 <p:column sortBy="year" headerText="Година">
-                    <p:cellEditor>
-                        <f:facet name="output">
-                            <p:outputLabel value="#{transport.year}">
-                            </p:outputLabel>
-                        </f:facet>
-
-                        <f:facet name="input">
-                            <p:selectOneMenu value="#{transport.year}" styleClass="min-width-seventy">
-                                <f:selectItems value="#{transportController.years}"/>
-                            </p:selectOneMenu>
-                        </f:facet>
-                    </p:cellEditor>
+                    <p:outputLabel value="#{transport.year}">
+                    </p:outputLabel>
                 </p:column>
 
-                <p:column sortBy="deliveryDate" headerText="Начало на седмицата">
-                    <p:cellEditor>
-                        <f:facet name="output">
-                            <p:outputLabel value="#{transport.startDate}">
-                                <f:convertDateTime pattern="dd.MM.yyyy"/>
-                            </p:outputLabel>
-                        </f:facet>
-                        <f:facet name="input">
-                            <p:calendar value="#{transport.startDate}" pattern="dd.MM.yyyy"/>
-                        </f:facet>
-                    </p:cellEditor>
+                <p:column sortBy="deliveryDate" headerText="Петък от седмицата">
+                    <p:outputLabel value="#{transport.startDate}">
+                        <f:convertDateTime pattern="dd.MM.yyyy"/>
+                    </p:outputLabel>                    
                 </p:column>
             </p:dataTable>
         </h:form>

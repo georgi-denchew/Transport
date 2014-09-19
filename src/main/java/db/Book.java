@@ -18,6 +18,7 @@ public class Book  implements java.io.Serializable {
      private String title;
      private int count;
      private double weight;
+     private double weightPerBook;
      private Set boxes = new HashSet(0);
 
     public Book() {
@@ -32,7 +33,7 @@ public class Book  implements java.io.Serializable {
         this.count = count;
         this.weight = weight;
     }
-    public Book(Bookspackage bookspackage, Transportation transportation, String bookNumber, String title, int count, double weight, Set boxes) {
+    public Book(Bookspackage bookspackage, Transportation transportation, String bookNumber, String title, int count, double weight, double weightPerBook, Set boxes) {
        this.bookspackage = bookspackage;
        this.transportation = transportation;
        this.bookNumber = bookNumber;
@@ -40,6 +41,7 @@ public class Book  implements java.io.Serializable {
        this.count = count;
        this.weight = weight;
        this.boxes = boxes;
+       this.weightPerBook = weightPerBook;
     }
    
     public Integer getId() {
@@ -99,7 +101,13 @@ public class Book  implements java.io.Serializable {
         this.boxes = boxes;
     }
 
+    public double getWeightPerBook() {
+        return weightPerBook;
+    }
 
+    public void setWeightPerBook(double weightPerBook) {
+        this.weightPerBook = weightPerBook;
+    }
 
 
 }

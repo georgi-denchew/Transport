@@ -26,6 +26,9 @@
         <property name="weight" type="double">
             <column name="Weight" precision="22" scale="0" not-null="true" />
         </property>
+                <property name="weightPerBook" type="double">
+            <column name="WeightPerBook" precision="22" scale="0" not-null="true" />
+        </property>
         <set name="boxes" table="box" inverse="true" lazy="true" cascade="delete" fetch="select">
             <key>
                 <column name="BookId" not-null="true" />

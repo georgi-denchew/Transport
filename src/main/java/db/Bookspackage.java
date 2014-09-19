@@ -12,7 +12,13 @@ import org.hibernate.annotations.Formula;
 public class Bookspackage implements java.io.Serializable {
 
     private Integer id;
+    private Integer version;
     private Transportation transportation;
+    private TruckGroup truckGroup;
+    private String country;
+    private String postalCode;
+    private String phoneNumber;
+    private String email;
     private String packageNumber;
     private String merchant;
     private String client;
@@ -24,6 +30,9 @@ public class Bookspackage implements java.io.Serializable {
 
 //     @Formula("select sum(b.BooksCount * b.BoxesCount) from box b where b.Id = id")
     private Integer totalBooksCount;
+    private Integer totalOrderedBooksCount;
+    private Double totalBooksWeight;
+    private Double totalOrderedBooksWeight;
     
     public Bookspackage() {
     }
@@ -33,6 +42,31 @@ public class Bookspackage implements java.io.Serializable {
         this.packageNumber = packageNumber;
     }
 
+    public Bookspackage(Integer id, Integer version, Transportation transportation, TruckGroup truckGroup,
+            String country, String postalCode, String phoneNumber, String email, 
+            String packageNumber, String merchant, String client, Date deliveryDate,
+            String deliveryAddress, String remarks, Integer totalBooksCount, Integer totalOrderedBooksCount,
+            Double totalBooksWeight, Double totalOrderedBooksWeight) {
+        this.id = id;
+        this.version = version;
+        this.transportation = transportation;
+        this.truckGroup = truckGroup;
+        this.country = country;
+        this.postalCode = postalCode;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.packageNumber = packageNumber;
+        this.merchant = merchant;
+        this.client = client;
+        this.deliveryDate = deliveryDate;
+        this.deliveryAddress = deliveryAddress;
+        this.remarks = remarks;
+        this.totalBooksCount = totalBooksCount;
+        this.totalOrderedBooksCount = totalOrderedBooksCount;
+        this.totalBooksWeight = totalBooksWeight;
+        this.totalOrderedBooksWeight = totalOrderedBooksWeight;
+    }
+    
     public Bookspackage(Transportation transportation, String packageNumber, String merchant, String client, Date deliveryDate, String deliveryAddress, String remarks, Set books, Set boxes) {
         this.transportation = transportation;
         this.packageNumber = packageNumber;
@@ -131,6 +165,78 @@ public class Bookspackage implements java.io.Serializable {
 
     public void setTotalBooksCount(Integer totalBooksCount) {
         this.totalBooksCount = totalBooksCount;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getPostalCode() {
+        return postalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public TruckGroup getTruckGroup() {
+        return truckGroup;
+    }
+
+    public void setTruckGroup(TruckGroup truckGroup) {
+        this.truckGroup = truckGroup;
+    }
+
+    public Integer getTotalOrderedBooksCount() {
+        return totalOrderedBooksCount;
+    }
+
+    public void setTotalOrderedBooksCount(Integer totalOrderedBooksCount) {
+        this.totalOrderedBooksCount = totalOrderedBooksCount;
+    }
+
+    public Double getTotalBooksWeight() {
+        return totalBooksWeight;
+    }
+
+    public void setTotalBooksWeight(Double totalBooksWeight) {
+        this.totalBooksWeight = totalBooksWeight;
+    }
+
+    public Double getTotalOrderedBooksWeight() {
+        return totalOrderedBooksWeight;
+    }
+
+    public void setTotalOrderedBooksWeight(Double totalOrderedBooksWeight) {
+        this.totalOrderedBooksWeight = totalOrderedBooksWeight;
     }
 
 }

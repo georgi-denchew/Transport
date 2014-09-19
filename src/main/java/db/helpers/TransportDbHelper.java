@@ -18,6 +18,7 @@ public class TransportDbHelper implements Serializable{
     public final BookspackagesHelper bookspackages;
     public final BooksHelper books;
     public final BoxesHelper boxes;
+    public final PulsioDetailsHelper pulsio;
     
     public TransportDbHelper() {
         this.deliveries = new DeliveriesHelper();
@@ -25,5 +26,6 @@ public class TransportDbHelper implements Serializable{
         this.bookspackages = new BookspackagesHelper();
         this.books = new BooksHelper();
         this.boxes = new BoxesHelper();
+        this.pulsio = new PulsioDetailsHelper();
     }    
 }

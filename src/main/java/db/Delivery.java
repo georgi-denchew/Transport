@@ -16,7 +16,7 @@ public class Delivery  implements java.io.Serializable {
      private Integer id;
      private Deliverydirection deliverydirection;
      private String requestedBy;
-     private Date requestDate;
+     private String deliveryNumber;
      private Date pickUpDate;
      private Date deliveryDate;
      private String uuid;
@@ -33,6 +33,7 @@ public class Delivery  implements java.io.Serializable {
      private String remarks;
      private Set attachments = new HashSet(0);
 
+     private Integer version;
     public Delivery() {
     }
 
@@ -41,10 +42,10 @@ public class Delivery  implements java.io.Serializable {
         this.deliverydirection = deliverydirection;
         this.uuid = uuid;
     }
-    public Delivery(Deliverydirection deliverydirection, String requestedBy, Date requestDate, Date pickUpDate, Date deliveryDate, String uuid, String state, String volume, BigDecimal weight, String billing, String pickUpAddress, String deliveryAddress, String driver, String executant, BigDecimal priceTaken, BigDecimal priceForUs, String remarks, Set attachments) {
+    public Delivery(Deliverydirection deliverydirection, String requestedBy, String deliveryNumber, Date pickUpDate, Date deliveryDate, String uuid, String state, String volume, BigDecimal weight, String billing, String pickUpAddress, String deliveryAddress, String driver, String executant, BigDecimal priceTaken, BigDecimal priceForUs, String remarks, Set attachments, Integer version) {
        this.deliverydirection = deliverydirection;
        this.requestedBy = requestedBy;
-       this.requestDate = requestDate;
+       this.deliveryNumber = deliveryNumber;
        this.pickUpDate = pickUpDate;
        this.deliveryDate = deliveryDate;
        this.uuid = uuid;
@@ -60,6 +61,7 @@ public class Delivery  implements java.io.Serializable {
        this.priceForUs = priceForUs;
        this.remarks = remarks;
        this.attachments = attachments;
+       this.version = version;
     }
    
     public Integer getId() {
@@ -83,12 +85,12 @@ public class Delivery  implements java.io.Serializable {
     public void setRequestedBy(String requestedBy) {
         this.requestedBy = requestedBy;
     }
-    public Date getRequestDate() {
-        return this.requestDate;
+    public String getDeliveryNumber() {
+        return this.deliveryNumber;
     }
     
-    public void setRequestDate(Date requestDate) {
-        this.requestDate = requestDate;
+    public void setDeliveryNumber(String deliveryNumber) {
+        this.deliveryNumber = deliveryNumber;
     }
     public Date getPickUpDate() {
         return this.pickUpDate;
@@ -196,9 +198,15 @@ public class Delivery  implements java.io.Serializable {
         this.attachments = attachments;
     }
 
+    public Integer getVersion() {
+        return version;
+    }
 
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
 
-
+    
 }
 
 

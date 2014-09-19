@@ -5,11 +5,13 @@
  */
 package models;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Georgi
  */
-public class BookExtendedModel {
+public class BookExtendedModel implements Serializable {
 
     private String title;
     private String bookNumber;

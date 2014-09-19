@@ -9,6 +9,8 @@ import db.Attachment;
 import db.Delivery;
 import db.Deliverydirection;
 import db.HibernateUtil;
+import db.Transportation;
+import exceptions.ConcurentUpdateException;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -22,7 +24,9 @@ import javax.ejb.Stateless;
 import javax.inject.Named;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
+import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.StaleObjectStateException;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Restrictions;
 
@@ -30,17 +34,20 @@ import org.hibernate.criterion.Restrictions;
  *
  * @author Georgi Ivanov
  */
-@Named(value = "deliveryHelper")  
+@Named(value = "deliveryHelper")
 @Stateless
 public class DeliveriesHelper implements DeliveryHelperLocal, Serializable {
 
     private static final Logger logger = Logger.getLogger(DeliveriesHelper.class.getName());
+
+    private static final String QUERY_MAX_DELIVERY_NUMBER = "select max(delivery.deliveryNumber) from Delivery delivery where delivery.deliveryNumber like :queryParameter";
+
     private Session session;
 
-    public DeliveriesHelper(){
-        
+    public DeliveriesHelper() {
+
     }
-    
+
     @Override
     public List<Delivery> getAllDeliveries() {
 
@@ -96,24 +103,27 @@ public class DeliveriesHelper implements DeliveryHelperLocal, Serializable {
                 DeliveriesHelper.logger.log(Level.SEVERE, ex.getMessage(), delivery);
             } catch (IllegalAccessException ex) {
                 Logger.getLogger(DeliveriesHelper.class.getName()).log(Level.SEVERE, null, ex);
-            } 
+            }
         }
 
         return isEmpty;
     }
 
     @Override
-    public boolean updateDelivery(Delivery delivery) {
+    public boolean updateDelivery(Delivery delivery) throws ConcurentUpdateException {
         boolean updated = false;
         this.session = HibernateUtil.getSessionFactory().openSession();
         Transaction transaction = this.session.beginTransaction();
 
         try {
-
             this.session.saveOrUpdate(delivery);
             transaction.commit();
 
             updated = true;
+        } catch (StaleObjectStateException e) {
+            transaction.rollback();
+            DeliveriesHelper.logger.log(Level.SEVERE, e.getMessage(), delivery);
+            throw new ConcurentUpdateException("Доставката е вече променена. Моля опитайте отново.");
         } catch (HibernateException e) {
             transaction.rollback();
             DeliveriesHelper.logger.log(Level.SEVERE, e.getMessage(), delivery);
@@ -146,24 +156,24 @@ public class DeliveriesHelper implements DeliveryHelperLocal, Serializable {
         this.session.close();
         return delivery;
     }
-    
+
     @Override
     public boolean deleteDelivery(Delivery delivery) {
         boolean isDeleted = false;
-        
+
         this.session = HibernateUtil.getSessionFactory().openSession();
         Transaction transaction = session.beginTransaction();
-        
+
         try {
             this.session.delete(delivery);
             transaction.commit();
             isDeleted = true;
-        } catch(HibernateException e) {
+        } catch (HibernateException e) {
             transaction.rollback();
             DeliveriesHelper.logger.log(Level.SEVERE, e.getMessage(), delivery);
             throw new HibernateException(e);
         }
-        
+
         return isDeleted;
     }
 
@@ -249,5 +259,26 @@ public class DeliveriesHelper implements DeliveryHelperLocal, Serializable {
         this.session.close();
 
         return resultDeliverydirection;
+    }
+
+    public String biggestDeliveryNumber(int week, int year) {
+        String biggestDeliveryNumber = null;
+
+        this.session = HibernateUtil.getSessionFactory().openSession();
+        Transaction transaction = this.session.beginTransaction();
+
+        try {
+            Query query = this.session.createQuery(QUERY_MAX_DELIVERY_NUMBER);
+            String queryParameter = String.format("G-%s-%%-%s", year, week);
+            query.setParameter("queryParameter", queryParameter);
+            biggestDeliveryNumber = (String) query.uniqueResult();
+        } catch (HibernateException e) {
+            transaction.rollback();
+            logger.log(Level.SEVERE, e.getMessage());
+        }
+
+        this.session.close();
+
+        return biggestDeliveryNumber;
     }
 }

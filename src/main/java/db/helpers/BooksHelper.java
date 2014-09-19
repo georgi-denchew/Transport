@@ -12,9 +12,12 @@ import db.Transportation;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import models.BookBoxModel;
 import models.BookExtendedModel;
 import models.BookModel;
 import org.hibernate.Criteria;
@@ -34,6 +37,14 @@ public class BooksHelper implements Serializable {
 
     private static final Logger logger = Logger.getLogger(BooksHelper.class.getName());
 
+    private static final String QUERY_BOOK_BOX_MODELS_BY_PACKAGE = "select bo.bookNumber as bookNumber, bo.title as title, b.booksCount as booksCount, sum(b.boxesCount) as boxesCount "
+        + "from Book bo "
+        + "join bo.boxes b "
+        + "where bo.bookspackage = :bookspackage "
+        + "group by b.booksCount, bo.bookNumber "
+        + "order by bo.bookNumber ";
+
+    
     private Session session;
 
     public BooksHelper() {
@@ -88,6 +99,60 @@ public class BooksHelper implements Serializable {
         return result;
     }
 
+    public List<BookBoxModel> getAllBookBoxModelsByPackage(Bookspackage bookspackage) {
+        this.session = HibernateUtil.getSessionFactory().openSession();
+        Transaction transaction = this.session.beginTransaction();
+
+        List<BookBoxModel> result = new ArrayList<BookBoxModel>();
+
+        try {
+            Query query = this.session.createQuery(QUERY_BOOK_BOX_MODELS_BY_PACKAGE);
+
+            query.setParameter("bookspackage", bookspackage);
+            query.setResultTransformer(Transformers.aliasToBean(BookBoxModel.class));
+            result = (List<BookBoxModel>) query.list();
+
+        } catch (HibernateException e) {
+            transaction.rollback();
+            e.printStackTrace();
+        }
+
+        this.session.close();
+
+        return result;
+    }
+
+    public Map<String, List<BookBoxModel>> getAllBookBoxModelsByTransportation(Transportation transportation) {
+        Map<String, List<BookBoxModel>> result = new HashMap<String, List<BookBoxModel>>();
+
+        this.session = HibernateUtil.getSessionFactory().openSession();
+        Transaction transaction = this.session.beginTransaction();
+
+        try {
+            transportation = (Transportation) this.session.merge(transportation);
+
+            for (Bookspackage bookspackage : transportation.getBookspackages()) {
+                Query query = this.session.createQuery(QUERY_BOOK_BOX_MODELS_BY_PACKAGE);
+
+                query.setParameter("bookspackage", bookspackage);
+                query.setResultTransformer(Transformers.aliasToBean(BookBoxModel.class));
+                List<BookBoxModel> bookBoxModels = (List<BookBoxModel>) query.list();
+                if (bookBoxModels.size() > 0) {
+                    result.put(bookspackage.getPackageNumber(), bookBoxModels);
+                }
+            }
+            
+            transaction.commit();
+        } catch (HibernateException e) {
+            transaction.rollback();
+            logger.log(Level.SEVERE, e.getMessage());
+        } 
+        
+        this.session.close();
+        
+        return result;
+    }
+
     public List<BookModel> getBookModelsByTransportation(Transportation transportation) {
         List<BookModel> resultList = new ArrayList<BookModel>();
 
@@ -98,7 +163,7 @@ public class BooksHelper implements Serializable {
             Criteria criteria = this.session.createCriteria(Book.class);
             criteria.add(Restrictions.eq("transportation", transportation));
             criteria.setProjection(Projections.projectionList()
-                    .add(Projections.property("bookNumber"), "bookNumber")
+                    .add(Projections.groupProperty("bookNumber"), "bookNumber")
                     .add(Projections.property("title"), "title"))
                     .setResultTransformer(Transformers.aliasToBean(BookModel.class));
 
@@ -172,4 +237,5 @@ public class BooksHelper implements Serializable {
 
         return isDeleted;
     }
+
 }

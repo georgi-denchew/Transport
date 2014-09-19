@@ -61,7 +61,7 @@ public class TransportController implements Serializable {
     public String addTransport() {
         String resultPage = null;
 
-        calendar.setWeekDate(newTransport.getYear(), newTransport.getWeekNumber(), Calendar.MONDAY);
+        calendar.setWeekDate(newTransport.getYear(), newTransport.getWeekNumber(), Calendar.FRIDAY);
 
         Date date = calendar.getTime();
         newTransport.setStartDate(date);

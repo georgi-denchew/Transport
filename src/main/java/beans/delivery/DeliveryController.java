@@ -11,13 +11,17 @@ import db.Delivery;
 import db.Deliverydirection;
 import db.helpers.TransportDbHelper;
 import enums.DeliveryStatus;
+import exceptions.ConcurentUpdateException;
 import exceptions.DeliveryFTPDeleteException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -35,6 +39,7 @@ import org.primefaces.event.RowEditEvent;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 import org.primefaces.model.UploadedFile;
+import utilities.Utilities;
 
 /**
  *
@@ -47,7 +52,7 @@ public class DeliveryController implements Serializable {
     private static final String DATATABLE_ID = "table-form:deliveryList";
 
     private String enteredPassword;
-    
+
     private final TransportDbHelper dbHelper;
 
     private Delivery newDelivery;
@@ -76,10 +81,7 @@ public class DeliveryController implements Serializable {
     }
 
     @PostConstruct
-    public void init() {    
-        // TODO: @EJB annotation not working? 
-        //deliveryHelper = new DeliveriesHelper();
-
+    public void init() {
         this.retrieveDeliveries();
         this.generateDeliveryDirectionsSelectItems();
         this.generateDeliveryStatusSelectItems();
@@ -98,20 +100,34 @@ public class DeliveryController implements Serializable {
         String resultPage = null;
 
         DataTable datatable = (DataTable) FacesContext.getCurrentInstance().getViewRoot().findComponent(DATATABLE_ID);
-
         datatable.reset();
 
         FacesMessage message = null;
 
         try {
+            // for copy-case
+            if (this.newDelivery.getId() != null) {
+                this.newDelivery.setId(0);
+            }
+
+            Date currentDate = new Date();
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(currentDate);
+            calendar.setFirstDayOfWeek(Calendar.MONDAY);
+            int weekNumber = calendar.get(Calendar.WEEK_OF_YEAR);
+            int year = calendar.get(Calendar.YEAR) - 2000;
+
+            String dbBiggestDeliveryNumber = this.dbHelper.deliveries.biggestDeliveryNumber(weekNumber, year);
+            String newBiggestDeliveryNumber = Utilities.generateDeliveryNumber(dbBiggestDeliveryNumber, weekNumber, year);
+            this.newDelivery.setDeliveryNumber(newBiggestDeliveryNumber);
+            
             this.setDeliveryDirection(this.newDelivery);
+            
             String uuid = String.valueOf(UUID.randomUUID().getMostSignificantBits());
             this.newDelivery.setUuid(uuid);
 
-            //boolean updated = this.deliveryHelper.updateDelivery(this.newDelivery);
             boolean updated = this.dbHelper.deliveries.updateDelivery(this.newDelivery);
 
-            
             if (updated) {
                 this.allDeliveries.add(0, this.newDelivery);
 
@@ -125,7 +141,7 @@ public class DeliveryController implements Serializable {
             }
 
         } catch (Exception e) {
-            message = new FacesMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), "");
+            message = new FacesMessage(FacesMessage.SEVERITY_ERROR, e.toString(), "");
         }
 
         FacesContext.getCurrentInstance().addMessage(null, message);
@@ -140,14 +156,6 @@ public class DeliveryController implements Serializable {
         FacesMessage message = null;
 
         boolean saveSuccessful = this.saveFile(file, this.selectedDelivery);
-
-//        if (saveSuccessful) {
-//            msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Файлът с име: " + file.getFileName() + " е добавен!", "");
-//        } else {
-//            msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Възникна грешка: файлът не е добавен!", "");
-//        }
-//        FacesContext.getCurrentInstance().addMessage(null, msg);
-//        FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
     }
 
     public void addFileToNewDelivery(FileUploadEvent event) {
@@ -167,15 +175,14 @@ public class DeliveryController implements Serializable {
 
     public void onEdit(RowEditEvent event) {
         FacesMessage message = null;
-
+        Delivery edited = null;
+        int index = -1;
         try {
-            Delivery edited = (Delivery) event.getObject();
+            edited = (Delivery) event.getObject();
             Integer directionId = edited.getDeliverydirection().getId();
 
-            //boolean updated = this.deliveryHelper.updateDelivery(edited);
             boolean updated = this.dbHelper.deliveries.updateDelivery(edited);
 
-            
             if (updated) {
                 Deliverydirection direction = null;
 
@@ -189,6 +196,10 @@ public class DeliveryController implements Serializable {
 
                 message = new FacesMessage(FacesMessage.SEVERITY_INFO, "Доставката е обновена!", "");
             }
+        } catch (ConcurentUpdateException e) {
+            message = new FacesMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), "");
+            this.retrieveDeliveries();
+
         } catch (Exception e) {
             message = new FacesMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), "");
         } finally {
@@ -199,7 +210,6 @@ public class DeliveryController implements Serializable {
     public void onCancelEdit(RowEditEvent event) {
         Delivery delivery = (Delivery) event.getObject();
 
-        //boolean toDelete = this.deliveryHelper.isEmpty(delivery);
         boolean toDelete = this.dbHelper.deliveries.isEmpty(delivery);
 
         if (toDelete) {
@@ -211,7 +221,6 @@ public class DeliveryController implements Serializable {
     }
 
     public List<Attachment> getAttachments(Delivery delivery) {
-        //List<Attachment> attachmentsForDelivery = this.deliveryHelper.getAttachments(delivery);
         List<Attachment> attachmentsForDelivery = this.dbHelper.deliveries.getAttachments(delivery);
 
         return attachmentsForDelivery;
@@ -290,7 +299,6 @@ public class DeliveryController implements Serializable {
     }
 
     private void retrieveDeliveries() {
-//        this.allDeliveries = (ArrayList<Delivery>) deliveryHelper.getAllDeliveries();
         this.allDeliveries = (ArrayList<Delivery>) this.dbHelper.deliveries.getAllDeliveries();
 
     }
@@ -305,14 +313,12 @@ public class DeliveryController implements Serializable {
             String fileName = file.getFileName();
             inputStream = (FileInputStream) file.getInputstream();
 
-            //int deliveryId = delivery.getId();
             String uuid = delivery.getUuid();
             String filePath = ftp.uploadFile(uuid, inputStream, fileName);
 
             if (!filePath.equals("")) {
                 Attachment newAttachment;
                 newAttachment = new Attachment(filePath, contentType);
-//                this.deliveryHelper.addAttachment(delivery, newAttachment);
                 this.dbHelper.deliveries.addAttachment(delivery, newAttachment);
 
                 isSaved = true;
@@ -326,14 +332,13 @@ public class DeliveryController implements Serializable {
     }
 
     private void generateDeliveryDirectionsSelectItems() {
-//        this.deliveryDirectionsList = deliveryHelper.getAllDeliveryDirections();
         this.deliveryDirectionsList = this.dbHelper.deliveries.getAllDeliveryDirections();
 
         int count = deliveryDirectionsList.size();
         this.deliveryDirectionsSelectItems = new SelectItem[count];
         this.deliveryDirectionsFilterSelectItems = new SelectItem[count + 1];
 
-        deliveryDirectionsFilterSelectItems[0] = new SelectItem("", "Всички");
+        deliveryDirectionsFilterSelectItems[0] = new SelectItem("", "Всички Посоки");
 
         for (int i = 0; i < count; i++) {
             SelectItem deliveryItem = new SelectItem(

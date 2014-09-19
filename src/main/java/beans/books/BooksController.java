@@ -56,13 +56,14 @@ public class BooksController implements Serializable {
     public void addBook() {
 
         selectedBook.setBookspackage(this.bookspackage);
+        calculateWeightPerBook(selectedBook);
         Transportation currentTransportation = this.bookspackage.getTransportation();
         selectedBook.setTransportation(currentTransportation);
 
         if (this.isNewTitle) {
             String biggestNumber = this.dbHelper.books.getBiggestBookNumberForTransportation(currentTransportation);
 
-            String newNumber = Utilities.generateUniqueNumber(
+            String newNumber = Utilities.generateUniqueBookspackageNumber(
                     biggestNumber,
                     currentTransportation.getYear(),
                     currentTransportation.getWeekNumber());
@@ -101,6 +102,9 @@ public class BooksController implements Serializable {
 
         try {
             isDeleted = this.dbHelper.books.deleteBook(this.selectedBook);
+            if (isDeleted){
+                initTranposrtationBooks();
+            }
         } catch (Exception e) {
             message = new FacesMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), "");
             FacesContext.getCurrentInstance().addMessage(null, message);
@@ -124,7 +128,7 @@ public class BooksController implements Serializable {
 
         try {
             Book edited = (Book) event.getObject();
-
+            calculateWeightPerBook(edited);
             boolean updated = this.dbHelper.books.updateBook(edited);
 
             if (updated) {
@@ -223,5 +227,10 @@ public class BooksController implements Serializable {
 
     public void setAllBookModels(List<BookModel> allBookModels) {
         this.allBookModels = allBookModels;
+    }
+
+    private void calculateWeightPerBook(Book selectedBook) {
+        double weightPerBook = selectedBook.getWeight() / selectedBook.getCount();
+        selectedBook.setWeightPerBook(weightPerBook);
     }
 }

@@ -8,14 +8,15 @@
             <column name="Id" />
             <generator class="identity" />
         </id>
+        <version column="Version" name="version"></version>
         <many-to-one name="deliverydirection" class="db.Deliverydirection" fetch="select">
             <column name="DeliveryDirectionId" not-null="true" />
         </many-to-one>
         <property name="requestedBy" type="string">
             <column name="RequestedBy" length="150" />
         </property>
-        <property name="requestDate" type="date">
-            <column name="RequestDate" length="10" />
+        <property name="deliveryNumber" type="string">
+            <column name="DeliveryNumber" length="10" />
         </property>
         <property name="pickUpDate" type="date">
             <column name="PickUpDate" length="10" />
