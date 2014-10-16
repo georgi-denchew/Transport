@@ -11,10 +11,18 @@
         Кашони
     </ui:define>
 
-
     <ui:define name="body">
         <h:form id="boxes-form">
             <p:growl id="boxes-growl"/>
+
+            <p:breadCrumb>
+                <p:menuitem url="/transports/all-transports" value="Всички транспорти" title="Всички транспорти"/>
+                <p:menuitem 
+                    value='Пратки за транспорт "#{boxesController.transportation.weekNumber}/#{boxesController.transportation.year}"' url="/bookspackages/bookspackages"/>
+                <p:menuitem value='Книги за пратка "#{boxesController.bookspackage.packageNumber}"' url="/books/books"/>
+                <p:menuitem value='Кашони за книгa "#{boxesController.book.title}"' url="/boxes/boxes"/>
+            </p:breadCrumb>
+
             <h:panelGrid styleClass="insert-form">
                 <h:panelGrid columns="4" style="margin: 0 auto;">
                     <f:facet name="header">
@@ -37,10 +45,10 @@
                     <h:panelGrid columns="2" cellspacing="5">
 
                         <p:outputLabel value="Брой книги:"/>
-                        <p:inputText value="#{boxesController.newBox.booksCount}"/>
+                        <p:inputText value="#{boxesController.newBox.booksCount}" converterMessage='Полето "Брой книги" трябва да е цяло число!'/>
 
                         <p:outputLabel value="Брой кашони:"/>
-                        <p:inputText value="#{boxesController.newBox.boxesCount}"/>
+                        <p:inputText value="#{boxesController.newBox.boxesCount}" converterMessage='Полето "Брой кашони" трябва да е цяло число!'/>
 
                         <f:facet name="footer">
                             <p:commandButton value="Добави"
@@ -101,6 +109,7 @@
         <p:dialog id="delete-dialog"
                   header="Изтрий Книга" 
                   widgetVar="deleteDialog" 
+                  closeOnEscape="true"
                   showEffect="blind"
                   hideEffect="blind"
                   minHeight="40">

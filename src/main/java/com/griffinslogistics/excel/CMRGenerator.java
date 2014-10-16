@@ -5,8 +5,8 @@
  */
 package com.griffinslogistics.excel;
 
-import db.Bookspackage;
-import db.Pulsiodetails;
+import com.griffinslogistics.db.entities.Bookspackage;
+import com.griffinslogistics.db.entities.Pulsiodetails;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import models.BookspackageCMRModel;
+import com.griffinslogistics.models.BookspackageCMRModel;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -64,7 +64,8 @@ public class CMRGenerator {
                 currentRow = generatePoint2Till9(sheet, styles, currentRow);
 
                 double weight = bookspackageCMRModel.getTotalWeight();
-                currentRow = generatePoints10Till15(weight, sheet, styles, currentRow);
+                Long totalBoxesCount = bookspackageCMRModel.getTotalBoxesCount();
+                currentRow = generatePoints10Till15(totalBoxesCount, weight, sheet, styles, currentRow);
                 currentRow = generatePoint15Till19(sheet, styles, currentRow);
                 currentRow = generatePoint20Till24(sheet, styles, currentRow, pulsioDetails);
 
@@ -95,7 +96,8 @@ public class CMRGenerator {
             currentRow = generatePoint2Till9(sheet, styles, currentRow);
 
             double weight = bookspackageCMRModel.getTotalWeight();
-            currentRow = generatePoints10Till15(weight, sheet, styles, currentRow);
+            Long totalBoxesCount = bookspackageCMRModel.getTotalBoxesCount();
+            currentRow = generatePoints10Till15(totalBoxesCount, weight, sheet, styles, currentRow);
             currentRow = generatePoint15Till19(sheet, styles, currentRow);
             currentRow = generatePoint20Till24(sheet, styles, currentRow, pulsioDetails);
 
@@ -534,7 +536,7 @@ public class CMRGenerator {
         return currentRow;
     }
 
-    private static int generatePoints10Till15(double weight, XSSFSheet sheet, Map<String, CellStyle> styles, int currentRow) {
+    private static int generatePoints10Till15(Long totalBoxesCount, double weight, XSSFSheet sheet, Map<String, CellStyle> styles, int currentRow) {
 
         currentRow++;
         Row row31 = sheet.createRow(currentRow);
@@ -582,7 +584,7 @@ public class CMRGenerator {
         currentRow++;
         Row row33 = sheet.createRow(currentRow);
         Cell packagesCountCell = row33.createCell(1);
-        packagesCountCell.setCellValue(1300);
+        packagesCountCell.setCellValue(totalBoxesCount);
         packagesCountCell.setCellStyle(styles.get(CONTENT_MIDDLE_ALLIGN_RIGHT_STYLE));
 
         Cell packagingMethodCell = row33.createCell(2);

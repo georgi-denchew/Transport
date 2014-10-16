@@ -7,7 +7,7 @@ create table deliverydirection
 (
 Id int not null primary key auto_increment,
 Direction varchar(100) not null
-);
+) ENGINE=InnoDB;
 
 create table delivery
 (
@@ -30,8 +30,8 @@ PriceForUs decimal(15,2),
 Remarks varchar(500),
 DeliveryDirectionId int not null,
 Version int not null,
-foreign key (DeliveryDirectionId) references deliveryDirection(Id)
-);
+foreign key (DeliveryDirectionId) references deliverydirection(Id)
+) ENGINE=InnoDB;
 
 create table attachment
 (
@@ -40,9 +40,9 @@ FilePath varchar(1000),
 ContentType varchar(100),
 DeliveryId int,
 foreign key (DeliveryId) references delivery(Id)
-);
+) ENGINE=InnoDB;
 
-insert into deliveryDirection (Direction) values
+insert into deliverydirection (Direction) values
 ( 'Внос'), ('Износ'), ('Фр-Фр');
 
 create table transportation
@@ -51,13 +51,13 @@ Id int not null primary key auto_increment,
 WeekNumber int not null,
 `Year` int not null,
 StartDate date not null
-);
+) ENGINE=InnoDB;
 
 
 create table truckGroup(
 Id int not null primary key auto_increment,
 `Name` varchar(30) not null
-);
+) ENGINE=InnoDB;
 
 insert into truckGroup(Name) values
 ('1'),
@@ -72,39 +72,60 @@ insert into truckGroup(Name) values
 ('10')
 ;
 
-create table booksPackage
+create table bookspackage
 (
 Id int not null primary key auto_increment,
-PackageNumber varchar(20) not null,
-Country varchar(25) not null,
-PostalCode varchar(15) not null,
-PhoneNumber varchar(15) not null,
-Email varchar(50) not null,
+PackageNumber varchar(20),
+Country varchar(25),
+PostalCode varchar(15),
+PhoneNumber varchar(15),
+Email varchar(50),
 Merchant varchar(30),
 Client varchar(70),
 DeliveryDate date,
 DeliveryAddress varchar(100),
 Remarks varchar(500),
-Version int not null,
-TransportationId int not null,
+PrintDeliveryDay varchar(10),
+Version int default 1,
+TransportationId int,
 TruckGroupId int,
 foreign key (TransportationId) references transportation(Id),
 foreign key (TruckGroupId) references truckGroup(Id)
-);
+) ENGINE=InnoDB;
+
+
+create table bookspackagehistory
+(
+Id int not null primary key auto_increment,
+LastModification timestamp not null,
+Country varchar(25),
+PostalCode varchar(15),
+PhoneNumber varchar(15),
+Email varchar(50),
+Merchant varchar(30),
+Client varchar(70),
+DeliveryDate date,
+DeliveryAddress varchar(100),
+Remarks varchar(500),
+PrintDeliveryDay varchar(10),
+TruckGroupName varchar(30),
+PackageId int not null,
+foreign key (PackageId) references bookspackage(Id)
+) ENGINE=InnoDB;
 
 create table book
 (
 Id int not null primary key auto_increment,
-BookNumber varchar(30) not null,
-Title varchar(50) not null,
+BookNumber int not null,
+Title varchar(50) ,
 `Count` int not null,
 Weight double not null,
 WeightPerBook double not null,
 PackageId int not null,
 TransportationId int not null,
-foreign key (PackageId) references booksPackage(Id),
+foreign key (PackageId) references bookspackage(Id),
 foreign key (TransportationId) references transportation(Id)
-);
+) ENGINE=InnoDB;
 
 create table box 
 (
@@ -114,27 +135,31 @@ BoxesCount int not null,
 BookId int not null,
 PackageId int not null,
 foreign key(BookId) references book(Id),
-foreign key (PackageId) references booksPackage(Id)
-);
+foreign key (PackageId) references bookspackage(Id)
+) ENGINE=InnoDB;
 
-
-create table pulsioDetails(
+create table pulsiodetails(
 Id int not null primary key auto_increment,
-Contact1 varchar(20) not null,
-Contact2 varchar(20) not null,
+Contact1 varchar(20),
+Contact2 varchar(20),
+Password varchar(30),
 Logo blob,
 Signature blob
-);
+) ENGINE=InnoDB;
 
 
-Insert into pulsioDetails (Contact1, Contact2, Logo) values(
-'09 70 44 06 46', '09 70 40 75 02');
+Insert into pulsiodetails (Contact1, Contact2, Password) values(
+'09 70 44 06 46', '09 70 40 75 02', 'm4r70');
 
+alter table bookspackage modify country varchar(50);
+alter table bookspackage modify phoneNumber varchar(100);
+alter table bookspackage modify email varchar(100);
+alter table bookspackage modify client varchar(100);
 
--- ALTER BOOKSPACKAGE SCRIPT
---alter table bookspackage 
--- add Version integer not null,
--- add Country varchar(25) not null,
--- add PostalCode varchar(15) not null,
--- add PhoneNumber varchar(15) not null,
--- add Email varchar(50) not null;
+alter table bookspackagehistory modify country varchar(50);
+alter table bookspackagehistory modify phoneNumber varchar(100);
+alter table bookspackagehistory modify email varchar(100);
+alter table bookspackagehistory modify client varchar(100);
+alter table bookspackagehistory modify truckGroupName varchar(100);
+
+alter table book modify title varchar(200);

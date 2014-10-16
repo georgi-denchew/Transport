@@ -3,6 +3,7 @@
 <hibernate-reverse-engineering>
   <schema-selection match-catalog="transport"/>
   <table-filter match-name="bookspackage"/>
+  <table-filter match-name="bookspackagehistory"/>
   <table-filter match-name="attachment"/>
   <table-filter match-name="transportation"/>
   <table-filter match-name="delivery"/>

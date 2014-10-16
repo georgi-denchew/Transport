@@ -1,36 +1,230 @@
+@font-face {
+    font-family: 'Cabin-Regular';
+    font-style: normal;
+    font-weight: normal;
+    src: local('Cabin-Regular'), url('../../r/fonts/Cabin-Regular.otf') format('truetype');
+}
 body {
-    background-color: #ffffff;
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    /*background: #2baeb3;*/ /* blue-green design*/
+    background: #BBBEC3;
+
     font-size: 12px;
-    font-family: Verdana, "Verdana CE",  Arial, "Arial CE", "Lucida Grande CE", lucida, "Helvetica CE", sans-serif;
-    color: #000000;  
-    margin: 10px;
+    font-family: Arial;
+    color: #4f4f4f;  
 }
 
 h1 {
-    font-family: Arial, "Arial CE", "Lucida Grande CE", lucida, "Helvetica CE", sans-serif;
-    border-bottom: 1px solid #AFAFAF; 
     font-size:  16px;
-    font-weight: bold;
     margin: 0px;
     padding: 0px;
-    color: #D20005;
 }
-dd
-h2{
+dd h2{
     font-weight: normal;
+    font-size: inherit !important;
+}
+
+.ui-state-default {
+    color: #4f4f4f;
+
+    text-shadow: none !important;
+    /*background: #60CD9B !important; blue-green design*/
+    background: #D4D2D1 !important;
+    box-shadow: none !important;
+    /*border: 1px solid #60AB9B !important; blue-green design*/
+    border: 1px solid #B3B1B1 !important;
+
+}
+
+.ui-state-highlight .ui-icon {
+    background-image: url("/Transport/javax.faces.resource/images/ui-icons_616161_256x240.png.xhtml?ln=primefaces-aristo");
+}
+
+.ui-widget-header {
+    text-shadow: none !important;
+}
+
+.ui-datatable-header {
+    /*background: #60CD9B; blue-green design*/
+    background: #D4D2D1;
+    border:none;
+    padding:5px !important;
+}
+
+.ui-datatable-odd {
+    background: none repeat scroll 0 0 #FFFFFF;
+}
+
+.ui-button, .ui-button-text-only{
+    background-size: 100%;
+    /*background: #60CD9B !important; blue-green design*/
+    background: #D4D2D1 !important;
+    border:none !important;
+    border-radius: 0;
+}
+
+.ui-button-text {
+    /*border-top: 1px solid #60CD9B; blue-green-design*/
+    border-top: 1px solid #D4D2D1;
+}
+
+.ui-button.ui-state-default {
+    border:none;
+}
+
+.ui-button.ui-state-hover {
+    /*background: #60CD9B !important; blue-green design*/
+    background: #D4D2D1 !important;
+}
+.ui-splitbutton-menubutton{
+    background: #BBB !important;
+}
+
+.ui-splitbutton-menubutton.ui-state-default{
+    background: #BBB !important;
+}
+
+.ui-selectonemenu, .ui-selectonemenu-panel {
+    border-radius: 0px;
+}
+
+.ui-selectonemenu-label, .ui-selectonemenu-items {
+    /*background: #60CD9B !important;*/
+    background: #D4D2D1 !important;
+}
+
+.ui-selectonemenu-label {
+    box-shadow: none;
+}
+
+.ui-state-highlight {
+    /*background: #30664D !important;*/
+    border-radius: 0px;
+}
+
+.ui-selectonemenu-items-wrapper .ui-state-hover {
+    background: #bdbdbd !important;
+    box-shadow: none !important;
+}
+
+tr[role="row"], .ui-datatable-empty-message {
+    /*background: #3ABDBF !important;*/
+    background: #E5E6E8;
+}
+
+
+.ui-datatable-odd:hover, .ui-datatable-even:hover {
+    background: #C3C4C8 !important;
+}
+
+.ui-menuitem.ui-state-hover {
+    background: none;
+    box-shadow: none;
+}
+
+.ui-inputfield {
+    border-radius: 0;
+    /*border: 1px solid #60AB9B; blue-green design*/
+    border: 1px solid #B3B1B1;
+}
+
+.ui-selectonemenu-trigger {
+    border-radius: 0px;
+    border: none !important;
+}
+
+.ui-datepicker .ui-datepicker-calendar .ui-state-default {
+    border: none !important;
+    background:  none !important;
+}
+
+.ui-datepicker-header {
+    /*background: #60CD9B !important; blue-green design*/
+    background: #D4D2D1 !important;
+    /*border: 1px solid #60AB9B; blue-green design*/
+    border: 1px solid #B3B1B1;
+}
+
+.ui-widget-content {
+    /*border: 1px solid #60AB9B; blue-green design*/
+    border: 1px solid #B3B1B1;
+    /*background: #60CD9B; blue-green design*/
+    background: #D4D2D1;
+}
+
+.ui-dialog {
+    border-radius: 0;
+    /*background: #2baeb3 !important;*/ /* blue-green design */
+    background: #BBBEC3 !important;
+}
+
+.ui-dialog-titlebar {
+    /*background: #67B0D1; blue-green design*/
+    background: #9AA8BD;
+}
+
+.ui-breadcrumb {
+    background: none;
+    border:none;
+}
+
+.ui-breadcrumb ul li:first-of-type a {
+    background-image: none !important;
+    text-indent: 0;
+    display: block;
+    float: left;
+    height: 21px;
+    line-height: 20px;
+    width: 100%;
+    margin-top: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.ui-menubar {
+    /*background: #67B0D1 !important; blue-green design*/
+    background: #9AA8BD !important;
+    border-radius: 0 !important;
+    border: none;
+}
+
+
+.ui-menuitem-link {
+    text-decoration: none;
+    color: #4f4f4f !important;
+    font-size: 1.1em;
+}
+
+.ui-menuitem-link.ui-corner-all.ui-state-hover {
+    background: inherit !important;
+    font-weight: inherit;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+th[role="columnheader"] {
+    font-size: 11px;
+}
+
+td[role="gridcell"]  input.ui-inputtext {
+    width: 100px;
+    margin: 0 auto;
+    display: block;
 }
 
 .insert-form{
     min-width: 300px;
     margin: 10px auto;
     padding:10px;
-    border:1px solid #afafaf;
-    border-radius: 5px;
-    background: -webkit-linear-gradient(#eee, #ccc); /* For Safari 5.1 to 6.0 */
-    background: -o-linear-gradient(#eee, #ccc); /* For Opera 11.1 to 12.0 */
-    background: -moz-linear-gradient(#eee, #ccc); /* For Firefox 3.6 to 15 */
-    background: linear-gradient(#eee, #ccc); /* Standard syntax (must be last) */
+    /*background: #3BBEC0; blue-green design*/
+    background: #9AA8BD;
 }
+
 
 a:link, a:visited {
     color: #045491;
@@ -69,10 +263,6 @@ a:link:hover, a:visited:hover  {
     width: 99% !important;
 }
 
-.ui-datatable-odd:hover, .ui-datatable-even:hover {
-    background: #ddd !important;
-}
-
 .large-text {
     font-size: 1.3em;
 }
@@ -98,7 +288,7 @@ a:link:hover, a:visited:hover  {
     /*background-color: #b66;*/
     color: #000;
     position: absolute;
-    top: -5px;
+    top: 11px;
     left: 310px;
     width: auto !important;
 }
@@ -108,7 +298,7 @@ a:link:hover, a:visited:hover  {
 }
 
 .outputLabelExclamationMark{
-    background: url('../../images/exclamation_mark.png') no-repeat; 
+    background: url('../../r/images/exclamation_mark.png') no-repeat; 
     background-size: 70%;
     background-position: center;
     height: 24px !important;
@@ -117,9 +307,9 @@ a:link:hover, a:visited:hover  {
 }
 
 .inputLabelExclamationMark {
-    background-image: url('../../images/exclamation_mark_transparent.png') !important;
+    background-image: url('../../r/images/exclamation_mark_transparent.png') !important;
     background-repeat: no-repeat !important;
-    background-size: 10% !important;
+    background-size: 19px !important;
     background-position: 99% 50% !important;
     display:block;
 }
@@ -137,9 +327,13 @@ a:link:hover, a:visited:hover  {
     font-size: 0.9em !important;
     margin: 0;
     text-align: right;
-    width: 140px;
+    display: block;
 }
 
 .errorRow{
-    background-color: #FF4444 !important;
+    background-color: #FF7777 !important;
+}
+
+.books-split-button{
+    min-width:100px;
 }

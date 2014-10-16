@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated Jul 28, 2014 10:58:21 PM by Hibernate Tools 3.6.0 -->
+<hibernate-mapping>
+  <class catalog="transport" name="com.griffinslogistics.db.entities.Delivery" table="delivery">
+    <id name="id" type="java.lang.Integer">
+      <column name="Id"/>
+      <generator class="identity"/>
+    </id>
+    <version column="Version" name="version"/>
+    <many-to-one class="com.griffinslogistics.db.entities.Deliverydirection" fetch="select" name="deliverydirection">
+      <column name="DeliveryDirectionId" not-null="true"/>
+    </many-to-one>
+    <property name="requestedBy" type="string">
+      <column length="150" name="RequestedBy"/>
+    </property>
+    <property name="deliveryNumber" type="string">
+      <column length="10" name="DeliveryNumber"/>
+    </property>
+    <property name="pickUpDate" type="date">
+      <column length="10" name="PickUpDate"/>
+    </property>
+    <property name="deliveryDate" type="date">
+      <column length="10" name="DeliveryDate"/>
+    </property>
+    <property name="uuid" type="string">
+      <column length="20" name="Uuid" not-null="true"/>
+    </property>
+    <property name="state" type="string">
+      <column length="100" name="State"/>
+    </property>
+    <property name="volume" type="string">
+      <column length="100" name="Volume"/>
+    </property>
+    <property name="weight" type="big_decimal">
+      <column name="Weight" precision="7"/>
+    </property>
+    <property name="billing" type="string">
+      <column length="1000" name="Billing"/>
+    </property>
+    <property name="pickUpAddress" type="string">
+      <column length="250" name="PickUpAddress"/>
+    </property>
+    <property name="deliveryAddress" type="string">
+      <column length="250" name="DeliveryAddress"/>
+    </property>
+    <property name="driver" type="string">
+      <column length="100" name="Driver"/>
+    </property>
+    <property name="executant" type="string">
+      <column length="100" name="Executant"/>
+    </property>
+    <property name="priceTaken" type="big_decimal">
+      <column name="PriceTaken" precision="15"/>
+    </property>
+    <property name="priceForUs" type="big_decimal">
+      <column name="PriceForUs" precision="15"/>
+    </property>
+    <property name="remarks" type="string">
+      <column length="500" name="Remarks"/>
+    </property>
+    <set cascade="delete" fetch="select" inverse="true" lazy="true" name="attachments" table="attachment">
+      <key>
+        <column name="DeliveryId"/>
+      </key>
+      <one-to-many class="com.griffinslogistics.db.entities.Attachment"/>
+    </set>
+  </class>
+</hibernate-mapping>

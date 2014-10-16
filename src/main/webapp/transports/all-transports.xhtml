@@ -16,6 +16,11 @@
 
         <h:form id="insert-form">
             <p:growl id="insert-transportation-growl"/>
+            
+            <p:breadCrumb>
+                <p:menuitem title="Всички транспорти" value="Всички транспорти" url="/transports/all-transports"/>
+            </p:breadCrumb>
+            
             <h:panelGrid id="new-delivery-grid" columns="2" cellspacing="5" styleClass="insert-form">
                 <f:facet name="header">
                     <h2>Нов Транспорт</h2>
@@ -47,9 +52,6 @@
             <p:dataTable id="transportation-datatable" 
                          value="#{transportController.allTransportations}"
                          var="transport">
-                <f:facet name="header">
-                    Транспорти
-                </f:facet>
 
                 <p:column headerText="Навигация" width="10%;">
                     <p:commandButton value="Пратки" ajax="false" action="#{transportController.viewBookspackages(transport)}"/>
@@ -95,7 +97,8 @@
         <p:dialog id="delete-dialog"
                   header="Изтрий Транспорт" 
                   widgetVar="deleteDialog" 
-                  showEffect="blind"
+                  closeOnEscape="true"
+                  showEffect="blind"                  
                   hideEffect="blind"
                   minHeight="40">
             <h:form prependId="false">

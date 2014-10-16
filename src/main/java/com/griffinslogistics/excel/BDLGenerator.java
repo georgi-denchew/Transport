@@ -5,7 +5,7 @@
  */
 package com.griffinslogistics.excel;
 
-import db.Pulsiodetails;
+import com.griffinslogistics.db.entities.Pulsiodetails;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import models.BookBoxModel;
+import com.griffinslogistics.models.BookBoxModel;
 import org.apache.poi.hssf.usermodel.HSSFPalette;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
@@ -371,7 +371,7 @@ public class BDLGenerator {
         String cellFormula;
 
         try {
-            String currentBookNumber = bookBoxModels.get(0).getBookNumber();
+            int currentBookNumber = bookBoxModels.get(0).getBookNumber();
 
             for (int i = 0; i < bookBoxModels.size(); i++) {
                 index++;
@@ -380,7 +380,7 @@ public class BDLGenerator {
 
                 Row row = sheet.createRow(index);
 
-                if (!currentBookNumber.equalsIgnoreCase(currentModel.getBookNumber())) {
+                if (currentBookNumber !=currentModel.getBookNumber()) {
                     for (int j = 2; j <= 4; j++) {
                         row.createCell(j).setCellStyle(footerStyle);
                     }

@@ -6,7 +6,8 @@
                 template="./../index.xhtml"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:p="http://primefaces.org/ui"
-                xmlns:f="http://xmlns.jcp.org/jsf/core">
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pe="http://primefaces.org/ui/extensions" >
 
     <ui:define name="title">
         Пратки
@@ -15,7 +16,14 @@
     <ui:define name="body">
         <h:form id="insert-form">
 
-            <p:growl id="bookspackages-growl" />
+            <p:growl id="messages" severity="info, warn" />
+            <p:growl id="error-messages" severity="error" sticky="true" />
+
+            <p:breadCrumb>
+                <p:menuitem url="/transports/all-transports" value="Всички транспорти" title="Всички транспорти"/>
+                <p:menuitem 
+                    value='Пратки за транспорт "#{bookspackageController.transportationForBookspackage.weekNumber}/#{bookspackageController.transportationForBookspackage.year}"' url="/bookspackages/bookspackages"/>
+            </p:breadCrumb>
 
             <h:panelGrid  styleClass="insert-form">
                 <h:panelGrid columns="4" style="margin: 0 auto;">
@@ -42,26 +50,18 @@
 
                     <p:outputLabel value="Държава:" for="country" />
                     <p:inputText id="country" 
-                                 required="true"
-                                 requiredMessage='Полето "Държава" е задължително!' 
                                  value="#{bookspackageController.newBookspackage.country}"/>      
 
                     <p:outputLabel value="Пощенски код:" for="postalCode" />
                     <p:inputText id="postalCode" 
-                                 required="true"
-                                 requiredMessage='Полето "Пощенски код" е задължително!' 
                                  value="#{bookspackageController.newBookspackage.postalCode}"/>      
 
                     <p:outputLabel value="Телефон:" for="phone" />
                     <p:inputText id="phone" 
-                                 required="true"
-                                 requiredMessage='Полето "Телефон" е задължително!' 
                                  value="#{bookspackageController.newBookspackage.phoneNumber}"/>      
 
                     <p:outputLabel value="Email:" for="email" />
                     <p:inputText id="email"
-                                 required="true"
-                                 requiredMessage='Полето "Email" е задължително!' 
                                  value="#{bookspackageController.newBookspackage.email}"/>      
 
                     <p:outputLabel for="delivery-date" value="Доставка най-късно:" />
@@ -69,6 +69,9 @@
 
                     <p:outputLabel for="remarks" value="Особености:" />
                     <p:inputText id="remarks" value="#{bookspackageController.newBookspackage.remarks}"/>
+
+                    <p:outputLabel for="print-delivery-day" value="Ден доставка от печат:" />
+                    <p:inputText id="print-delivery-day" value="#{bookspackageController.newBookspackage.printDeliveryDay}"/>
 
                     <p:outputLabel for="merchant" value="Търговец:" />
                     <p:inputText id="merchant" value="#{bookspackageController.newBookspackage.merchant}"/>
@@ -100,88 +103,105 @@
 
         <h:form id="bookspackages-datatable-form">
 
-            <h:commandLink>
-                <h:outputText value="Извлечи в Excel"/>
-                <p:dataExporter type="xls" target="bookspackages-datatable-hidden" 
-                                fileName="Transport #{bookspackageController.transportationForBookspackage.weekNumber}/#{bookspackageController.transportationForBookspackage.year}" />
-            </h:commandLink>
+            <p:commandButton id="xls" ajax="false" value="Извлечи в Excel" icon="ui-icon-document">  
+                <pe:exporter type="xlsx" target="bookspackages-datatable" 
+                             fileName="Transport #{bookspackageController.transportationForBookspackage.weekNumber}/#{bookspackageController.transportationForBookspackage.year}" />  
+            </p:commandButton>  
+
+            <p:commandButton value="Всички BDL" title="генерирай всички BDL" icon="ui-icon-document" action="#{bookspackageController.getAllBDL}" ajax="false"/>
+            <p:commandButton value="Всички CMR" title="генерирай всички CMR" icon="ui-icon-document" action="#{bookspackageController.getAllCMR}" ajax="false"/>
 
             <p:dataTable id="bookspackages-datatable"
                          value="#{bookspackageController.bookspackagesForTransport}"
+                         filteredValue="#{bookspackageController.filteredBookspackages}"
                          editable="true"
                          var="bookspackage"
-                         rowStyleClass='#{bookspackage.totalBooksCount - bookspackage.totalOrderedBooksCount lt 0 ? "errorRow" : "" }'
                          >
 
-                <p:column headerText="Книги" width="2%;">
-                    <p:commandButton value="Книги" ajax="false" action="#{bookspackageController.viewBooks(bookspackage)}"/>
+                <f:facet rendered="false" name="header">
+                    <h:outputText value="Пратки за Транспорт  #{bookspackageController.transportationForBookspackage.weekNumber}/#{bookspackageController.transportationForBookspackage.year}"/>
+                </f:facet>
+
+                <p:column  exportable="false" headerText="Действия">
+                    <p:splitButton styleClass="books-split-button"
+                        value="Книги" title="Книги"
+                        type="submit" ajax="false"
+                        action="#{bookspackageController.viewBooks(bookspackage)}" >
+                        <p:menuitem
+                            title="генерирай BDL" value="BDL"
+                            icon="ui-icon-document"
+                            action="#{bookspackageController.getBDL}" ajax="false" >
+                            <f:setPropertyActionListener target="#{bookspackageController.selectedBookspackage}"
+                                                         value="#{bookspackage}"/>
+                        </p:menuitem>
+
+                        <p:menuitem
+                            title="генерирай CMR" value="CMR"
+                            icon="ui-icon-document"
+                            action="#{bookspackageController.getCMR}" ajax="false" >
+                            <f:setPropertyActionListener target="#{bookspackageController.selectedBookspackage}"
+                                                         value="#{bookspackage}"/>
+                        </p:menuitem>
+
+                        <p:menuitem 
+                            title="Виж промените" value="Виж промените"
+                            icon="ui-icon-script"
+                            action="#{bookspackageController.fetchBookspackageHistory}"
+                            update=":history-dialog"
+                            oncomplete="PF('historyDialog').show();"
+                            >
+                            <f:setPropertyActionListener target="#{bookspackageController.selectedBookspackage}"
+                                                         value="#{bookspackage}"/>
+                        </p:menuitem>
+
+                        <p:menuitem title="Изтрий" value="Изтрий"
+                                    icon="ui-icon-trash"
+                                    oncomplete="PF('deleteDialog').show();">
+                            <f:setPropertyActionListener target="#{bookspackageController.selectedBookspackage}"
+                                                         value="#{bookspackage}"/>
+                        </p:menuitem>
+                    </p:splitButton>
                 </p:column>
 
-                <p:column width="2%"  headerText="BDL">
-                    <f:facet name="header">
-                        <p:commandButton value="В" title="генерирай всички BDL" icon="ui-icon-document" action="#{bookspackageController.getAllBDL}" ajax="false"/>
-                    </f:facet>
-
-                    <p:commandButton value="B" title="генерирай BDL" icon="ui-icon-document" action="#{bookspackageController.getBDL}" ajax="false">
-                        <f:setPropertyActionListener target="#{bookspackageController.selectedBookspackage}"
-                                                     value="#{bookspackage}"/>
-                    </p:commandButton>
-                </p:column>
-
-                <p:column width="2%" headerText="CMR">
-                    <f:facet name="header">
-                        <p:commandButton value="C" title="генерирай всички CMR" icon="ui-icon-document" action="#{bookspackageController.getAllCMR}" ajax="false"/>
-                    </f:facet>
-
-                    <p:commandButton icon="ui-icon-document" value="C"
-                                     title="генерирай CMR"
-                                     action="#{bookspackageController.getCMR}" ajax="false">
-                        <f:setPropertyActionListener target="#{bookspackageController.selectedBookspackage}"
-                                                     value="#{bookspackage}"/>
-                    </p:commandButton>
-                </p:column>
-                
-                <p:ajax event="rowEdit" async="false"  class="edit-button" 
-                        update=":bookspackages-datatable-form:bookspackages-datatable-hidden  bookspackages-datatable :insert-form:bookspackages-growl :insert-form:totals" 
-                        listener="#{bookspackageController.onEdit}" />
-                
-                <p:ajax immediate="true" event="rowEditCancel" listener="#{bookspackageController.onCancelEdit}"
-                        update="bookspackages-datatable :insert-form:bookspackages-growl" 
-                        onstart="if(confirm('Откажи промените?')) return true;"/>
-
-                <p:column style="width: 2%;">                    
-                    <p:commandButton title="Изтрий" icon="ui-icon-trash"
-                                     oncomplete="PF('deleteDialog').show();">
-                        <f:setPropertyActionListener target="#{bookspackageController.selectedBookspackage}"
-                                                     value="#{bookspackage}"/>
-                    </p:commandButton>
-                </p:column>
-
-                <p:column width="2%">
+                <p:column exportable="false" width="2%">
                     <p:rowEditor/>
                 </p:column>
 
-                <p:column headerText="Тир Група"
-                          sortBy="#{bookspackage.truckGroup.id}"
+                <p:ajax event="rowEdit" async="false"  class="edit-button" 
+                        update=":bookspackages-datatable-form:bookspackages-datatable-hidden bookspackages-datatable :insert-form:messages :insert-form:error-messages  :insert-form:totals" 
+                        listener="#{bookspackageController.onEdit}" />
+
+                <p:ajax immediate="true" event="rowEditCancel" listener="#{bookspackageController.onCancelEdit}"
+                        update="bookspackages-datatable :insert-form:messages :insert-form:error-messages " 
+                        onstart="if(confirm('Откажи промените?')) return true;"/>          
+
+                <p:column sortBy="#{bookspackage.truckGroup.id}"
                           filterBy="#{bookspackage.truckGroup.id}" 
                           filterOptions="#{bookspackageController.truckGroupFilterSelectItems}"
                           filterMatchMode="exact"
                           >
+                    <f:facet name="header">
+                        <h:outputText value="Тир Група"/>
+                    </f:facet>
                     <p:cellEditor>
                         <f:facet name="output">
                             <p:outputLabel value="#{bookspackage.truckGroup == null ? null : bookspackage.truckGroup.name}"/>
                         </f:facet>
                         <f:facet name="input">
-                            <p:selectOneMenu style="width: 99%;" 
-                                             value="#{bookspackage.truckGroup.id}">
-                                <f:selectItem itemLabel="Изберете" itemValue="0"/>
-                                <f:selectItems value="#{bookspackageController.truckGroupSelectItems}"/>
+                            <p:selectOneMenu style="width: 99%;" converter="#{truckGroupConverter}"
+                                             value="#{bookspackage.truckGroup}">
+                                <f:selectItem itemLabel="Изберете" itemValue="#{null}"/>
+                                <f:selectItems value="#{bookspackageController.allTruckGroups}" 
+                                               var="truckGroup" itemLabel="#{truckGroup.name}" itemValue="#{truckGroup}"/>
                             </p:selectOneMenu>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
 
-                <p:column headerText="Клиент">
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Клиент"/>
+                    </f:facet>
                     <p:cellEditor>
                         <f:facet name="output">
                             <p:outputLabel value="#{bookspackage.client}"/>
@@ -192,7 +212,10 @@
                     </p:cellEditor>
                 </p:column>
 
-                <p:column headerText="Търговец">
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Търговец"/>
+                    </f:facet>
                     <p:cellEditor>
                         <f:facet name="output">
                             <p:outputLabel value="#{bookspackage.merchant}"/>
@@ -203,7 +226,10 @@
                     </p:cellEditor>
                 </p:column>
 
-                <p:column headerText="Номер на пратка">
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Номер на пратка"/>
+                    </f:facet>
                     <p:cellEditor>
                         <f:facet name="output">
                             <p:outputLabel value="#{bookspackage.packageNumber}"/>
@@ -214,21 +240,27 @@
                     </p:cellEditor>
                 </p:column>
 
-                <p:column headerText="Пощенски Код">
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Пощенски Код"/>
+                    </f:facet>
                     <p:cellEditor>
                         <f:facet name="output">
-                            <p:outputLabel value="#{bookspackage.postalCode}"/>
+                            <p:outputLabel value="#{bookspackage.postalCode}"
+                                           styleClass='#{bookspackage.postalCode == "" ? "outputLabelExclamationMark" :""}'/>
                         </f:facet>
                         <f:facet name="input">
                             <p:inputText 
-                                required="true"
-                                requiredMessage='Полето "Пощенски Код" е задължително!' 
+                                styleClass='#{bookspackage.postalCode == "" ? "inputLabelExclamationMark" :""}'
                                 value="#{bookspackage.postalCode}"/>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
 
-                <p:column headerText="Адрес на доставка">
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Адрес на доставка"/>
+                    </f:facet>
                     <p:cellEditor>
                         <f:facet name="output">
                             <p:outputLabel value="#{bookspackage.deliveryAddress}"/>
@@ -239,7 +271,10 @@
                     </p:cellEditor>
                 </p:column>
 
-                <p:column headerText="Доставка най-късно">                    
+                <p:column>    
+                    <f:facet name="header">
+                        <h:outputText value="Доставка най-късно"/>
+                    </f:facet>
                     <p:cellEditor>
                         <f:facet name="output">
                             <p:outputLabel value="#{bookspackage.deliveryDate}">
@@ -252,7 +287,10 @@
                     </p:cellEditor>
                 </p:column>
 
-                <p:column headerText="Особености">
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Особености"/>
+                    </f:facet>
                     <p:cellEditor>
                         <f:facet name="output">
                             <p:outputLabel value="#{bookspackage.remarks}"/>
@@ -263,107 +301,128 @@
                     </p:cellEditor>
                 </p:column>
 
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Ден от печат"/>
+                    </f:facet>
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{bookspackage.printDeliveryDay}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{bookspackage.printDeliveryDay}"/>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
                 <!-- Aggregate Properties -->
-                <p:column headerText="Общ/Поръчан брой">
+
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Поръчани кг"/>
+                    </f:facet>
                     <p:cellEditor>
                         <f:facet name="output">
-                            <div class="totalsOutput">
-                                <p:outputLabel value="#{bookspackage.totalBooksCount != null ? bookspackage.totalBooksCount : 0}"/>
-                                <p:outputLabel value=" - "/>
-                                <p:outputLabel value="#{bookspackage.totalOrderedBooksCount != null ? bookspackage.totalOrderedBooksCount : 0}"/>
-                                <p:outputLabel value=" = "/>
-                                <p:outputLabel
-                                    value="#{bookspackage.totalBooksCount - bookspackage.totalOrderedBooksCount}"/>
-                            </div>
+                            <p:outputLabel styleClass="totalsOutput"
+                                           value="#{bookspackage.totalOrderedBooksWeight != null ? bookspackage.totalOrderedBooksWeight : 0}">
+                                <f:convertNumber pattern="#.##"/>
+                            </p:outputLabel>
                         </f:facet>
                         <f:facet name="input">
-                            <div class="totalsOutput">
-                                <p:outputLabel value="#{bookspackage.totalBooksCount != null ? bookspackage.totalBooksCount : 0}"/>
-                                <p:outputLabel value=" - "/>
-                                <p:outputLabel value="#{bookspackage.totalOrderedBooksCount != null ? bookspackage.totalOrderedBooksCount : 0}"/>
-                                <p:outputLabel value=" = "/>
-                                <p:outputLabel
-                                    value="#{bookspackage.totalBooksCount - bookspackage.totalOrderedBooksCount}"/>
-                            </div>
+                            <p:outputLabel styleClass="totalsOutput"
+                                           value="#{bookspackage.totalOrderedBooksWeight != null ? bookspackage.totalOrderedBooksWeight : 0}">
+                                <f:convertNumber pattern="#.##"/>
+                            </p:outputLabel>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
 
-
-                <p:column headerText="Общо/Поръчани кг">
+                <p:column
+                    styleClass='#{bookspackage.totalBooksCount - bookspackage.totalOrderedBooksCount lt 0 ? "errorRow" : "" }'>
+                    <f:facet name="header">
+                        <h:outputText value="Общ/Поръчан брой"/>
+                    </f:facet>
                     <p:cellEditor>
                         <f:facet name="output">
-                            <div class="totalsOutput">
-                                <p:outputLabel value="#{bookspackage.totalBooksWeight != null ? bookspackage.totalBooksWeight : 0}">
-                                    <f:convertNumber pattern="#.##"/>
-                                </p:outputLabel>
-                                <p:outputLabel value=" - "/>
-                                <p:outputLabel value="#{bookspackage.totalOrderedBooksWeight != null ? bookspackage.totalOrderedBooksWeight : 0}">
-                                    <f:convertNumber pattern="#.##"/>
-                                </p:outputLabel>
-                                <p:outputLabel value=" = "/>
-                                <p:outputLabel
-                                    value="#{bookspackage.totalBooksWeight - bookspackage.totalOrderedBooksWeight}">
-                                    <f:convertNumber pattern="#.##"/>
-                                </p:outputLabel>
-                            </div>
+                            <p:outputLabel styleClass='totalsOutput #{bookspackage.totalBooksCount - bookspackage.totalOrderedBooksCount lt 0 ? "errorRow" : "" }'
+                                           value="#{bookspackage.totalBooksCount != null ? bookspackage.totalBooksCount : 0} - #{bookspackage.totalOrderedBooksCount != null ? bookspackage.totalOrderedBooksCount : 0} = #{bookspackage.totalBooksCount - bookspackage.totalOrderedBooksCount}"/>
                         </f:facet>
                         <f:facet name="input">
-                            <div class="totalsOutput">
-                                <p:outputLabel value="#{bookspackage.totalBooksWeight != null ? bookspackage.totalBooksWeight : 0}">
-                                    <f:convertNumber pattern="#.##"/>
-                                </p:outputLabel>
-                                <p:outputLabel value=" - "/>
-                                <p:outputLabel value="#{bookspackage.totalOrderedBooksWeight != null ? bookspackage.totalOrderedBooksWeight : 0}">
-                                    <f:convertNumber pattern="#.##"/>
-                                </p:outputLabel>
-                                <p:outputLabel value=" = "/>
-                                <p:outputLabel
-                                    value="#{bookspackage.totalBooksWeight - bookspackage.totalOrderedBooksWeight}">
-                                    <f:convertNumber pattern="#.##"/>
-                                </p:outputLabel>
-                            </div>
+                            <p:outputLabel styleClass="totalsOutput"
+                                           value="#{bookspackage.totalBooksCount != null ? bookspackage.totalBooksCount : 0} - #{bookspackage.totalOrderedBooksCount != null ? bookspackage.totalOrderedBooksCount : 0} = #{bookspackage.totalBooksCount - bookspackage.totalOrderedBooksCount}"/>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
 
-                <p:column headerText="Телефон">
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Общо/Поръчани кг"/>
+                    </f:facet>
                     <p:cellEditor>
                         <f:facet name="output">
-                            <p:outputLabel value="#{bookspackage.phoneNumber}"/>
+                            <p:outputLabel styleClass="totalsOutput"
+                                           value="#{bookspackage.totalBooksWeight != null ? bookspackage.totalBooksWeight : 0} - #{bookspackage.totalOrderedBooksWeight != null ? bookspackage.totalOrderedBooksWeight : 0} = #{bookspackage.totalBooksWeight - bookspackage.totalOrderedBooksWeight}">
+                                <f:convertNumber pattern="#.##"/>
+                            </p:outputLabel>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:outputLabel styleClass="totalsOutput"
+                                           value="#{bookspackage.totalBooksWeight != null ? bookspackage.totalBooksWeight : 0} - #{bookspackage.totalOrderedBooksWeight != null ? bookspackage.totalOrderedBooksWeight : 0} = #{bookspackage.totalBooksWeight - bookspackage.totalOrderedBooksWeight}">
+                                <f:convertNumber pattern="#.##"/>
+                            </p:outputLabel>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Телефон"/>
+                    </f:facet>
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{bookspackage.phoneNumber}"
+                                           styleClass='#{bookspackage.phoneNumber == "" ? "outputLabelExclamationMark" :""}'
+                                           />
                         </f:facet>
                         <f:facet name="input">
                             <p:inputText 
-                                required="true"
-                                requiredMessage='Полето "Телефон" е задължително!' 
+                                styleClass='#{bookspackage.phoneNumber == "" ? "inputLabelExclamationMark" :""}'
                                 value="#{bookspackage.phoneNumber}"/>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
 
-                <p:column headerText="Email">
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Email"/>
+                    </f:facet>
                     <p:cellEditor>
                         <f:facet name="output">
-                            <p:outputLabel value="#{bookspackage.email}"/>
+                            <p:outputLabel value="#{bookspackage.email}"
+                                           styleClass='#{bookspackage.email == "" ? "outputLabelExclamationMark" :""}'
+                                           />
                         </f:facet>
                         <f:facet name="input">
                             <p:inputText 
-                                required="true"
-                                requiredMessage='Полето "Email" е задължително!' 
+                                styleClass='#{bookspackage.email == "" ? "inputLabelExclamationMark" :""}'
                                 value="#{bookspackage.email}"/>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
 
-                <p:column headerText="Държава">
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Държава"/>
+                    </f:facet>
                     <p:cellEditor>
                         <f:facet name="output">
-                            <p:outputLabel value="#{bookspackage.country}"/>
+                            <p:outputLabel value="#{bookspackage.country}"
+                                           styleClass='#{bookspackage.country == "" ? "outputLabelExclamationMark" :""}'
+                                           />
                         </f:facet>
                         <f:facet name="input">
                             <p:inputText
-                                required="true"
-                                requiredMessage='Полето "Държава" е задължително!' 
+                                styleClass='#{bookspackage.country == "" ? "inputLabelExclamationMark" :""}'
                                 value="#{bookspackage.country}"/>
                         </f:facet>
                     </p:cellEditor>
@@ -381,7 +440,7 @@
                     </f:facet>
                     <p:outputLabel value="#{bookspackage.truckGroup == null ? null : bookspackage.truckGroup.name}"/>
                 </p:column>
-                
+
                 <p:column>
                     <f:facet name="header">
                         <p:outputLabel value="Клиент"/>
@@ -433,7 +492,7 @@
                     <p:outputLabel value="#{bookspackage.remarks}"/>
                 </p:column>
 
-                 <!-- Aggregate Properties -->
+                <!-- Aggregate Properties -->
                 <p:column>
                     <f:facet name="header">
                         <p:outputLabel value="Общ/Поръчан брой"/>
@@ -492,6 +551,7 @@
                   widgetVar="deleteDialog" 
                   showEffect="blind"
                   hideEffect="blind"
+                  closeOnEscape="true"
                   minHeight="40">
             <h:form prependId="false">
                 <h:panelGrid style="width:500px;" columns="2">
@@ -507,6 +567,71 @@
                                          onsuccess="PF('deleteDialog').hide(1000);"/>
                     </f:facet>
                 </h:panelGrid>    
+            </h:form>
+        </p:dialog>
+
+        <p:dialog id="history-dialog"
+                  header='Промени за пратка "#{bookspackageController.selectedBookspackage.packageNumber}" ' 
+                  widgetVar="historyDialog" 
+                  showEffect="blind"
+                  hideEffect="blind"
+                  minHeight="40">
+            <h:form prependId="false">
+                <p:dataTable
+                    value="#{bookspackageController.bookspackageHistories}"
+                    var="bookspackageHistory">
+                    <p:column headerText="Промяна от">
+                        <p:outputLabel value="#{bookspackageHistory.lastModification}">
+                            <f:convertDateTime pattern="dd.MM.yy HH:mm:ss"/>
+                        </p:outputLabel>
+                    </p:column>
+
+                    <p:column headerText="Тир Група">
+                        <p:outputLabel value="#{bookspackageHistory.truckGroupName}"/>
+                    </p:column>
+
+                    <p:column headerText="Клиент">
+                        <p:outputLabel value="#{bookspackageHistory.client}"/>
+                    </p:column>
+
+                    <p:column headerText="Търговец">
+                        <p:outputLabel value="#{bookspackageHistory.merchant}"/>
+                    </p:column>
+
+                    <p:column headerText="Пощенски Код">
+                        <p:outputLabel value="#{bookspackageHistory.postalCode}"/>
+                    </p:column>
+
+                    <p:column headerText="Адрес на доставка">
+                        <p:outputLabel value="#{bookspackageHistory.deliveryAddress}"/>
+                    </p:column>
+
+                    <p:column headerText="Доставка най-късно">
+                        <p:outputLabel value="#{bookspackageHistory.deliveryDate}">
+                            <f:convertDateTime pattern="dd.MM.yy"/>
+                        </p:outputLabel>
+                    </p:column>
+
+                    <p:column headerText="Особености">
+                        <p:outputLabel value="#{bookspackageHistory.remarks}"/>
+                    </p:column>
+
+                    <p:column headerText="Ден от печат">
+                        <p:outputLabel value="#{bookspackageHistory.printDeliveryDay}"/>
+                    </p:column>
+
+                    <p:column headerText="Телефон">
+                        <p:outputLabel value="#{bookspackageHistory.phoneNumber}"/>
+                    </p:column>
+
+                    <p:column headerText="Email">
+                        <p:outputLabel value="#{bookspackageHistory.email}"/>
+                    </p:column>
+
+                    <p:column headerText="Държава">
+                        <p:outputLabel value="#{bookspackageHistory.country}"/>
+                    </p:column>                    
+                </p:dataTable>
             </h:form>
         </p:dialog>
 

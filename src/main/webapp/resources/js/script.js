@@ -69,12 +69,11 @@ function success() {
 
 $(document).on('click', ".ui-icon-pencil", function(e) {
     setTimeout(function() {
-        debugger;
         var editButton = $(e.target);
         var currentRow = editButton.closest(".ui-widget-content");
 
         var calendarSpans = currentRow.find("span.inputLabelExclamationMark");
-        
+
         if (calendarSpans) {
             var calendarInputs = calendarSpans.find("input");
             calendarInputs.addClass("inputLabelExclamationMark");
@@ -155,6 +154,7 @@ $(document).on('keyup', function(event) {
         }
         // ' when 'ENTER' is a pressed in a widget (e.g. Calendar or Dropdown Menu) the 'keypress' event doesn't work - below stands the workaround
         else if (event.keyCode === 13) {
+            debugger;
             event.preventDefault();
             event.stopPropagation();
 
@@ -165,16 +165,86 @@ $(document).on('keyup', function(event) {
     }
 });
 
+toUpdate = true;
+
 $(document).on('keypress', '.ui-row-editing', function(event) {
+    debugger;
     // if key is 'ENTER'
+
+    // workaround for invoking the keypress event twice
+    if (!toUpdate) {
+        toUpdate = true;
+        return;
+    }
     if (event.keyCode === 13) {
         event.preventDefault();
         event.stopPropagation();
         var checkButton = $(this).find(".ui-icon-check");
         checkButton.click();
+        toUpdate = false;
     }
 });
 
 function addCalendarsBackgroundImage() {
+}
+
+(function() {
+    var pencils = $(".ui-icon-pencil");
+    pencils.attr("title", "Промени");
+
+    var saveChangesButtons = $(".ui-icon-check");
+    saveChangesButtons.attr("title", "Запази промените");
+
+    var saveChangesButtons = $(".ui-icon-close");
+    saveChangesButtons.attr("title", "Откажи промените");
+
+    $("th[role='columnheader']").removeClass("errorRow");
+
+})();
+
+
+//$('body').on('DOMNodeInserted', '.ui-datatable', function(e) {
+//    debugger;
+//    console.log(e);
+//    $(e.target).hide();
+//    $(e.target).fadeIn(500);
+//});
+
+//function removeLast(e){
+//    debugger;
+//    
+//    $(".ui-datatable tr:last-of-type").fadeOut(500);
+//}
+
+
+function cancelChanges() {
+    var confirmed;
     debugger;
+    alertify.confirm("Message", function(e) {
+         if (e) {
+            debugger;
+
+        } else {
+            debugger;
+
+        }
+    });
+//    
+//    swal({
+//        title: "Откажи промените?",
+//        type: "warning",
+//        showCancelButton: true, 
+//        confirmButtonColor: "#DD6B55",
+//        confirmButtonText: "OK",
+//        closeOnConfirm: true 
+//    },
+//    
+//    function (confirmed) {    
+//        if (!confirmed) {
+//            return false;
+//        }
+//    });
+//    
+//        debugger;
+
 }

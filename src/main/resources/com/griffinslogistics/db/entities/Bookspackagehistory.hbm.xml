@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated Jul 28, 2014 10:58:21 PM by Hibernate Tools 3.6.0 -->
+<hibernate-mapping>
+    <class catalog="transport" name="com.griffinslogistics.db.entities.BookspackageHistory" table="bookspackagehistory">
+        <id name="id" type="java.lang.Integer">
+            <column name="Id"/>
+            <generator class="identity"/>
+        </id>
+        <many-to-one class="com.griffinslogistics.db.entities.Bookspackage" fetch="select" name="bookspackage">
+            <column name="PackageId"/>
+        </many-to-one>
+        <property name="lastModification" type="timestamp">
+            <column name="LastModification" not-null="true"/>
+        </property>
+        <property name="country" type="string">
+            <column length="50" name="Country"/>
+        </property>
+        <property name="postalCode" type="string">
+            <column length="15" name="PostalCode"/>
+        </property>
+        <property name="phoneNumber" type="string">
+            <column length="100" name="PhoneNumber"/>
+        </property>
+        <property name="email" type="string">
+            <column length="100" name="Email"/>
+        </property>
+        <property name="merchant" type="string">
+            <column length="30" name="Merchant"/>
+        </property>
+        <property name="client" type="string">
+            <column length="100" name="Client"/>
+        </property>
+        <property name="deliveryDate" type="date">
+            <column length="10" name="DeliveryDate"/>
+        </property>
+        <property name="deliveryAddress" type="string">
+            <column length="100" name="DeliveryAddress"/>
+        </property>
+        <property name="remarks" type="string">
+            <column length="500" name="Remarks"/>
+        </property>
+        <property name="printDeliveryDay" type="string">
+            <column length="10" name="PrintDeliveryDay"/>
+        </property>
+        <property name="truckGroupName" type="string">
+            <column length="100" name="TruckGroupName"/>
+        </property>
+    </class>
+</hibernate-mapping>

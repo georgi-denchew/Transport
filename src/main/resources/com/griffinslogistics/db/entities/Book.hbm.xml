@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated Jul 28, 2014 10:58:21 PM by Hibernate Tools 3.6.0 -->
+<hibernate-mapping>
+  <class catalog="transport" name="com.griffinslogistics.db.entities.Book" table="book">
+    <id name="id" type="java.lang.Integer">
+      <column name="Id"/>
+      <generator class="identity"/>
+    </id>
+    <many-to-one class="com.griffinslogistics.db.entities.Bookspackage" fetch="select" name="bookspackage">
+      <column name="PackageId" not-null="true"/>
+    </many-to-one>
+    <many-to-one class="com.griffinslogistics.db.entities.Transportation" fetch="select" name="transportation">
+      <column name="TransportationId" not-null="true"/>
+    </many-to-one>
+    <property name="bookNumber" type="int">
+      <column name="BookNumber" not-null="true"/>
+    </property>
+    <property name="title" type="string">
+      <column length="100" name="Title" not-null="true"/>
+    </property>
+    <property name="count" type="int">
+      <column name="Count" not-null="true"/>
+    </property>
+    <property name="weight" type="double">
+      <column name="Weight" not-null="true" precision="22" scale="0"/>
+    </property>
+    <property name="weightPerBook" type="double">
+      <column name="WeightPerBook" not-null="true" precision="22" scale="0"/>
+    </property>
+<!--    <property name="totalBooksCount" not-null="false" type="long">
+      <formula>
+                (select sum(b.BooksCount * b.BoxesCount)
+                from Box b
+                where b.BookId = Id)
+            </formula>
+    </property>
+    <property name="totalBooksWeight" not-null="false" type="double">
+      <formula>
+                (select sum(b.BooksCount * b.BoxesCount * WeightPerBook)
+                from Box b
+                where b.BookId = Id)
+            </formula>
+    </property>-->
+    <set cascade="delete" fetch="select" inverse="true" lazy="true" name="boxes" table="box">
+      <key>
+        <column name="BookId" not-null="true"/>
+      </key>
+      <one-to-many class="com.griffinslogistics.db.entities.Box"/>
+    </set>
+  </class>
+</hibernate-mapping>
