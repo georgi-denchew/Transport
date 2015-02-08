@@ -12,4 +12,6 @@
   <table-filter match-name="box"/>
   <table-filter match-name="pulsiodetails"/>
   <table-filter match-name="truckgroup"/>
+  <table-filter match-name="printinghouse"/>
+  <table-filter match-name="additionalcost"/>
 </hibernate-reverse-engineering>

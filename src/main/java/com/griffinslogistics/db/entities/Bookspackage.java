@@ -1,6 +1,7 @@
 package com.griffinslogistics.db.entities;
 // Generated Jul 28, 2014 10:58:21 PM by Hibernate Tools 3.6.0
 
+import com.griffinslogistics.enums.BookspackagePriorityEnum;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -15,6 +16,7 @@ public class Bookspackage implements java.io.Serializable {
     private Integer id;
     private Integer version;
     private Transportation transportation;
+    private Integer transportationId;
     private TruckGroup truckGroup;
     private String country;
     private String postalCode;
@@ -23,18 +25,24 @@ public class Bookspackage implements java.io.Serializable {
     private String packageNumber;
     private String merchant;
     private String client;
+    private Double pricePerKilogram;
+    private String priority;
     private Date deliveryDate;
     private String deliveryAddress;
-    private String remarks;
+    private String remarksSales;
+    private String remarksLogistics;
     private String printDeliveryDay;
-    private List<Book> books;
+    private Set<Book> books;
     private Set boxes = new HashSet(0);
     private List<BookspackageHistory> bookspackageHistories;
-//     @Formula("select sum(b.BooksCount * b.BoxesCount) from box b where b.Id = id")
+    
     private Integer totalBooksCount;
     private Integer totalOrderedBooksCount;
     private Double totalBooksWeight;
     private Double totalOrderedBooksWeight;
+    
+    private String displayPriority;
+    private boolean hasDiscardedBooks;
     
     public Bookspackage() {
     }
@@ -48,7 +56,7 @@ public class Bookspackage implements java.io.Serializable {
             String country, String postalCode, String phoneNumber, String email, 
             String packageNumber, String merchant, String client, Date deliveryDate,
             String deliveryAddress, String remarks, String printDeliveryDay, Integer totalBooksCount, Integer totalOrderedBooksCount,
-            Double totalBooksWeight, Double totalOrderedBooksWeight) {
+            Double totalBooksWeight, Double totalOrderedBooksWeight, String priority) {
         this.id = id;
         this.version = version;
         this.transportation = transportation;
@@ -62,28 +70,87 @@ public class Bookspackage implements java.io.Serializable {
         this.client = client;
         this.deliveryDate = deliveryDate;
         this.deliveryAddress = deliveryAddress;
-        this.remarks = remarks;
+        this.remarksSales = remarks;
         this.printDeliveryDay = printDeliveryDay;
         this.totalBooksCount = totalBooksCount;
         this.totalOrderedBooksCount = totalOrderedBooksCount;
         this.totalBooksWeight = totalBooksWeight;
         this.totalOrderedBooksWeight = totalOrderedBooksWeight;
+        this.priority = priority;
     }
     
     public Bookspackage(Transportation transportation, String packageNumber, String merchant,
             String client, Date deliveryDate, String deliveryAddress, String remarks, String printDeliveryDay,
-            List<Book> books, Set boxes, List<BookspackageHistory> bookspackageHistories) {
+            Set<Book> books, Set boxes, List<BookspackageHistory> bookspackageHistories) {
         this.transportation = transportation;
         this.packageNumber = packageNumber;
         this.merchant = merchant;
         this.client = client;
         this.deliveryDate = deliveryDate;
         this.deliveryAddress = deliveryAddress;
-        this.remarks = remarks;
+        this.remarksSales = remarks;
         this.printDeliveryDay = printDeliveryDay;
         this.books = books;
         this.boxes = boxes;
         this.bookspackageHistories = bookspackageHistories;
+    }
+    
+    public Bookspackage makeDeepCopy(){
+        Bookspackage bookspackage = new Bookspackage();
+        
+        bookspackage.setClient(this.getClient());
+        bookspackage.setCountry(this.getCountry());
+        bookspackage.setDeliveryAddress(this.getDeliveryAddress());
+        bookspackage.setDeliveryDate(this.getDeliveryDate());
+        bookspackage.setEmail(this.getEmail());
+        bookspackage.setMerchant(this.getMerchant());
+        bookspackage.setPhoneNumber(this.getPhoneNumber());
+        bookspackage.setPostalCode(this.getPostalCode());
+        bookspackage.setPrintDeliveryDay(this.getPrintDeliveryDay());
+        bookspackage.setRemarksSales(this.getRemarksSales());
+        bookspackage.setRemarksLogistics(this.getRemarksLogistics());
+        bookspackage.setPriority(this.getPriority());
+        
+        return bookspackage;
+    }
+    
+    public boolean haveEqualProperties(Bookspackage bookspackage) {
+        boolean haveEqualProperties = true;
+
+        haveEqualProperties = haveEqualProperties && this.getClient().equals(bookspackage.getClient());
+        haveEqualProperties = haveEqualProperties && this.getCountry().equals(bookspackage.getCountry());
+        haveEqualProperties = haveEqualProperties && this.getDeliveryAddress().equals(bookspackage.getDeliveryAddress());
+        haveEqualProperties = haveEqualProperties && this.getEmail().equals(bookspackage.getEmail());
+        haveEqualProperties = haveEqualProperties && this.getMerchant().equals(bookspackage.getMerchant());
+        haveEqualProperties = haveEqualProperties && this.getPhoneNumber().equals(bookspackage.getPhoneNumber());
+        haveEqualProperties = haveEqualProperties && this.getPostalCode().equals(bookspackage.getPostalCode());
+        haveEqualProperties = haveEqualProperties && this.getRemarksSales().equals(bookspackage.getRemarksSales());
+        haveEqualProperties = haveEqualProperties && this.getRemarksLogistics().equals(bookspackage.getRemarksLogistics());
+        haveEqualProperties = haveEqualProperties && this.getPrintDeliveryDay().equals(bookspackage.getPrintDeliveryDay());
+
+        TruckGroup existingTruckGroup = this.getTruckGroup();
+        TruckGroup bookspackageTruckGroup = bookspackage.getTruckGroup();
+
+        if (existingTruckGroup != null && bookspackageTruckGroup != null) {
+            haveEqualProperties = haveEqualProperties && existingTruckGroup.getId().equals(bookspackageTruckGroup.getId());
+        } else if (existingTruckGroup == null && bookspackageTruckGroup == null) {
+            haveEqualProperties = haveEqualProperties && true;
+        } else {
+            haveEqualProperties = false;
+        }
+
+        Date existingDeliveryDate = this.getDeliveryDate();
+        Date bookspackageDeliveryDate = bookspackage.getDeliveryDate();
+
+        if (existingDeliveryDate != null && bookspackageDeliveryDate != null) {
+            haveEqualProperties = haveEqualProperties && existingDeliveryDate.equals(bookspackageDeliveryDate);
+        } else if (existingDeliveryDate == null && bookspackageDeliveryDate == null) {
+            haveEqualProperties = haveEqualProperties && true;
+        } else {
+            haveEqualProperties = false;
+        }
+
+        return haveEqualProperties;
     }
 
     public Integer getId() {
@@ -142,19 +209,27 @@ public class Bookspackage implements java.io.Serializable {
         this.deliveryAddress = deliveryAddress;
     }
 
-    public String getRemarks() {
-        return this.remarks;
+    public String getRemarksSales() {
+        return this.remarksSales;
     }
 
-    public void setRemarks(String remarks) {
-        this.remarks = remarks;
+    public void setRemarksSales(String remarksSales) {
+        this.remarksSales = remarksSales;
     }
 
-    public List<Book> getBooks() {
+    public String getRemarksLogistics() {
+        return remarksLogistics;
+    }
+
+    public void setRemarksLogistics(String remarksLogistics) {
+        this.remarksLogistics = remarksLogistics;
+    }
+
+    public Set<Book> getBooks() {
         return this.books;
     }
 
-    public void setBooks(List<Book> books) {
+    public void setBooks(Set<Book> books) {
         this.books = books;
     }
 
@@ -260,5 +335,48 @@ public class Bookspackage implements java.io.Serializable {
 
     public void setPrintDeliveryDay(String printDeliveryDay) {
         this.printDeliveryDay = printDeliveryDay;
+    }
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(String priority) {
+        this.priority = priority;
+        
+        BookspackagePriorityEnum priorityEnum = BookspackagePriorityEnum.byValue(this.priority);
+        this.setDisplayPriority(priorityEnum.getDisplayValue());
+    }
+
+    public String getDisplayPriority() {
+        return displayPriority;
+    }
+
+    public void setDisplayPriority(String displayPriority) {
+        this.displayPriority = displayPriority;
+    }
+
+    public boolean isHasDiscardedBooks() {
+        return hasDiscardedBooks;
+    }
+
+    public void setHasDiscardedBooks(boolean hasDiscardedBooks) {
+        this.hasDiscardedBooks = hasDiscardedBooks;
+    }
+
+    public Integer getTransportationId() {
+        return transportationId;
+    }
+
+    public void setTransportationId(Integer transportationId) {
+        this.transportationId = transportationId;
+    }
+
+    public Double getPricePerKilogram() {
+        return pricePerKilogram;
+    }
+
+    public void setPricePerKilogram(Double pricePerKilogram) {
+        this.pricePerKilogram = pricePerKilogram;
     }
 }

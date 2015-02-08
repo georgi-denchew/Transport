@@ -18,8 +18,10 @@ public class BookLabelModel {
     private String postalCode;
     private String transportNumber;
     private Long count;
-
-    public BookLabelModel(String address, String postalCode, String title, int bookNumber, String client, String transportNumber, Long count) {
+    private String packageNumber;
+    
+    
+    public BookLabelModel(String address, String postalCode, String title, int bookNumber, String client, String transportNumber, Long count, String packageNumber) {
         this.address = address;
         this.postalCode = postalCode;
         this.title = title;
@@ -27,6 +29,7 @@ public class BookLabelModel {
         this.client = client;
         this.transportNumber = transportNumber;
         this.count = count;
+        this.packageNumber = packageNumber;
     }
 
     public BookLabelModel() {
@@ -86,5 +89,13 @@ public class BookLabelModel {
 
     public void setPostalCode(String postalCode) {
         this.postalCode = postalCode;
+    }
+
+    public String getPackageNumber() {
+        return packageNumber;
+    }
+
+    public void setPackageNumber(String packageNumber) {
+        this.packageNumber = packageNumber;
     }
 }

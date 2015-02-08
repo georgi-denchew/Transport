@@ -31,17 +31,26 @@
         <property name="client" type="string">
             <column length="100" name="Client"/>
         </property>
+        <property name="pricePerKilogram" type="double">
+            <column name="PricePerKilogram" precision="2"/>
+        </property>
+        <property name="priority" type="string">
+            <column length="30" name="Priority"/>
+        </property>
         <property name="deliveryDate" type="date">
             <column length="10" name="DeliveryDate"/>
         </property>
         <property name="deliveryAddress" type="string">
             <column length="100" name="DeliveryAddress"/>
         </property>
-        <property name="remarks" type="string">
-            <column length="500" name="Remarks"/>
+        <property name="remarksSales" type="string">
+            <column length="1000" name="RemarksSales"/>
+        </property>
+        <property name="remarksLogistics" type="string">
+            <column length="1000" name="RemarksLogistics"/>
         </property>
         <property name="printDeliveryDay" type="string">
-            <column length="10" name="PrintDeliveryDay"/>
+            <column length="20" name="PrintDeliveryDay"/>
         </property>
         <property name="truckGroupName" type="string">
             <column length="100" name="TruckGroupName"/>

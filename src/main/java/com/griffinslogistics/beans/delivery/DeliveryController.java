@@ -10,7 +10,7 @@ import com.griffinslogistics.db.entities.Attachment;
 import com.griffinslogistics.db.entities.Delivery;
 import com.griffinslogistics.db.entities.Deliverydirection;
 import com.griffinslogistics.db.helpers.TransportDbHelper;
-import com.griffinslogistics.enums.DeliveryStatus;
+import com.griffinslogistics.enums.DeliveryStatusEnum;
 import com.griffinslogistics.exceptions.ConcurentUpdateException;
 import com.griffinslogistics.exceptions.DeliveryFTPDeleteException;
 import com.griffinslogistics.utilities.Utilities;
@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,7 +34,6 @@ import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.event.FileUploadEvent;
-import org.primefaces.event.NodeSelectEvent;
 import org.primefaces.event.RowEditEvent;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
@@ -61,7 +59,7 @@ public class DeliveryController implements Serializable {
 
     private List<Delivery> filteredDeliveries;
 
-    private ArrayList<Delivery> allDeliveries;
+    private List<Delivery> allDeliveries = new ArrayList<Delivery>();
     private List<UploadedFile> uploadedFiles;
     private List<Attachment> attachments;
     private StreamedContent downloadFile;
@@ -123,7 +121,7 @@ public class DeliveryController implements Serializable {
             String dbBiggestDeliveryNumber = this.dbHelper.deliveries.biggestDeliveryNumber(weekNumber, year);
             String newBiggestDeliveryNumber = Utilities.generateDeliveryNumber(dbBiggestDeliveryNumber, weekNumber, year);
             this.newDelivery.setDeliveryNumber(newBiggestDeliveryNumber);
-            
+
             this.setDeliveryDirection(this.newDelivery);
 
             String uuid = String.valueOf(UUID.randomUUID().getMostSignificantBits());
@@ -155,6 +153,19 @@ public class DeliveryController implements Serializable {
         return resultPage;
     }
 
+    public String copyDelivery(Delivery delivery) {
+        String result = null;
+
+        this.deliveryDirectionId = delivery.getDeliverydirection().getId();
+        this.newDelivery = new Delivery(
+                null, delivery.getRequestedBy(), null, delivery.getPickUpDate(), delivery.getDeliveryDate(), null, delivery.getState(),
+                delivery.getVolume(), delivery.getWeight(), delivery.getBilling(), delivery.getPickUpAddress(), delivery.getDeliveryAddress(),
+                delivery.getDriver(), delivery.getExecutant(), delivery.getPriceTaken(), delivery.getPriceForUs(), delivery.getRemarks(),
+                null, null);
+
+        return result;
+    }
+
     public void addFile(FileUploadEvent event) {
 
         UploadedFile file = event.getFile();
@@ -170,10 +181,12 @@ public class DeliveryController implements Serializable {
     }
 
     public void fillAttachments(Delivery delivery) {
-        Set<Attachment> all = delivery.getAttachments();
+//        Set<Attachment> all = delivery.getAttachments();
+        List<Attachment> attachmentsForDelivery = this.dbHelper.deliveries.getAttachments(delivery.getId());
+
         this.attachments.clear();
-        if (all != null) {
-            this.attachments.addAll(all);
+        if (attachmentsForDelivery != null) {
+            this.attachments.addAll(attachmentsForDelivery);
         } else {
             this.attachments = new ArrayList<Attachment>();
         }
@@ -184,14 +197,12 @@ public class DeliveryController implements Serializable {
         Delivery edited = null;
 
         try {
-            edited = (Delivery) event.getObject();            
+            edited = (Delivery) event.getObject();
             boolean updated = this.dbHelper.deliveries.updateDelivery(edited);
 
             if (updated) {
-
                 message = new FacesMessage(FacesMessage.SEVERITY_INFO, "Доставката е променена успешно!", "");
                 this.filteredDeliveries = this.allDeliveries;
-            } else {
             }
         } catch (ConcurentUpdateException e) {
             message = new FacesMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), "");
@@ -217,13 +228,7 @@ public class DeliveryController implements Serializable {
         FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_INFO, "Промяната е отказана!", "");
         FacesContext.getCurrentInstance().addMessage(null, message);
     }
-
-    public List<Attachment> getAttachments(Delivery delivery) {
-        List<Attachment> attachmentsForDelivery = this.dbHelper.deliveries.getAttachments(delivery);
-
-        return attachmentsForDelivery;
-    }
-
+    
     public StreamedContent getDownloadFile(Attachment attachment) {
 
         FacesMessage message = null;
@@ -239,20 +244,17 @@ public class DeliveryController implements Serializable {
 
             byteOutputStream.close();
             byteInputStream.close();
-
-//            message = new FacesMessage(FacesMessage.SEVERITY_INFO, "Р”РѕСЃС‚Р°РІРєР°С‚Р° Рµ РѕР±РЅРѕРІРµРЅР°!", "");
-
         } catch (IOException e) {
             Logger.getLogger(DeliveryController.class.getName()).log(Level.SEVERE, null, e);
             message = new FacesMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), "");
+            FacesContext.getCurrentInstance().addMessage(null, message);
         }
 
-        FacesContext.getCurrentInstance().addMessage(null, message);
         return downloadFile;
     }
 
     public String getDeliveryStatus(String state) {
-        DeliveryStatus status = DeliveryStatus.byValue(state);
+        DeliveryStatusEnum status = DeliveryStatusEnum.byValue(state);
 
         if (status != null) {
             return status.getDisplayValue();
@@ -297,9 +299,7 @@ public class DeliveryController implements Serializable {
     }
 
     private void retrieveDeliveries() {
-        this.allDeliveries = (ArrayList<Delivery>) this.dbHelper.deliveries.getAllDeliveries();
-        this.filteredDeliveries = allDeliveries;
-
+        this.allDeliveries = this.dbHelper.deliveries.getAllDeliveries();
     }
 
     private boolean saveFile(UploadedFile file, Delivery delivery) {
@@ -362,7 +362,7 @@ public class DeliveryController implements Serializable {
     }
 
     private void generateDeliveryStatusSelectItems() {
-        DeliveryStatus[] statuses = DeliveryStatus.values();
+        DeliveryStatusEnum[] statuses = DeliveryStatusEnum.values();
 
         this.deliveryStatusSelectItems = new SelectItem[statuses.length];
         this.deliveryStatusFilterSelectItems = new SelectItem[statuses.length + 1];
@@ -426,7 +426,7 @@ public class DeliveryController implements Serializable {
         return this.allDeliveries;
     }
 
-    public void setAllDeliveries(ArrayList<Delivery> allDeliveries) {
+    public void setAllDeliveries(List<Delivery> allDeliveries) {
         this.allDeliveries = allDeliveries;
     }
 

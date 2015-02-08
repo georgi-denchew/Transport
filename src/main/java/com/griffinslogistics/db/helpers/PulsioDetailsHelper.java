@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.griffinslogistics.db.helpers;
 
 import com.griffinslogistics.db.entities.HibernateUtil;
@@ -27,66 +26,67 @@ import org.hibernate.Transaction;
  *
  * @author Georgi
  */
-public class PulsioDetailsHelper implements Serializable{
+public class PulsioDetailsHelper implements Serializable {
+
     private static final Logger logger = Logger.getLogger(PulsioDetailsHelper.class.getName());
-    
+    private static final String CLASS_NAME = PulsioDetailsHelper.class.getSimpleName();
+
     private Session session;
-    
-    public PulsioDetailsHelper(){
+
+    public PulsioDetailsHelper() {
     }
-    
-    public boolean validatePassword(String password){
+
+    public boolean validatePassword(String password) {
+        logger.log(Level.SEVERE, "{0}: validatePassword started", CLASS_NAME);
+
         boolean result = false;
-        
+
         this.session = HibernateUtil.getSessionFactory().openSession();
         Transaction transaction = this.session.beginTransaction();
-        
+
         try {
             Query query = this.session.createQuery("select password from Pulsiodetails where password like :password");
             query.setParameter("password", password);
             String passwordResult = (String) query.uniqueResult();
-            if (passwordResult != null && passwordResult.equals(password)){
+            if (passwordResult != null && passwordResult.equals(password)) {
                 result = true;
             }
-            
+
         } catch (HibernateException e) {
             transaction.rollback();
             logger.log(Level.SEVERE, e.getMessage());
-        }finally{
-        this.session.close();
+        } finally {
+            this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: validatePassword finished", CLASS_NAME);
         }
-        
+
         return result;
     }
-    public Pulsiodetails getDetails(){
+
+    public Pulsiodetails getDetails() {
+        logger.log(Level.SEVERE, "{0}: getDetails started", CLASS_NAME);
+
         this.session = HibernateUtil.getSessionFactory().openSession();
         Transaction transaction = this.session.beginTransaction();
-        
+
         Pulsiodetails pulsiodetails = null;
-        
+
         try {
             Criteria criteria = this.session.createCriteria(Pulsiodetails.class);
             List list = criteria.list();
             pulsiodetails = (Pulsiodetails) list.get(0);
-//            InputStream inputStream = new FileInputStream("D:\\pulsio.jpg");
-//            byte[] bytes = IOUtils.toByteArray(inputStream);
-//            pulsiodetails.setLogo(bytes);
-//            inputStream.close();
-            transaction.commit(); 
-        } catch(HibernateException e) {
+            transaction.commit();
+        } catch (HibernateException e) {
             transaction.rollback();
             logger.log(Level.SEVERE, e.getMessage());
-        } 
-//        catch (FileNotFoundException ex) {
-//            Logger.getLogger(PulsioDetailsHelper.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (IOException ex) {
-//            Logger.getLogger(PulsioDetailsHelper.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-        finally{
-        this.session.close();
+        } finally {
+            this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: getDetails finished", CLASS_NAME);
         }
-        
+
         return pulsiodetails;
     }
-    
+
 }

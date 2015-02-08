@@ -83,7 +83,7 @@
 
                 <f:facet name="footer">
                     <p:commandButton id="show-new-delivery"  value="Добави"
-                                     action="#{deliveryController.addNewDelivery}" update=":table-form :growl-form @form" />
+                                     action="#{deliveryController.addNewDelivery}" update=":table-form :growls @form" />
                 </f:facet>
             </h:panelGrid>
         </h:form>
@@ -91,13 +91,18 @@
         <h:form id="table-form" styleClass="deliveryDatatableForm">
 
             <p:commandButton id="xls" ajax="false" value="Извлечи в Excel" icon="ui-icon-document">  
-                <pe:exporter type="xlsx" target="deliveryList" fileName="dostavki" />  
+                <pe:exporter type="xlsx" target="deliveryList" pageOnly="true" tableTitle="Доставки" encoding="UTF-8"  fileName="dostavki" />  
             </p:commandButton>  
 
             <p:dataTable id="deliveryList" style="table-layout: fixed; font-size: 11px;"
                          value="#{deliveryController.allDeliveries}" var="delivery" 
                          filteredValue="#{deliveryController.filteredDeliveries}"
                          editable="true"
+                         paginator="true" 
+                         rows="20"
+                         currentPageReportTemplate="Страница {currentPage} от {totalPages}"
+                         paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                         rowsPerPageTemplate="20,40, #{deliveryController.allDeliveries.size()}"
                          widgetVar="deliveriesTableWidget"
                          rowStyleClass="#{delivery.state}"
                          >
@@ -105,9 +110,9 @@
                     <p:outputLabel value="Доставки"/>
                 </f:facet>
                 <p:ajax event="rowEdit" async="false" onsuccess="addCalendarsBackgroundImage();"  class="edit-button" 
-                        update="deliveryList direction :growl-form"  listener="#{deliveryController.onEdit}" />
+                        update="deliveryList direction :growls"  listener="#{deliveryController.onEdit}" />
                 <p:ajax immediate="true" event="rowEditCancel" listener="#{deliveryController.onCancelEdit}" 
-                        update="deliveryList :growl-form" 
+                        update="deliveryList :growls" 
                         onstart="if(confirm('Откажи промените?')){tryRemoveFirstRow();}else{ return false;}"/>
 
                 <p:column exportable="false" style="min-width:60px;" headerText="Действия">
@@ -125,12 +130,9 @@
                                                      value="#{delivery}"/>
 
                         <p:menuitem value="Копирай" title="Копирай" icon="ui-icon-copy"
-                                    update=":insert-form"
+                                    update=":insert-form" action="#{deliveryController.copyDelivery(delivery)}"
                                     >
-                            <f:setPropertyActionListener target="#{deliveryController.newDelivery}"
-                                                         value="#{delivery}"/>
-                            <f:setPropertyActionListener target="#{deliveryController.deliveryDirectionId}"
-                                                         value="#{delivery.deliverydirection.id}"/>
+
                         </p:menuitem>
 
                         <p:menuitem value="Изтрий" title="Изтрий" icon="ui-icon-trash"
@@ -492,7 +494,7 @@
                     <f:facet name="footer">
                         <p:commandButton value="Изтрий" 
                                          actionListener="#{deliveryController.deleteDelivery}"
-                                         update=":growl-form :table-form"
+                                         update=":growls :table-form"
                                          onerror="alert('Изтриването беше неуспешно');"
                                          onsuccess="PF('deleteDialog').hide(1000);"/>
                     </f:facet>
@@ -515,10 +517,10 @@
             </h:form>
         </p:dialog>
 
-        <h:form id="growl-form" prependId="false">
+<!--        <h:form id="growl-form" prependId="false">
             <p:growl id="messages" severity="info, warn" />
             <p:growl id="error-messages" severity="error" sticky="true" />
-        </h:form>
+        </h:form>-->
     </ui:define>
 
 </ui:composition>

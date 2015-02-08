@@ -14,11 +14,8 @@
     </ui:define>
 
     <ui:define name="body">
+
         <h:form id="insert-form">
-
-            <p:growl id="messages" severity="info, warn" />
-            <p:growl id="error-messages" severity="error" sticky="true" />
-
             <p:breadCrumb>
                 <p:menuitem url="/transports/all-transports" value="Всички транспорти" title="Всички транспорти"/>
                 <p:menuitem 
@@ -26,96 +23,144 @@
             </p:breadCrumb>
 
             <h:panelGrid  styleClass="insert-form">
-                <h:panelGrid columns="4" style="margin: 0 auto;">
 
+                <h:panelGrid columns="6" style="margin: 0 auto;" cellspacing="4px">
                     <f:facet name="header">
-                        <h2>Текущ транспорт</h2>
-                    </f:facet>
-                    <h:panelGrid styleClass="large-text" columns="4">
-                        <p:outputLabel value="Година:"/>
-                        <p:outputLabel styleClass="bold" value="#{bookspackageController.transportationForBookspackage.year}"/>
-
-                        <p:outputLabel value="Седмица:"/>
-                        <p:outputLabel styleClass="bold" value="#{bookspackageController.transportationForBookspackage.weekNumber}"/>
-                    </h:panelGrid>
-                </h:panelGrid>
-
-                <h:panelGrid columns="4" style="margin: 0 auto;">
-                    <f:facet name="header">
-                        <h2>Добави пратка</h2>
+                        <h2>Добави пратка за Транспорт "#{bookspackageController.transportationForBookspackage.weekNumber}/#{bookspackageController.transportationForBookspackage.year}"</h2>
                     </f:facet>
 
                     <p:outputLabel value="Клиент:" for="client" />
-                    <p:inputText id="client" value="#{bookspackageController.newBookspackage.client}"/>      
+                    <p:inputText size="30"
+                                 validatorMessage='Полето "Клиент" може да съдържа най-много 100 символа'
+                                 id="client" value="#{bookspackageController.newBookspackage.client}" >
+                        <f:validateLength maximum="100" />
+                    </p:inputText>
+
 
                     <p:outputLabel value="Държава:" for="country" />
-                    <p:inputText id="country" 
-                                 value="#{bookspackageController.newBookspackage.country}"/>      
+                    <p:inputText size="30" id="country" 
+                                 validatorMessage='Полето "Държава" може да съдържа най-много 50 символа'
+                                 value="#{bookspackageController.newBookspackage.country}">
+                        <f:validateLength maximum="50"/>
+                    </p:inputText>     
 
                     <p:outputLabel value="Пощенски код:" for="postalCode" />
-                    <p:inputText id="postalCode" 
-                                 value="#{bookspackageController.newBookspackage.postalCode}"/>      
+                    <p:inputText size="30" id="postalCode"
+                                 validatorMessage='Полето "Пощенски код" може да съдържа най-много 15 символа'
+                                 value="#{bookspackageController.newBookspackage.postalCode}">
+                        <f:validateLength maximum="15"/>
+                    </p:inputText>  
 
                     <p:outputLabel value="Телефон:" for="phone" />
-                    <p:inputText id="phone" 
-                                 value="#{bookspackageController.newBookspackage.phoneNumber}"/>      
+                    <p:inputText size="30" id="phone" 
+                                 validatorMessage='Полето "Телефон" може да съдържа най-много 100 символа'
+                                 value="#{bookspackageController.newBookspackage.phoneNumber}">
+                        <f:validateLength maximum="100"/>
+                    </p:inputText>   
 
                     <p:outputLabel value="Email:" for="email" />
-                    <p:inputText id="email"
-                                 value="#{bookspackageController.newBookspackage.email}"/>      
+                    <p:inputText size="30" id="email"
+                                 validatorMessage='Полето "Email" може да съдържа най-много 100 символа'
+                                 value="#{bookspackageController.newBookspackage.email}">
+                        <f:validateLength maximum="100"/>
+                    </p:inputText> 
 
                     <p:outputLabel for="delivery-date" value="Доставка най-късно:" />
-                    <p:calendar id="delivery-date"  pattern="dd.MM.yyyy" value="#{bookspackageController.newBookspackage.deliveryDate}"/>
+                    <p:calendar size="30" id="delivery-date"  pattern="dd.MM.yyyy" value="#{bookspackageController.newBookspackage.deliveryDate}"/>
 
-                    <p:outputLabel for="remarks" value="Особености:" />
-                    <p:inputText id="remarks" value="#{bookspackageController.newBookspackage.remarks}"/>
-
-                    <p:outputLabel for="print-delivery-day" value="Ден доставка от печат:" />
-                    <p:inputText id="print-delivery-day" value="#{bookspackageController.newBookspackage.printDeliveryDay}"/>
+                    <p:outputLabel for="print-delivery-day" value="Ден доставка от печат:" styleClass="label-dropdown-bug-fix" />
+                    <p:inputText size="30" id="print-delivery-day" 
+                                 validatorMessage='Полето "Ден доставка от печат" може да съдържа най-много 20 символа'
+                                 value="#{bookspackageController.newBookspackage.printDeliveryDay}">
+                        <f:validateLength maximum="20"/>
+                    </p:inputText>
 
                     <p:outputLabel for="merchant" value="Търговец:" />
-                    <p:inputText id="merchant" value="#{bookspackageController.newBookspackage.merchant}"/>
+                    <p:inputText size="30" id="merchant" 
+                                 validatorMessage='Полето "Търговец" може да съдържа най-много 30 символа'
+                                 value="#{bookspackageController.newBookspackage.merchant}">
+                        <f:validateLength maximum="30"/>
+                    </p:inputText>
+
+                    <p:outputLabel for="priority" value="Приоритет:"/>
+                    <p:selectOneMenu var="priority" id="priority" styleClass="dropdown" value="#{bookspackageController.newBookspackage.priority}">
+                        <f:selectItems var="pr"  value="#{bookspackageController.bookspackagePrioritySelectItems}"/>
+                    </p:selectOneMenu>    
 
                     <p:outputLabel for="delivery-address" value="Адрес на доставка:" />
-                    <p:inputText id="delivery-address" value="#{bookspackageController.newBookspackage.deliveryAddress}"/>
+                    <p:inputTextarea styleClass="text-area-insert-width" id="delivery-address" 
+                                     validatorMessage='Полето "Адрес на доставка" може да съдържа най-много 500 символа'
+                                     value="#{bookspackageController.newBookspackage.deliveryAddress}">
+                        <f:validateLength maximum="500"/>
+                    </p:inputTextarea>
+
+                    <p:outputLabel for="remarksSales" value="Особености Търговци:"  styleClass="label-dropdown-bug-fix" />
+                    <p:inputTextarea styleClass="text-area-insert-width" id="remarksSales" 
+                                     validatorMessage='Полето "Особености Търговци" може да съдържа най-много 1000 символа'
+                                     value="#{bookspackageController.newBookspackage.remarksSales}">
+                        <f:validateLength maximum="1000"/>
+                    </p:inputTextarea>
+
+                    <p:outputLabel for="remarksLogistics" value="Особености Логистика:" styleClass="label-dropdown-bug-fix" />
+                    <p:inputTextarea styleClass="text-area-insert-width" cols="31" id="remarksLogistics"
+                                     validatorMessage='Полето "Особености Логистика" може да съдържа най-много 1000 символа'
+                                     value="#{bookspackageController.newBookspackage.remarksLogistics}">
+                        <f:validateLength maximum="1000"/>
+                    </p:inputTextarea>
 
                     <f:facet name="footer">
                         <p:commandButton value="Добави" action="#{bookspackageController.addBookspackage}" 
-                                         update=":bookspackages-datatable-form @form"/>
+                                         update=":bookspackages-datatable-form @form :growls"/>
                     </f:facet>
                 </h:panelGrid>
-
             </h:panelGrid>
 
             <h:panelGroup layout="span" id="totals" styleClass="totals">
-                <h3 style="font-style: italic;">Общо килограми:</h3>
+                <h3 style="font-style: italic;">
+                    Общо килограми: 
+                    <h:outputLabel 
+                        value="#{bookspackageController.totalWeights.get(bookspackageController.totalWeightsKeys.get(bookspackageController.totalWeightsKeys.size() - 1))}"
+                        >
+                        <f:convertNumber pattern="#.##"/> кг
+                    </h:outputLabel>
+                </h3>
                 <h:panelGroup layout="span" rendered="#{bookspackageController.totalWeights.size() == 0}">няма стойности за изчисление</h:panelGroup>
-                <ui:repeat value="#{bookspackageController.totalWeightsKeys}" var="key">
-                    <div>
+                <ui:repeat value="#{bookspackageController.totalWeightsKeys.subList(0, bookspackageController.totalWeightsKeys.size() - 1)}" var="key">
+                    <span class="truck-group">
                         <h:outputLabel style="font-weight: bold;" value="#{key}: "/>
                         <h:outputLabel value="#{bookspackageController.totalWeights.get(key)}">
-                            <f:convertNumber pattern="#.##"/>
+                            <f:convertNumber pattern="#.##"/> кг
                         </h:outputLabel>
-                    </div>
+                    </span>
+                    |
                 </ui:repeat>
             </h:panelGroup>
+
         </h:form>
 
         <h:form id="bookspackages-datatable-form">
+            <div id="export-pane">
 
-            <p:commandButton id="xls" ajax="false" value="Извлечи в Excel" icon="ui-icon-document">  
-                <pe:exporter type="xlsx" target="bookspackages-datatable" 
-                             fileName="Transport #{bookspackageController.transportationForBookspackage.weekNumber}/#{bookspackageController.transportationForBookspackage.year}" />  
-            </p:commandButton>  
+                <p:commandButton id="xls" ajax="false" value="Извлечи в Excel" icon="ui-icon-document">  
+                    <pe:exporter type="xlsx" target="bookspackages-datatable" 
+                                 fileName="Transport #{bookspackageController.transportationForBookspackage.weekNumber}/#{bookspackageController.transportationForBookspackage.year}" />  
+                </p:commandButton>  
 
-            <p:commandButton value="Всички BDL" title="генерирай всички BDL" icon="ui-icon-document" action="#{bookspackageController.getAllBDL}" ajax="false"/>
-            <p:commandButton value="Всички CMR" title="генерирай всички CMR" icon="ui-icon-document" action="#{bookspackageController.getAllCMR}" ajax="false"/>
+                <p:commandButton value="Всички BDL" title="генерирай всички BDL" icon="ui-icon-document" action="#{bookspackageController.getAllBDL}" ajax="false"/>
+                <p:commandButton value="Всички CMR" title="генерирай всички CMR" icon="ui-icon-document" action="#{bookspackageController.getAllCMR}" ajax="false"/>
 
+            </div>
             <p:dataTable id="bookspackages-datatable"
                          value="#{bookspackageController.bookspackagesForTransport}"
                          filteredValue="#{bookspackageController.filteredBookspackages}"
+                         rowStyleClass='#{bookspackage.hasDiscardedBooks == true? "book-discarded" : ""}'
                          editable="true"
                          var="bookspackage"
+                         paginator="true" 
+                         rows="15"
+                         currentPageReportTemplate="Страница {currentPage} от {totalPages}"
+                         paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                         rowsPerPageTemplate="15,40 #{bookspackageController.bookspackagesForTransport.size()}"
                          >
 
                 <f:facet rendered="false" name="header">
@@ -124,9 +169,15 @@
 
                 <p:column  exportable="false" headerText="Действия">
                     <p:splitButton styleClass="books-split-button"
-                        value="Книги" title="Книги"
-                        type="submit" ajax="false"
-                        action="#{bookspackageController.viewBooks(bookspackage)}" >
+                                   value="Книги" title="Книги"
+                                   type="submit" ajax="false"
+                                   action="#{bookspackageController.viewBooks(bookspackage)}" >
+
+
+                        <p:menuitem value="Копирай" title="Копирай" icon="ui-icon-copy"
+                                    update=":insert-form" action="#{bookspackageController.copyBookspackage(bookspackage)}"
+                                    />
+
                         <p:menuitem
                             title="генерирай BDL" value="BDL"
                             icon="ui-icon-document"
@@ -168,17 +219,18 @@
                 </p:column>
 
                 <p:ajax event="rowEdit" async="false"  class="edit-button" 
-                        update=":bookspackages-datatable-form:bookspackages-datatable-hidden bookspackages-datatable :insert-form:messages :insert-form:error-messages  :insert-form:totals" 
+                        update=" bookspackages-datatable :growls :insert-form:totals" 
                         listener="#{bookspackageController.onEdit}" />
 
                 <p:ajax immediate="true" event="rowEditCancel" listener="#{bookspackageController.onCancelEdit}"
-                        update="bookspackages-datatable :insert-form:messages :insert-form:error-messages " 
+                        update="bookspackages-datatable :growls" 
                         onstart="if(confirm('Откажи промените?')) return true;"/>          
 
                 <p:column sortBy="#{bookspackage.truckGroup.id}"
                           filterBy="#{bookspackage.truckGroup.id}" 
                           filterOptions="#{bookspackageController.truckGroupFilterSelectItems}"
                           filterMatchMode="exact"
+                          id="filter"
                           >
                     <f:facet name="header">
                         <h:outputText value="Тир Група"/>
@@ -188,7 +240,7 @@
                             <p:outputLabel value="#{bookspackage.truckGroup == null ? null : bookspackage.truckGroup.name}"/>
                         </f:facet>
                         <f:facet name="input">
-                            <p:selectOneMenu style="width: 99%;" converter="#{truckGroupConverter}"
+                            <p:selectOneMenu style="width: 30px !important;" converter="#{truckGroupConverter}"
                                              value="#{bookspackage.truckGroup}">
                                 <f:selectItem itemLabel="Изберете" itemValue="#{null}"/>
                                 <f:selectItems value="#{bookspackageController.allTruckGroups}" 
@@ -207,7 +259,10 @@
                             <p:outputLabel value="#{bookspackage.client}"/>
                         </f:facet>
                         <f:facet name="input">
-                            <p:inputText value="#{bookspackage.client}"/>
+                            <p:inputText value="#{bookspackage.client}"
+                                         validatorMessage='Полето "Клиент" може да съдържа най-много 100 символа'>
+                                <f:validateLength maximum="100"/>
+                            </p:inputText>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
@@ -221,14 +276,17 @@
                             <p:outputLabel value="#{bookspackage.merchant}"/>
                         </f:facet>
                         <f:facet name="input">
-                            <p:inputText value="#{bookspackage.merchant}"/>
+                            <p:inputText value="#{bookspackage.merchant}"
+                                         validatorMessage='Полето "Търговец" може да съдържа най-много 30 символа'>
+                                <f:validateLength maximum="30"/>
+                            </p:inputText>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
 
                 <p:column>
                     <f:facet name="header">
-                        <h:outputText value="Номер на пратка"/>
+                        <h:outputText value="Пратка №"/>
                     </f:facet>
                     <p:cellEditor>
                         <f:facet name="output">
@@ -252,7 +310,10 @@
                         <f:facet name="input">
                             <p:inputText 
                                 styleClass='#{bookspackage.postalCode == "" ? "inputLabelExclamationMark" :""}'
-                                value="#{bookspackage.postalCode}"/>
+                                validatorMessage='Полето "Пощенски код" може да съдържа най-много 15 символа'
+                                value="#{bookspackage.postalCode}">
+                                <f:validateLength maximum="15"/>
+                            </p:inputText>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
@@ -266,12 +327,32 @@
                             <p:outputLabel value="#{bookspackage.deliveryAddress}"/>
                         </f:facet>
                         <f:facet name="input">
-                            <p:inputText value="#{bookspackage.deliveryAddress}"/>
+                            <p:inputTextarea value="#{bookspackage.deliveryAddress}"
+                                             validatorMessage='Полето "Адрес на доставка" може да съдържа най-много 500 символа'>
+                                <f:validateLength maximum="500"/>
+                            </p:inputTextarea>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
 
                 <p:column>    
+                    <f:facet name="header">
+                        <h:outputText value="Приоритет"/>
+                    </f:facet>
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{bookspackage.displayPriority}"/>
+                        </f:facet>
+                        <f:facet name="input">
+
+                            <p:selectOneMenu style="width: 100px !important;" styleClass="state-row" value="#{bookspackage.priority}">
+                                <f:selectItems value="#{bookspackageController.bookspackagePrioritySelectItems}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column styleClass="#{bookspackage.priority}">    
                     <f:facet name="header">
                         <h:outputText value="Доставка най-късно"/>
                     </f:facet>
@@ -289,14 +370,18 @@
 
                 <p:column>
                     <f:facet name="header">
-                        <h:outputText value="Особености"/>
+                        <h:outputText value="Особености Търговци"/>
                     </f:facet>
                     <p:cellEditor>
                         <f:facet name="output">
-                            <p:outputLabel value="#{bookspackage.remarks}"/>
+                            <p:outputLabel value="#{bookspackage.remarksSales}"/>
                         </f:facet>
                         <f:facet name="input">
-                            <p:inputText value="#{bookspackage.remarks}"/>
+                            <p:inputTextarea autoResize="false" 
+                                             validatorMessage='Полето "Особености Търговци" може да съдържа най-много 1000 символа'
+                                             value="#{bookspackage.remarksSales}">
+                                <f:validateLength maximum="1000"/>
+                            </p:inputTextarea>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
@@ -310,12 +395,13 @@
                             <p:outputLabel value="#{bookspackage.printDeliveryDay}"/>
                         </f:facet>
                         <f:facet name="input">
-                            <p:inputText value="#{bookspackage.printDeliveryDay}"/>
+                            <p:inputText value="#{bookspackage.printDeliveryDay}"
+                                         validatorMessage='Полето "Ден доставка от печат" може да съдържа най-много 20 символа'>
+                                <f:validateLength maximum="20"/>
+                            </p:inputText>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
-
-                <!-- Aggregate Properties -->
 
                 <p:column>
                     <f:facet name="header">
@@ -376,6 +462,24 @@
 
                 <p:column>
                     <f:facet name="header">
+                        <h:outputText value="Цена/(КГ)"/>
+                    </f:facet>
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{bookspackage.pricePerKilogram}" />
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{bookspackage.pricePerKilogram}"
+                                         converterMessage='Полето "Цена/(КГ)" трябва да бъде положително цяло или дробно число във формат #.##'
+                                         validatorMessage='Полето "Цена/(КГ)" трябва да бъде положително цяло или дробно число във формат #.##'>
+                                <f:validateDoubleRange minimum="0"/>
+                            </p:inputText>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column>
+                    <f:facet name="header">
                         <h:outputText value="Телефон"/>
                     </f:facet>
                     <p:cellEditor>
@@ -387,7 +491,10 @@
                         <f:facet name="input">
                             <p:inputText 
                                 styleClass='#{bookspackage.phoneNumber == "" ? "inputLabelExclamationMark" :""}'
-                                value="#{bookspackage.phoneNumber}"/>
+                                value="#{bookspackage.phoneNumber}"
+                                validatorMessage='Полето "Телефон" може да съдържа най-много 100 символа'>
+                                <f:validateLength maximum="100"/>
+                            </p:inputText>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
@@ -405,7 +512,10 @@
                         <f:facet name="input">
                             <p:inputText 
                                 styleClass='#{bookspackage.email == "" ? "inputLabelExclamationMark" :""}'
-                                value="#{bookspackage.email}"/>
+                                value="#{bookspackage.email}"
+                                validatorMessage='Полето "Email" може да съдържа най-много 100 символа'>
+                                <f:validateLength maximum="100"/>
+                            </p:inputText>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
@@ -423,127 +533,31 @@
                         <f:facet name="input">
                             <p:inputText
                                 styleClass='#{bookspackage.country == "" ? "inputLabelExclamationMark" :""}'
-                                value="#{bookspackage.country}"/>
+                                value="#{bookspackage.country}"
+                                validatorMessage='Полето "Държава" може да съдържа най-много 50 символа'>
+                                <f:validateLength maximum="50"/>
+                            </p:inputText>
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
 
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Особености Логистика"/>
+                    </f:facet>
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{bookspackage.remarksLogistics}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputTextarea value="#{bookspackage.remarksLogistics}"
+                                             validatorMessage='Полето "Особености Логистика" може да съдържа най-много 1000 символа'>
+                                <f:validateLength maximum="1000"/>
+                            </p:inputTextarea>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
             </p:dataTable>
-
-            <p:dataTable id="bookspackages-datatable-hidden" style="table-layout: fixed; font-size: 11px;"
-                         value="#{bookspackageController.bookspackagesForTransport}" 
-                         var="bookspackage" rendered="false"
-                         editable="false">
-                <p:column>
-                    <f:facet name="header">
-                        <p:outputLabel value="Тир Група"/>
-                    </f:facet>
-                    <p:outputLabel value="#{bookspackage.truckGroup == null ? null : bookspackage.truckGroup.name}"/>
-                </p:column>
-
-                <p:column>
-                    <f:facet name="header">
-                        <p:outputLabel value="Клиент"/>
-                    </f:facet>
-                    <p:outputLabel value="#{bookspackage.client}"/>
-                </p:column>
-
-                <p:column>
-                    <f:facet name="header">
-                        <p:outputLabel value="Търговец"/>
-                    </f:facet>
-                    <p:outputLabel value="#{bookspackage.merchant}"/>
-                </p:column>
-
-                <p:column>
-                    <f:facet name="header">
-                        <p:outputLabel value="Номер на пратка"/>
-                    </f:facet>
-                    <p:outputLabel value="#{bookspackage.packageNumber}"/>
-                </p:column>
-
-                <p:column>
-                    <f:facet name="header">
-                        <p:outputLabel value="Пощенски Код"/>
-                    </f:facet>
-                    <p:outputLabel value="#{bookspackage.postalCode}"/>
-                </p:column>
-
-                <p:column>
-                    <f:facet name="header">
-                        <p:outputLabel value="Адрес на доставка"/>
-                    </f:facet>
-                    <p:outputLabel value="#{bookspackage.deliveryAddress}"/>
-                </p:column>
-
-                <p:column>       
-                    <f:facet name="header">
-                        <p:outputLabel value="Доставка най-късно"/>
-                    </f:facet>
-                    <p:outputLabel value="#{bookspackage.deliveryDate}">
-                        <f:convertDateTime pattern="dd.MM.yyyy"/>
-                    </p:outputLabel>
-                </p:column>
-
-                <p:column>
-                    <f:facet name="header">
-                        <p:outputLabel value="Особености"/>
-                    </f:facet>
-                    <p:outputLabel value="#{bookspackage.remarks}"/>
-                </p:column>
-
-                <!-- Aggregate Properties -->
-                <p:column>
-                    <f:facet name="header">
-                        <p:outputLabel value="Общ/Поръчан брой"/>
-                    </f:facet>
-                    <p:outputLabel value="#{bookspackage.totalBooksCount != null ? bookspackage.totalBooksCount : 0}"/>
-                    <p:outputLabel value=" - "/>
-                    <p:outputLabel value="#{bookspackage.totalOrderedBooksCount != null ? bookspackage.totalOrderedBooksCount : 0}"/>
-                    <p:outputLabel value=" = "/>
-                    <p:outputLabel
-                        value="#{bookspackage.totalBooksCount - bookspackage.totalOrderedBooksCount}"/>
-                </p:column>
-
-                <p:column>
-                    <f:facet name="header">
-                        <p:outputLabel value="Общо/Поръчани кг"/>
-                    </f:facet>
-                    <p:outputLabel value="#{bookspackage.totalBooksWeight != null ? bookspackage.totalBooksWeight : 0}">
-                        <f:convertNumber pattern="#.##"/>
-                    </p:outputLabel>
-                    <p:outputLabel value=" - "/>
-                    <p:outputLabel value="#{bookspackage.totalOrderedBooksWeight != null ? bookspackage.totalOrderedBooksWeight : 0}">
-                        <f:convertNumber pattern="#.##"/>
-                    </p:outputLabel>
-                    <p:outputLabel value=" = "/>
-                    <p:outputLabel
-                        value="#{bookspackage.totalBooksWeight - bookspackage.totalOrderedBooksWeight}">
-                        <f:convertNumber pattern="#.##"/>
-                    </p:outputLabel>
-                </p:column>
-
-                <p:column>
-                    <f:facet name="header">
-                        <p:outputLabel value="Телефон"/>
-                    </f:facet>
-                    <p:outputLabel value="#{bookspackage.phoneNumber}"/>
-                </p:column>
-
-                <p:column>
-                    <f:facet name="header">
-                        <p:outputLabel value="Email"/>
-                    </f:facet>
-                    <p:outputLabel value="#{bookspackage.email}"/>
-                </p:column>
-
-                <p:column>
-                    <f:facet name="header">
-                        <p:outputLabel value="Държава"/>
-                    </f:facet>
-                    <p:outputLabel value="#{bookspackage.country}"/>
-                </p:column>
-            </p:dataTable>            
         </h:form>
 
         <p:dialog id="delete-dialog"
@@ -563,7 +577,7 @@
                     <f:facet name="footer">
                         <p:commandButton value="Изтрий" 
                                          actionListener="#{bookspackageController.deleteBookspackage}"
-                                         update=":insert-form :bookspackages-datatable-form"
+                                         update=":insert-form :bookspackages-datatable-form :growls"
                                          onsuccess="PF('deleteDialog').hide(1000);"/>
                     </f:facet>
                 </h:panelGrid>    
@@ -612,8 +626,8 @@
                         </p:outputLabel>
                     </p:column>
 
-                    <p:column headerText="Особености">
-                        <p:outputLabel value="#{bookspackageHistory.remarks}"/>
+                    <p:column headerText="Особености Търговци">
+                        <p:outputLabel value="#{bookspackageHistory.remarksSales}"/>
                     </p:column>
 
                     <p:column headerText="Ден от печат">
@@ -630,7 +644,11 @@
 
                     <p:column headerText="Държава">
                         <p:outputLabel value="#{bookspackageHistory.country}"/>
-                    </p:column>                    
+                    </p:column>
+
+                    <p:column headerText="Особености Логистика">
+                        <p:outputLabel value="#{bookspackageHistory.remarksLogistics}"/>
+                    </p:column>
                 </p:dataTable>
             </h:form>
         </p:dialog>

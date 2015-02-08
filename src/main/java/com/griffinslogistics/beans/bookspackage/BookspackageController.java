@@ -5,13 +5,14 @@
  */
 package com.griffinslogistics.beans.bookspackage;
 
+import com.griffinslogistics.db.entities.Book;
 import com.griffinslogistics.db.entities.Bookspackage;
 import com.griffinslogistics.db.entities.BookspackageHistory;
 import com.griffinslogistics.db.entities.Pulsiodetails;
 import com.griffinslogistics.db.entities.Transportation;
 import com.griffinslogistics.db.entities.TruckGroup;
 import com.griffinslogistics.db.helpers.TransportDbHelper;
-import com.griffinslogistics.enums.TruckGroupEnum;
+import com.griffinslogistics.enums.BookspackagePriorityEnum;
 import com.griffinslogistics.excel.BDLGenerator;
 import com.griffinslogistics.excel.CMRGenerator;
 import com.griffinslogistics.exceptions.ConcurentUpdateException;
@@ -20,7 +21,6 @@ import com.griffinslogistics.models.BookBoxModel;
 import com.griffinslogistics.models.BookspackageCMRModel;
 import com.griffinslogistics.utilities.Utilities;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -29,7 +29,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
@@ -39,7 +38,7 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
-import org.apache.commons.io.output.TeeOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import org.primefaces.event.RowEditEvent;
 
 /**
@@ -61,6 +60,9 @@ public class BookspackageController implements Serializable {
     private Integer weekNumber;
 
     private Transportation transportationForBookspackage;
+    private Book bookFilter;
+    private boolean hasBookFilter;
+
     private List<Bookspackage> bookspackagesForTransport;
     private List<Bookspackage> filteredBookspackages;
     private Bookspackage selectedBookspackage;
@@ -70,6 +72,9 @@ public class BookspackageController implements Serializable {
     private List<String> totalWeightsKeys;
 
     private List<BookspackageHistory> bookspackageHistories;
+
+    private SelectItem[] bookspackagePrioritySelectItems;
+    private SelectItem[] bookspackagePriorityFilterSelectItems;
 
     public BookspackageController() {
         this.dbHelper = new TransportDbHelper();
@@ -82,11 +87,26 @@ public class BookspackageController implements Serializable {
 
     @PostConstruct
     public void init() {
-        if (!FacesContext.getCurrentInstance().isPostback()) {
-            initTransportation();
-            initTruckGroups();
-            initTotals();
+        HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+        String bookFilterString = request.getParameter("book-filter");
+        this.hasBookFilter = false;
+
+        if (bookFilterString != null) {
+            this.hasBookFilter = Boolean.valueOf(bookFilterString);
         }
+
+        initTransportation();
+
+        if (this.hasBookFilter) {
+            initBookFilter();
+            initBookspackagesWithBookFilter(this.bookFilter);
+        } else {
+            initBookspackages();
+        }
+
+        initTruckGroups();
+        initTotals();
+        generateBookspackagePrioritySelectItems();
     }
 
     public void onEdit(RowEditEvent event) {
@@ -98,7 +118,6 @@ public class BookspackageController implements Serializable {
 
             if (isUpdated) {
                 message = new FacesMessage(FacesMessage.SEVERITY_INFO, "Пратката е обновена!", "");
-
                 initTotals();
             } else {
                 message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Възникна грешка! Пратката не е обновена!", "");
@@ -163,6 +182,10 @@ public class BookspackageController implements Serializable {
         return "/books/books?faces-redirect=true";
     }
 
+    public void copyBookspackage(Bookspackage bookspackage) {
+        this.newBookspackage = bookspackage.makeDeepCopy();
+    }
+
     public void addBookspackage() {
         boolean added = false;
 
@@ -175,15 +198,14 @@ public class BookspackageController implements Serializable {
                 this.transportationForBookspackage.getWeekNumber());
         this.newBookspackage.setPackageNumber(newNumber);
 
+        this.newBookspackage.setPricePerKilogram(1d);
+
         FacesMessage message = null;
 
         try {
             added = this.dbHelper.bookspackages.updateBookspackage(this.newBookspackage);
         } catch (ConcurentUpdateException e) {
-            message = new FacesMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), "");
             this.initTransportation();
-        } catch (Exception e) {
-            message = new FacesMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), "");
         }
 
         if (added) {
@@ -201,19 +223,27 @@ public class BookspackageController implements Serializable {
         OutputStream outputStream = null;
 
         try {
+            Map<String, List<BookBoxModel>> bookBoxModelsForTransportation = this.dbHelper.books.getAllBookBoxModelsByTransportation(this.transportationForBookspackage);
+
+            if (bookBoxModelsForTransportation.isEmpty()) {
+                FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_WARN, "Няма записани кашони за този транспорт - BDL и CMR не могат да бъдат генерирани.", null);
+                FacesContext.getCurrentInstance().addMessage(null, message);
+                return;
+            }
+
             ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
             externalContext.responseReset();
 
             String contentType = "application/vnd.ms-excel";
             externalContext.setResponseContentType(contentType);
-            String responseHeaderValue = String.format("attachment; filename=\"BDL Transport %s\"", this.transportationForBookspackage.getWeekNumber() + "/" + this.transportationForBookspackage.getYear());
+            String transportNumber = this.transportationForBookspackage.getWeekNumber() + "/" + this.transportationForBookspackage.getYear();
+            String responseHeaderValue = String.format("attachment; filename=\"BDL Transport %s\"", transportNumber);
             externalContext.setResponseHeader("Content-Disposition", responseHeaderValue);
             outputStream = externalContext.getResponseOutputStream();
 
-            Map<String, List<BookBoxModel>> bookBoxModelsForTransportation = this.dbHelper.books.getAllBookBoxModelsByTransportation(this.transportationForBookspackage);
             Pulsiodetails pulsioDetails = this.dbHelper.pulsio.getDetails();
 
-            BDLGenerator.generateAll(outputStream, bookBoxModelsForTransportation, pulsioDetails);
+            BDLGenerator.generateAll(outputStream, bookBoxModelsForTransportation, pulsioDetails, transportNumber);
 
             FacesContext.getCurrentInstance().responseComplete();
 
@@ -223,7 +253,9 @@ public class BookspackageController implements Serializable {
             Logger.getLogger(BookspackageController.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
-                outputStream.close();
+                if (outputStream != null) {
+                    outputStream.close();
+                }
             } catch (IOException ex) {
                 Logger.getLogger(BookspackageController.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -234,19 +266,27 @@ public class BookspackageController implements Serializable {
         OutputStream outputStream = null;
 
         try {
+            List<BookBoxModel> bookBoxModels = this.dbHelper.books.getAllBookBoxModelsByPackage(selectedBookspackage);
+
+            if (bookBoxModels.isEmpty()) {
+                FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_WARN, "Няма записани кашони за тази пратка - BDL и CMR не могат да бъдат генерирани.", null);
+                FacesContext.getCurrentInstance().addMessage(null, message);
+                return;
+            }
+
             ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
             externalContext.responseReset();
 
             String contentType = "application/vnd.ms-excel";
             externalContext.setResponseContentType(contentType);
-            String responseHeaderValue = String.format("attachment; filename=\"BDL %s\"", selectedBookspackage.getPackageNumber());
+            String packageNumber = selectedBookspackage.getPackageNumber();
+            String responseHeaderValue = String.format("attachment; filename=\"BDL %s\"", packageNumber);
             externalContext.setResponseHeader("Content-Disposition", responseHeaderValue);
             outputStream = externalContext.getResponseOutputStream();
 
-            List<BookBoxModel> bookBoxModels = this.dbHelper.books.getAllBookBoxModelsByPackage(selectedBookspackage);
             Pulsiodetails pulsioDetails = this.dbHelper.pulsio.getDetails();
 
-            BDLGenerator.generateSingle(outputStream, bookBoxModels, pulsioDetails);
+            BDLGenerator.generateSingle(outputStream, bookBoxModels, pulsioDetails, packageNumber);
 
             FacesContext.getCurrentInstance().responseComplete();
 
@@ -256,7 +296,9 @@ public class BookspackageController implements Serializable {
             Logger.getLogger(BookspackageController.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
-                outputStream.close();
+                if (outputStream != null) {
+                    outputStream.close();
+                }
             } catch (IOException ex) {
                 Logger.getLogger(BookspackageController.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -267,6 +309,14 @@ public class BookspackageController implements Serializable {
         OutputStream outputStream = null;
 
         try {
+            List<BookspackageCMRModel> bookspackageCMRModels = this.dbHelper.bookspackages.totalWeightForBookspackages(this.transportationForBookspackage);
+
+            if (bookspackageCMRModels.isEmpty()) {
+                FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_WARN, "Няма записани кашони за този транспорт - BDL и CMR не могат да бъдат генерирани.", null);
+                FacesContext.getCurrentInstance().addMessage(null, message);
+                return;
+            }
+
             ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
             externalContext.responseReset();
 
@@ -276,19 +326,24 @@ public class BookspackageController implements Serializable {
             externalContext.setResponseHeader("Content-Disposition", responseHeaderValue);
             outputStream = externalContext.getResponseOutputStream();
 
-            List<BookspackageCMRModel> bookspackageCMRModels = this.dbHelper.bookspackages.totalWeightForBookspackages(this.transportationForBookspackage);
             Pulsiodetails pulsioDetails = this.dbHelper.pulsio.getDetails();
 
             CMRGenerator.generateAll(outputStream, bookspackageCMRModels, pulsioDetails);
+            
             FacesContext.getCurrentInstance().responseComplete();
 
         } catch (FileNotFoundException ex) {
             Logger.getLogger(BookspackageController.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(BookspackageController.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(BookspackageController.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
-                outputStream.close();
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+
             } catch (IOException ex) {
                 Logger.getLogger(BookspackageController.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -299,6 +354,14 @@ public class BookspackageController implements Serializable {
         OutputStream outputStream = null;
 
         try {
+            BookspackageCMRModel bookspackageCMRModel = this.dbHelper.bookspackages.totalWeightForBookspackage(selectedBookspackage);
+
+            if (bookspackageCMRModel.getTotalBoxesCount() == null || bookspackageCMRModel.getTotalBoxesCount() == 0) {
+                FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_WARN, "Няма записани кашони за тази пратка - BDL и CMR не могат да бъдат генерирани.", null);
+                FacesContext.getCurrentInstance().addMessage(null, message);
+                return;
+            }
+
             ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
             externalContext.responseReset();
 
@@ -308,7 +371,6 @@ public class BookspackageController implements Serializable {
             externalContext.setResponseHeader("Content-Disposition", responseHeaderValue);
             outputStream = externalContext.getResponseOutputStream();
 
-            BookspackageCMRModel bookspackageCMRModel = this.dbHelper.bookspackages.totalWeightForBookspackage(selectedBookspackage);
             Pulsiodetails pulsioDetails = this.dbHelper.pulsio.getDetails();
 
             CMRGenerator.generateSingle(outputStream, bookspackageCMRModel, pulsioDetails);
@@ -320,10 +382,20 @@ public class BookspackageController implements Serializable {
             Logger.getLogger(BookspackageController.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
-                outputStream.close();
+                if (outputStream != null) {
+                    outputStream.close();
+                }
             } catch (IOException ex) {
                 Logger.getLogger(BookspackageController.class.getName()).log(Level.SEVERE, null, ex);
             }
+        }
+    }
+
+    private void initBookFilter() {
+        Map<String, Object> session = FacesContext.getCurrentInstance().getExternalContext().getSessionMap();
+
+        if (this.bookFilter == null) {
+            this.bookFilter = (Book) session.get("book");
         }
     }
 
@@ -333,9 +405,17 @@ public class BookspackageController implements Serializable {
         if (this.transportationForBookspackage == null) {
             this.transportationForBookspackage = (Transportation) session.get("transportation");
         }
+    }
 
+    private void initBookspackages() {
         if (transportationForBookspackage != null) {
             this.bookspackagesForTransport = (List<Bookspackage>) this.dbHelper.bookspackages.getBookspackagesByTransport(transportationForBookspackage);
+        }
+    }
+
+    private void initBookspackagesWithBookFilter(Book book) {
+        if (transportationForBookspackage != null) {
+            this.bookspackagesForTransport = (List<Bookspackage>) this.dbHelper.bookspackages.getBookspackagesByTransportAndBookFilter(transportationForBookspackage, book);
         }
     }
 
@@ -374,6 +454,34 @@ public class BookspackageController implements Serializable {
             truckGroupSelectItems.add(new SelectItem(truckGroup.getId(), truckGroup.getName()));
             truckGroupFilterSelectItems.add(new SelectItem(truckGroup.getId(), truckGroup.getName()));
         }
+    }
+
+    private void generateBookspackagePrioritySelectItems() {
+        BookspackagePriorityEnum[] priorities = BookspackagePriorityEnum.values();
+
+        this.bookspackagePrioritySelectItems = new SelectItem[priorities.length];
+        this.bookspackagePriorityFilterSelectItems = new SelectItem[priorities.length + 1];
+        this.bookspackagePriorityFilterSelectItems[0] = new SelectItem("", "Всички");
+
+        for (int i = 0; i < priorities.length; i++) {
+            this.bookspackagePrioritySelectItems[i] = new SelectItem(priorities[i].getValue(), priorities[i].getDisplayValue());
+            this.bookspackagePriorityFilterSelectItems[i + 1] = new SelectItem(priorities[i].getValue(), priorities[i].getDisplayValue());
+        }
+    }
+
+    private TruckGroup findTruckGroup() {
+        for (TruckGroup truckGroup : allTruckGroups) {
+            if (truckGroup.getId().equals(this.selectedTruckGroup.getId())) {
+                return truckGroup;
+            }
+        }
+
+        return null;
+    }
+
+    private void initTotals() {
+        totalWeights = this.dbHelper.bookspackages.totalWeightsForTransportation(this.transportationForBookspackage);
+        this.totalWeightsKeys = new ArrayList<String>(totalWeights.keySet());
     }
 
     public Transportation getTransportationForBookspackage() {
@@ -488,18 +596,35 @@ public class BookspackageController implements Serializable {
         this.allTruckGroups = allTruckGroups;
     }
 
-    private TruckGroup findTruckGroup() {
-        for (TruckGroup truckGroup : allTruckGroups) {
-            if (truckGroup.getId().equals(this.selectedTruckGroup.getId())) {
-                return truckGroup;
-            }
-        }
-
-        return null;
+    public SelectItem[] getBookspackagePrioritySelectItems() {
+        return bookspackagePrioritySelectItems;
     }
 
-    private void initTotals() {
-        totalWeights = this.dbHelper.bookspackages.totalWeightsForTransportation(this.transportationForBookspackage);
-        this.totalWeightsKeys = new ArrayList<String>(totalWeights.keySet());
+    public void setBookspackagePrioritySelectItems(SelectItem[] bookspackagePrioritySelectItems) {
+        this.bookspackagePrioritySelectItems = bookspackagePrioritySelectItems;
+    }
+
+    public SelectItem[] getBookspackagePriorityFilterSelectItems() {
+        return bookspackagePriorityFilterSelectItems;
+    }
+
+    public void setBookspackagePriorityFilterSelectItems(SelectItem[] bookspackagePriorityFilterSelectItems) {
+        this.bookspackagePriorityFilterSelectItems = bookspackagePriorityFilterSelectItems;
+    }
+
+    public Book getBookFilter() {
+        return bookFilter;
+    }
+
+    public void setBookFilter(Book bookFilter) {
+        this.bookFilter = bookFilter;
+    }
+
+    public boolean isHasBookFilter() {
+        return hasBookFilter;
+    }
+
+    public void setHasBookFilter(boolean hasBookFilter) {
+        this.hasBookFilter = hasBookFilter;
     }
 }

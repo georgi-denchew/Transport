@@ -12,6 +12,8 @@ package com.griffinslogistics.models;
 public class BookBoxModel {
     private int bookNumber;
     private String title;
+    private String client;
+    private String deliveryAddress;
     private Object booksCount;
     private Object boxesCount;
     
@@ -23,6 +25,11 @@ public class BookBoxModel {
         this.title = title;
         this.booksCount = booksCount;
         this.boxesCount = boxesCount;
+    }
+
+    public BookBoxModel(int bookNumber, String title) {
+        this.bookNumber = bookNumber;
+        this.title = title;
     }
 
     public String getTitle() {
@@ -55,5 +62,21 @@ public class BookBoxModel {
 
     public void setBookNumber(int bookNumber) {
         this.bookNumber = bookNumber;
+    }
+
+    public String getClient() {
+        return client;
+    }
+
+    public void setClient(String client) {
+        this.client = client;
+    }
+
+    public String getDeliveryAddress() {
+        return deliveryAddress;
+    }
+
+    public void setDeliveryAddress(String deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
     }
 }

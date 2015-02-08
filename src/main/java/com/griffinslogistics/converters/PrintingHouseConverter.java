@@ -6,10 +6,8 @@
 
 package com.griffinslogistics.converters;
 
-import com.griffinslogistics.beans.bookspackage.BookspackageController;
-import com.griffinslogistics.beans.delivery.DeliveryController;
-import com.griffinslogistics.db.entities.Deliverydirection;
-import com.griffinslogistics.db.entities.TruckGroup;
+import com.griffinslogistics.beans.books.BooksController;
+import com.griffinslogistics.db.entities.PrintingHouse;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
@@ -25,10 +23,10 @@ import javax.faces.convert.ConverterException;
  */
 @ManagedBean
 @RequestScoped
-public class TruckGroupConverter implements Converter {
+public class PrintingHouseConverter implements Converter {
     
-    @ManagedProperty(value="#{bookspackageController}")
-    BookspackageController bookspackageController;
+    @ManagedProperty(value="#{booksController}")
+    BooksController booksController;
     
     public Object getAsObject(FacesContext facesContext, UIComponent component, String submittedValue) {
         if (submittedValue.trim().equals("")) {
@@ -37,14 +35,14 @@ public class TruckGroupConverter implements Converter {
             try {
                 int number = Integer.parseInt(submittedValue);
 
-                for (TruckGroup truckGroup : bookspackageController.getAllTruckGroups()) {
-                    if (truckGroup.getId() == number) {
-                        return truckGroup;
+                for (PrintingHouse printingHouse : booksController.getAllPrintingHouses()) {
+                    if (printingHouse.getId() == number) {
+                        return printingHouse;
                     }
                 }
 
             } catch(NumberFormatException exception) {
-                throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "Conversion Error", "Невалидна група!"));
+                throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "Conversion Error", "Невалидна печатница!"));
             }
         }
 
@@ -55,16 +53,16 @@ public class TruckGroupConverter implements Converter {
         if (value == null || value.equals("")) {
             return "";
         } else {
-            int id= ((TruckGroup) value).getId();
+            int id= ((PrintingHouse) value).getId();
             return String.valueOf(id);
         }
     }
 
-    public BookspackageController getBookspackageController() {
-        return bookspackageController;
+    public BooksController getBooksController() {
+        return booksController;
     }
 
-    public void setBookspackageController(BookspackageController bookspackageController) {
-        this.bookspackageController = bookspackageController;
+    public void setBooksController(BooksController booksController) {
+        this.booksController = booksController;
     }
 }

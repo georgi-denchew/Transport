@@ -2,45 +2,39 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <!-- Generated Jul 28, 2014 10:58:21 PM by Hibernate Tools 3.6.0 -->
 <hibernate-mapping>
-  <class catalog="transport" name="com.griffinslogistics.db.entities.Transportation" table="transportation">
-    <id name="id" type="java.lang.Integer">
-      <column name="Id"/>
-      <generator class="identity"/>
-    </id>
-    <property name="weekNumber" type="int">
-      <column name="WeekNumber" not-null="true"/>
-    </property>
-    <property name="year" type="int">
-      <column name="Year" not-null="true"/>
-    </property>
-    <property name="startDate" type="date">
-      <column length="10" name="StartDate" not-null="true"/>
-    </property>
-    <!--                <property name="totalBooksCount" type="integer" not-null="true">
-            <formula>
-                ( select sum(b.BooksCount * b.BoxesCount)
-                from Box b
-                where b.PackageId = Id)
-            </formula>            
-        </property>-->
-    <!--        <bag name="bookspackages" table="bookspackage" inverse="true" cascade="delete" lazy="true" fetch="select">
+    <class catalog="transport" name="com.griffinslogistics.db.entities.Transportation" table="transportation">
+        <id name="id" type="java.lang.Integer">
+            <column name="Id"/>
+            <generator class="identity"/>
+        </id>
+        <property name="weekNumber" type="int">
+            <column name="WeekNumber" not-null="true"/>
+        </property>
+        <property name="year" type="int">
+            <column name="Year" not-null="true"/>
+        </property>
+        <property name="startDate" type="date">
+            <column length="10" name="StartDate" not-null="true"/>
+        </property>
+        <set cascade="delete" fetch="select" inverse="true" lazy="true" name="bookspackages" order-by="id" table="bookspackage">
             <key>
-                <column name="TransportationId" not-null="true" />
+                <column name="TransportationId" />
             </key>
-            <one-to-many class="db.Bookspackage" />
-        </bag>-->
-    <bag cascade="delete" fetch="select" inverse="true" lazy="true" name="bookspackages" table="bookspackage">
-      <key>
-        <column name="TransportationId" />
-      </key>
-      <one-to-many class="com.griffinslogistics.db.entities.Bookspackage"/>
-    </bag>
+            <one-to-many class="com.griffinslogistics.db.entities.Bookspackage"/>
+        </set>
 
-    <set fetch="select" inverse="true" lazy="true" name="books" table="book">
-      <key>
-        <column name="TransportationId" not-null="true"/>
-      </key>
-      <one-to-many class="com.griffinslogistics.db.entities.Book"/>
-    </set>
-  </class>
+        <set fetch="select" inverse="true" lazy="true" name="books" order-by="id" table="book">
+            <key>
+                <column name="TransportationId" not-null="true"/>
+            </key>
+            <one-to-many class="com.griffinslogistics.db.entities.Book"/>
+        </set>
+    
+        <bag cascade="delete" fetch="select" inverse="true" lazy="true" name="additionalCosts" table="additionalcost">
+            <key>
+                <column name="TransportationId" not-null="true"/>
+            </key>
+            <one-to-many class="com.griffinslogistics.db.entities.AdditionalCost"/>
+        </bag>
+    </class>
 </hibernate-mapping>

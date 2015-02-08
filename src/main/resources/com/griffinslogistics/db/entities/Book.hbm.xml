@@ -13,6 +13,9 @@
     <many-to-one class="com.griffinslogistics.db.entities.Transportation" fetch="select" name="transportation">
       <column name="TransportationId" not-null="true"/>
     </many-to-one>
+        <many-to-one class="com.griffinslogistics.db.entities.PrintingHouse" fetch="select" name="printingHouse">
+      <column name="PrintingHouseId" not-null="false"/>
+    </many-to-one>
     <property name="bookNumber" type="int">
       <column name="BookNumber" not-null="true"/>
     </property>
@@ -25,6 +28,10 @@
     <property name="weight" type="double">
       <column name="Weight" not-null="true" precision="22" scale="0"/>
     </property>
+    <property name="discarded" type="boolean">
+      <column name="Discarded" default="0" not-null="true" />
+    </property>
+    
     <property name="weightPerBook" type="double">
       <column name="WeightPerBook" not-null="true" precision="22" scale="0"/>
     </property>
@@ -42,7 +49,7 @@
                 where b.BookId = Id)
             </formula>
     </property>-->
-    <set cascade="delete" fetch="select" inverse="true" lazy="true" name="boxes" table="box">
+    <set cascade="delete" fetch="select" inverse="true" lazy="true" name="boxes" order-by="id" table="box">
       <key>
         <column name="BookId" not-null="true"/>
       </key>

@@ -27,7 +27,7 @@ public interface DeliveryHelperLocal {
     public Delivery getDeliveryById(int id);
     public boolean deleteDelivery(Delivery delivery);
     public void addAttachment(Delivery selectedDelivery, Attachment newAttachment);
-    public List<Attachment> getAttachments(Delivery delivery);
+    public List<Attachment> getAttachments(int  deliveryId);
     public List<Deliverydirection> getAllDeliveryDirections();
     public Deliverydirection getDeliveryDirectionById(int id);
 }

@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import javax.ejb.Stateless;
 import javax.inject.Named;
 import org.hibernate.Criteria;
+import org.hibernate.FetchMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -41,15 +42,16 @@ public class DeliveriesHelper implements DeliveryHelperLocal, Serializable {
     private static final Logger logger = Logger.getLogger(DeliveriesHelper.class.getName());
 
     private static final String QUERY_MAX_DELIVERY_NUMBER = "select max(delivery.deliveryNumber) from Delivery delivery where delivery.deliveryNumber like :queryParameter";
+    private static final String CLASS_NAME = DeliveriesHelper.class.getSimpleName();
 
     private Session session;
 
     public DeliveriesHelper() {
-
     }
 
     @Override
     public List<Delivery> getAllDeliveries() {
+        logger.log(Level.SEVERE, "{0}: getAllDeliveries started", CLASS_NAME);
 
         this.session = HibernateUtil.getSessionFactory().openSession();
         List<Delivery> result = new ArrayList<Delivery>();
@@ -57,21 +59,19 @@ public class DeliveriesHelper implements DeliveryHelperLocal, Serializable {
 
         try {
             Criteria criteria = this.session.createCriteria(Delivery.class);
-            result = (List<Delivery>) criteria.list();
+            result = (List<Delivery>) criteria
+//                    .setFetchMode("attachments", FetchMode.JOIN)
+                    .setFetchMode("deliverydirection", FetchMode.JOIN)
+                    .list();
 
-            for (Delivery delivery : result) {
-                Set<Attachment> attachments = delivery.getAttachments();
-                delivery.getDeliverydirection().getDirection();
-                for (Attachment attachment : attachments) {
-                    attachment.getFilePath();
-                }
-            }
             transaction.commit();
         } catch (HibernateException e) {
             transaction.rollback();
             DeliveriesHelper.logger.log(Level.SEVERE, e.getMessage());
-        }finally{
-        this.session.close();
+        } finally {
+            this.session.close();
+            logger.log(Level.SEVERE, "{0}: getAllDeliveries finished", CLASS_NAME);
+
         }
 
         Collections.reverse(result);
@@ -80,6 +80,8 @@ public class DeliveriesHelper implements DeliveryHelperLocal, Serializable {
 
     @Override
     public boolean isEmpty(Delivery delivery) {
+        logger.log(Level.SEVERE, "{0}: isEmpty started", CLASS_NAME);
+
         boolean isEmpty = true;
 
         Field[] fields = Delivery.class.getDeclaredFields();
@@ -105,11 +107,15 @@ public class DeliveriesHelper implements DeliveryHelperLocal, Serializable {
             }
         }
 
+        logger.log(Level.SEVERE, "{0}: isEmpty finished", CLASS_NAME);
+
         return isEmpty;
     }
 
     @Override
     public boolean updateDelivery(Delivery delivery) throws ConcurentUpdateException {
+        logger.log(Level.SEVERE, "{0}: updateDelivery started", CLASS_NAME);
+
         boolean updated = false;
         this.session = HibernateUtil.getSessionFactory().openSession();
         Transaction transaction = this.session.beginTransaction();
@@ -126,14 +132,19 @@ public class DeliveriesHelper implements DeliveryHelperLocal, Serializable {
         } catch (HibernateException e) {
             transaction.rollback();
             DeliveriesHelper.logger.log(Level.SEVERE, e.getMessage(), delivery);
-        }finally{
-        this.session.close();
+        } finally {
+            this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: updateDelivery finished", CLASS_NAME);
+
         }
         return updated;
     }
 
     @Override
     public Delivery getDeliveryById(int id) {
+        logger.log(Level.SEVERE, "{0}: getDeliveryById started", CLASS_NAME);
+
         Delivery delivery = null;
 
         this.session = HibernateUtil.getSessionFactory().openSession();
@@ -150,14 +161,19 @@ public class DeliveriesHelper implements DeliveryHelperLocal, Serializable {
         } catch (HibernateException e) {
             transaction.rollback();
             DeliveriesHelper.logger.log(Level.SEVERE, e.getMessage(), delivery);
-        }finally{
-        this.session.close();
+        } finally {
+            this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: getDeliveryById finished", CLASS_NAME);
+
         }
         return delivery;
     }
 
     @Override
     public boolean deleteDelivery(Delivery delivery) {
+        logger.log(Level.SEVERE, "{0}: deleteDelivery started", CLASS_NAME);
+
         boolean isDeleted = false;
 
         this.session = HibernateUtil.getSessionFactory().openSession();
@@ -171,15 +187,19 @@ public class DeliveriesHelper implements DeliveryHelperLocal, Serializable {
             transaction.rollback();
             DeliveriesHelper.logger.log(Level.SEVERE, e.getMessage(), delivery);
             throw new HibernateException(e);
-        }finally{
-        this.session.close();
+        } finally {
+            this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: deleteDelivery finished", CLASS_NAME);
         }
-        
+
         return isDeleted;
     }
 
     @Override
     public void addAttachment(Delivery selectedDelivery, Attachment newAttachment) {
+        logger.log(Level.SEVERE, "{0}: addAttachment started", CLASS_NAME);
+
         this.session = HibernateUtil.getSessionFactory().openSession();
         Transaction transaction = session.beginTransaction();
         try {
@@ -191,32 +211,43 @@ public class DeliveriesHelper implements DeliveryHelperLocal, Serializable {
         } catch (HibernateException e) {
             transaction.rollback();
             DeliveriesHelper.logger.log(Level.SEVERE, e.getMessage(), new Object[]{selectedDelivery, newAttachment});
-        }finally{
-        this.session.close();
+        } finally {
+            this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: addAttachment finished", CLASS_NAME);
+
         }
     }
 
     @Override
-    public List<Attachment> getAttachments(Delivery delivery) {
+    public List<Attachment> getAttachments(int deliveryId) {
+        logger.log(Level.SEVERE, "{0}: getAttachments started", CLASS_NAME);
+
         List<Attachment> resultAttachments = new ArrayList<Attachment>();
         this.session = HibernateUtil.getSessionFactory().openSession();
         Transaction transaction = session.beginTransaction();
+        
+        Delivery delivery = null;
+        
         try {
-            delivery = (Delivery) this.session.merge(delivery);
+            delivery = (Delivery) this.session.get(Delivery.class, deliveryId);
             transaction.commit();
             resultAttachments = new ArrayList<Attachment>(delivery.getAttachments());
 
         } catch (HibernateException e) {
             transaction.rollback();
             DeliveriesHelper.logger.log(Level.SEVERE, e.getMessage(), delivery);
-        }finally{
-        this.session.close();
+        } finally {
+            this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: getAttachments finished", CLASS_NAME);
         }
         return resultAttachments;
     }
 
     @Override
     public List<Deliverydirection> getAllDeliveryDirections() {
+        logger.log(Level.SEVERE, "{0}: getAllDeliveryDirections started", CLASS_NAME);
 
         this.session = HibernateUtil.getSessionFactory().openSession();
 
@@ -231,8 +262,10 @@ public class DeliveriesHelper implements DeliveryHelperLocal, Serializable {
         } catch (HibernateException e) {
             transaction.rollback();
             DeliveriesHelper.logger.log(Level.SEVERE, e.getMessage());
-        }finally{
-        this.session.close();
+        } finally {
+            this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: getAllDeliveryDirections finished", CLASS_NAME);
         }
 
         return resultDeliverydirections;
@@ -240,6 +273,7 @@ public class DeliveriesHelper implements DeliveryHelperLocal, Serializable {
 
     @Override
     public Deliverydirection getDeliveryDirectionById(int id) {
+        logger.log(Level.SEVERE, "{0}: getDeliveryDirectionById started", CLASS_NAME);
 
         this.session = HibernateUtil.getSessionFactory().openSession();
 
@@ -255,14 +289,19 @@ public class DeliveriesHelper implements DeliveryHelperLocal, Serializable {
         } catch (HibernateException e) {
             transaction.rollback();
             DeliveriesHelper.logger.log(Level.SEVERE, e.getMessage());
-        }finally{
-        this.session.close();
+        } finally {
+            this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: getDeliveryDirectionById finished", CLASS_NAME);
+
         }
 
         return resultDeliverydirection;
     }
 
     public String biggestDeliveryNumber(int week, int year) {
+        logger.log(Level.SEVERE, "{0}: biggestDeliveryNumber started", CLASS_NAME);
+
         String biggestDeliveryNumber = null;
 
         this.session = HibernateUtil.getSessionFactory().openSession();
@@ -276,8 +315,10 @@ public class DeliveriesHelper implements DeliveryHelperLocal, Serializable {
         } catch (HibernateException e) {
             transaction.rollback();
             logger.log(Level.SEVERE, e.getMessage());
-        }finally{
-        this.session.close();
+        } finally {
+            this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: biggestDeliveryNumber finished", CLASS_NAME);
         }
 
         return biggestDeliveryNumber;

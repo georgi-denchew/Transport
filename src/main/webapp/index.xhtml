@@ -10,8 +10,6 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <h:outputStylesheet name="./css/default.css"/>
         <h:outputStylesheet name="./css/cssLayout.css"/>
-        <h:outputStylesheet name="./css/sweet-alert.css"/>
-        <h:outputStylesheet name="./css/alertify.css"/>
         <title>
             <ui:insert name="title">Default Title</ui:insert>
         </title>
@@ -22,8 +20,13 @@
             <ui:insert name="header">
                 <h:form prependId="false">
                     <p:menubar id="menubar">
-                        <p:menuitem value="Доставки" oncomplete="PF('deliveryDialog').show();"  />
+                        <p:submenu label="Админ">
+                            <p:menuitem value="Доставки" oncomplete="PF('deliveryDialog').show();"  />
+                            <p:menuitem value="Печатници" oncomplete="PF('printingHouseDialog').show();"  />
+                        </p:submenu>
+                        
                         <p:menuitem value="Транспорт" outcome="/transports/all-transports"  />
+
                     </p:menubar>
                 </h:form>
 
@@ -35,7 +38,6 @@
                           closeOnEscape="true"
                           minHeight="40">
                     <h:form prependId="false">
-                        <p:growl id="delivery-growl"/>
                         <h:panelGrid style="width:500px;" columns="2">
                             <p:outputLabel for="delivery-password" value="Парола за достъп:"/>
                             <p:password id="delivery-password" required="true" requiredMessage="Паролата е задължителна!">
@@ -44,22 +46,76 @@
 
                             <f:facet name="footer">
                                 <p:commandButton value="Влез" 
-                                                 action="/deliveries/deliveries?faces-redirect=true"
+                                                 action="/admin/deliveries?faces-redirect=true"
                                                  onsuccess="PF('deliveryDialog').hide(1000);"
-                                                 update="delivery-growl"
+                                                 update=":growls"
                                                  />
                             </f:facet>
                         </h:panelGrid>    
+                    </h:form>
+                </p:dialog>
+
+
+                <p:dialog id="printing-house-dialog"
+                          header="Вход за Печатници" 
+                          widgetVar="printingHouseDialog" 
+                          showEffect="blind"
+                          hideEffect="blind"
+                          closeOnEscape="true"
+                          minHeight="40">
+                    <h:form prependId="false">
+                        <h:panelGrid style="width:500px;" columns="2">
+                            <p:outputLabel for="printing-house-password" value="Парола за достъп:"/>
+                            <p:password id="printing-house-password" required="true" requiredMessage="Паролата е задължителна!">
+                                <f:validator validatorId="deleteDeliveryValidator"  />
+                            </p:password>
+
+                            <f:facet name="footer">
+                                <p:commandButton value="Влез" 
+                                                 action="/admin/printing-houses?faces-redirect=true"
+                                                 onsuccess="PF('printingHouseDialog').hide(1000);"
+                                                 update=":growls"
+                                                 />
+                            </f:facet>
+                        </h:panelGrid>
+                    </h:form>
+                </p:dialog>
+                
+                
+                <p:dialog id="additional-costs-dialog"
+                          header="Вход за Допълнителни Разходи" 
+                          widgetVar="additionalCostsDialog" 
+                          showEffect="blind"
+                          hideEffect="blind"
+                          closeOnEscape="true"
+                          minHeight="40">
+                    <h:form prependId="false">
+                        <h:panelGrid style="width:500px;" columns="2">
+                            <p:outputLabel for="additional-costs-password" value="Парола за достъп:"/>
+                            <p:password id="additional-costs-password" required="true" requiredMessage="Паролата е задължителна!">
+                                <f:validator validatorId="deleteDeliveryValidator"  />
+                            </p:password>
+
+                            <f:facet name="footer">
+                                <p:commandButton value="Влез" 
+                                                 action="/admin/additional-costs?faces-redirect=true"
+                                                 onsuccess="PF('additionalCostsDialog').hide(1000);"
+                                                 update=":growls"
+                                                 />
+                            </f:facet>
+                        </h:panelGrid>
                     </h:form>
                 </p:dialog>
             </ui:insert>
         </div>
 
         <div id="body">
+            <h:form id="growls">
+                <p:growl id="messages" severity="info, warn" autoUpdate="true" />
+                <p:growl id="error-messages" severity="error" redisplay="false" autoUpdate="true" sticky="true" />
+            </h:form>
             <ui:insert name="body"></ui:insert>
 
-            <h:outputScript name="./js/sweet-alert.min.js"/>
-            <h:outputScript name="./js/alertify.js"/>
             <h:outputScript name="./js/script.js"/>
         </div>
 

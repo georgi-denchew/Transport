@@ -21,6 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.griffinslogistics.models.BookBoxModel;
 import com.griffinslogistics.models.BookExtendedModel;
+import com.griffinslogistics.models.BookForTransportationModel;
 import com.griffinslogistics.models.BookLabelModel;
 import com.griffinslogistics.models.BookModel;
 import org.hibernate.Criteria;
@@ -39,6 +40,7 @@ import org.hibernate.transform.Transformers;
 public class BooksHelper implements Serializable {
 
     private static final Logger logger = Logger.getLogger(BooksHelper.class.getName());
+    private static final String CLASS_NAME = BooksHelper.class.getSimpleName();
 
     private static final String QUERY_BOOK_BOX_MODELS_BY_PACKAGE = "select bo.bookNumber as bookNumber, bo.title as title, b.booksCount as booksCount, sum(b.boxesCount) as boxesCount "
             + "from Book bo "
@@ -71,6 +73,8 @@ public class BooksHelper implements Serializable {
     }
 
     public List<Book> getAllBooks() {
+        logger.log(Level.SEVERE, "{0}: getAllBooks started", CLASS_NAME);
+
         List<Book> resultList = new ArrayList<Book>();
 
         this.session = HibernateUtil.getSessionFactory().openSession();
@@ -86,11 +90,14 @@ public class BooksHelper implements Serializable {
             logger.log(Level.SEVERE, e.getMessage());
         } finally {
             this.session.close();
+            logger.log(Level.SEVERE, "{0}: getAllBooks finished", CLASS_NAME);
+
         }
         return resultList;
     }
 
     public List<Book> getBooksByBookspackage(Bookspackage bookspackage) {
+        logger.log(Level.SEVERE, "{0}: getBooksByBookspackage started", CLASS_NAME);
 
         this.session = HibernateUtil.getSessionFactory().openSession();
         Transaction transaction = this.session.beginTransaction();
@@ -99,11 +106,17 @@ public class BooksHelper implements Serializable {
 
         try {
             bookspackage = (Bookspackage) this.session.get(Bookspackage.class, bookspackage.getId());
-            result = bookspackage.getBooks();
+            result.addAll(bookspackage.getBooks());
 
             for (Book book : result) {
                 long totalBooksCount = 0;
                 double totalBooksWeight = 0;
+
+                // lazy loading
+                if (book.getPrintingHouse() != null) {
+                    book.getPrintingHouse().getName();
+                }
+
                 for (Box box : (Set<Box>) book.getBoxes()) {
                     int boxesCount = box.getBoxesCount();
                     int booksCount = box.getBooksCount();
@@ -116,42 +129,22 @@ public class BooksHelper implements Serializable {
                 book.setTotalBooksWeight(totalBooksWeight);
             }
 
-//            Query query = this.session.createQuery(QUERY_BOOKS_TOTALS_BY_BOOKSPACKAGE);
-//            query.setParameter("bookspackage", bookspackage);
-//            query.setResultTransformer(Transformers.aliasToBean(Book.class));
-//            result = (List<Book>) query.list();
             transaction.commit();
         } catch (HibernateException e) {
             transaction.rollback();
             logger.log(Level.SEVERE, e.getMessage());
         } finally {
             this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: getBooksByBookspackage finished", CLASS_NAME);
         }
 
         return result;
-//
-//        List<Book> resultList = new ArrayList<Book>();
-//
-//        this.session = HibernateUtil.getSessionFactory().openSession();
-//        Transaction transaction = this.session.beginTransaction();
-//
-//        try {
-//            Criteria criteria = this.session.createCriteria(Book.class);
-//            criteria.add(Restrictions.eq("bookspackage", bookspackage));
-//            resultList = criteria.list();
-//            Collections.reverse(resultList);
-//            transaction.commit();
-//        } catch (HibernateException e) {
-//            transaction.rollback();
-//            logger.log(Level.SEVERE, e.getMessage());
-//        }
-//
-//        this.session.close();
-//
-//        return resultList;
     }
 
     public List<BookExtendedModel> getAllBooksByTransportation(Transportation transportation) {
+        logger.log(Level.SEVERE, "{0}: getAllBooksByTransportation started", CLASS_NAME);
+
         this.session = HibernateUtil.getSessionFactory().openSession();
         Transaction transaction = this.session.beginTransaction();
 
@@ -168,12 +161,17 @@ public class BooksHelper implements Serializable {
             logger.log(Level.SEVERE, e.getMessage());
         } finally {
             this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: getAllBooksByTransportation finished", CLASS_NAME);
         }
 
         return result;
     }
 
     public List<BookBoxModel> getAllBookBoxModelsByPackage(Bookspackage bookspackage) {
+
+        logger.log(Level.SEVERE, "{0}: getAllBookBoxModelsByPackage started", CLASS_NAME);
+
         this.session = HibernateUtil.getSessionFactory().openSession();
         Transaction transaction = this.session.beginTransaction();
 
@@ -186,17 +184,25 @@ public class BooksHelper implements Serializable {
             query.setResultTransformer(Transformers.aliasToBean(BookBoxModel.class));
             result = (List<BookBoxModel>) query.list();
 
+            for (BookBoxModel bookBoxModel : result) {
+                bookBoxModel.setClient(bookspackage.getClient());
+                bookBoxModel.setDeliveryAddress(bookspackage.getDeliveryAddress());
+            }
         } catch (HibernateException e) {
             transaction.rollback();
-            e.printStackTrace();
         } finally {
             this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: getAllBookBoxModelsByPackage finished", CLASS_NAME);
+
         }
 
         return result;
     }
 
     public Map<String, List<BookBoxModel>> getAllBookBoxModelsByTransportation(Transportation transportation) {
+        logger.log(Level.SEVERE, "{0}: getAllBookBoxModelsByTransportation started", CLASS_NAME);
+
         Map<String, List<BookBoxModel>> result = new HashMap<String, List<BookBoxModel>>();
 
         this.session = HibernateUtil.getSessionFactory().openSession();
@@ -207,11 +213,18 @@ public class BooksHelper implements Serializable {
             transportation = (Transportation) this.session.get(Transportation.class, transportation.getId());
 
             for (Bookspackage bookspackage : transportation.getBookspackages()) {
+
                 Query query = this.session.createQuery(QUERY_BOOK_BOX_MODELS_BY_PACKAGE);
 
                 query.setParameter("bookspackage", bookspackage);
                 query.setResultTransformer(Transformers.aliasToBean(BookBoxModel.class));
                 List<BookBoxModel> bookBoxModels = (List<BookBoxModel>) query.list();
+
+                for (BookBoxModel bookBoxModel : bookBoxModels) {
+                    bookBoxModel.setClient(bookspackage.getClient());
+                    bookBoxModel.setDeliveryAddress(bookspackage.getDeliveryAddress());
+                }
+
                 if (bookBoxModels.size() > 0) {
                     result.put(bookspackage.getPackageNumber(), bookBoxModels);
                 }
@@ -223,12 +236,16 @@ public class BooksHelper implements Serializable {
             logger.log(Level.SEVERE, e.getMessage());
         } finally {
             this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: getAllBookBoxModelsByTransportation finished", CLASS_NAME);
         }
 
         return result;
     }
 
     public List<BookModel> getBookModelsByTransportation(Transportation transportation) {
+        logger.log(Level.SEVERE, "{0}: getBookModelsByTransportation started", CLASS_NAME);
+
         List<BookModel> resultList = new ArrayList<BookModel>();
 
         this.session = HibernateUtil.getSessionFactory().openSession();
@@ -250,12 +267,16 @@ public class BooksHelper implements Serializable {
             logger.log(Level.SEVERE, e.getMessage());
         } finally {
             this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: getBookModelsByTransportation finished", CLASS_NAME);
         }
 
         return resultList;
     }
 
     public boolean updateBook(Book book) {
+        logger.log(Level.SEVERE, "{0}: updateBook started", CLASS_NAME);
+
         boolean updated = false;
 
         this.session = HibernateUtil.getSessionFactory().openSession();
@@ -270,12 +291,16 @@ public class BooksHelper implements Serializable {
             logger.log(Level.SEVERE, e.getMessage());
         } finally {
             this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: updateBook finished", CLASS_NAME);
         }
 
         return updated;
     }
 
     public Integer getBiggestBookNumberForTransportation(Transportation transportation) {
+        logger.log(Level.SEVERE, "{0}: getBiggestBookNumberForTransportation started", CLASS_NAME);
+
         Integer biggestBookspackageNumber = null;
 
         this.session = HibernateUtil.getSessionFactory().openSession();
@@ -290,12 +315,17 @@ public class BooksHelper implements Serializable {
             logger.log(Level.SEVERE, e.getMessage());
         } finally {
             this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: getBiggestBookNumberForTransportation finished", CLASS_NAME);
+
         }
 
         return biggestBookspackageNumber;
     }
 
     public boolean deleteBook(Book selectedBook) {
+        logger.log(Level.SEVERE, "{0}: deleteBook started", CLASS_NAME);
+
         this.session = HibernateUtil.getSessionFactory().openSession();
         Transaction transaction = this.session.beginTransaction();
 
@@ -310,12 +340,16 @@ public class BooksHelper implements Serializable {
             logger.log(Level.SEVERE, e.getMessage());
         } finally {
             this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: deleteBook finished", CLASS_NAME);
         }
 
         return isDeleted;
     }
 
     public BookLabelModel getLabelInfoForBook(Book book) {
+        logger.log(Level.SEVERE, "{0}: getLabelInfoForBook started", CLASS_NAME);
+
         this.session = HibernateUtil.getSessionFactory().openSession();
         Transaction transaction = this.session.beginTransaction();
 
@@ -325,16 +359,15 @@ public class BooksHelper implements Serializable {
 //            book = (Book) this.session.merge(book);
             book = (Book) this.session.get(Book.class, book.getId());
 
-            Long count = 0L;
-
-            for (Box box : (Set<Box>) book.getBoxes()) {
-                count += box.getBooksCount() * box.getBoxesCount();
-            }
+//            Long count = 0L;
+//            for (Box box : (Set<Box>) book.getBoxes()) {
+//                count += box.getBooksCount() * box.getBoxesCount();
+//            }
             Transportation transportation = book.getTransportation();
             Bookspackage bookspackage = book.getBookspackage();
             result = new BookLabelModel(bookspackage.getDeliveryAddress(), bookspackage.getPostalCode(),
                     book.getTitle(), book.getBookNumber(), bookspackage.getClient(),
-                    transportation.getWeekNumber() + "/" + transportation.getYear(), count);
+                    transportation.getWeekNumber() + "/" + transportation.getYear(), (long) book.getCount(), bookspackage.getPackageNumber());
 
             transaction.commit();
         } catch (HibernateException e) {
@@ -342,9 +375,104 @@ public class BooksHelper implements Serializable {
             logger.log(Level.SEVERE, e.getMessage());
         } finally {
             this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: getLabelInfoForBook finished", CLASS_NAME);
         }
 
         return result;
+    }
+
+    public List<BookForTransportationModel> getBooksForTransportation(Integer transportationId) {
+        logger.log(Level.SEVERE, "{0}: getBooksForTransportation started", CLASS_NAME);
+
+        List<BookForTransportationModel> resultList = new ArrayList<BookForTransportationModel>();
+
+        this.session = HibernateUtil.getSessionFactory().openSession();
+        Transaction transaction = this.session.beginTransaction();
+
+        try {
+            Transportation transportation = (Transportation) this.session.get(Transportation.class, transportationId);
+            for (Book book : transportation.getBooks()) {
+
+                if (book.getPrintingHouse() != null) {
+                    book.getPrintingHouse().getName();
+                }
+
+                BookForTransportationModel model = BookForTransportationModel.fromBook(book);
+                resultList.add(model);
+            }
+
+            Collections.reverse(resultList);
+            transaction.commit();
+        } catch (HibernateException e) {
+            transaction.rollback();
+            logger.log(Level.SEVERE, e.getMessage());
+        } finally {
+            this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: getBooksForTransportation finished", CLASS_NAME);
+        }
+
+        return resultList;
+    }
+
+    public List<Book> getBooksByTransportation(Transportation transportation) {
+        logger.log(Level.SEVERE, "{0}: getBooksByTransportation started", CLASS_NAME);
+
+        this.session = HibernateUtil.getSessionFactory().openSession();
+        Transaction transaction = this.session.beginTransaction();
+
+        List<Book> result = new ArrayList<Book>();
+
+        try {
+            transportation = (Transportation) this.session.get(Transportation.class, transportation.getId());
+            result.addAll(transportation.getBooks());
+
+            for (Book book : result) {
+                // lazy loading
+                if (book.getPrintingHouse() != null) {
+                    book.getPrintingHouse().getName();
+                }
+
+                book.getBookspackage().getPackageNumber();
+            }
+
+            transaction.commit();
+        } catch (HibernateException e) {
+            transaction.rollback();
+            logger.log(Level.SEVERE, e.getMessage());
+        } finally {
+            this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: getBooksByTransportation finished", CLASS_NAME);
+        }
+
+        return result;
+    }
+
+    public boolean updateBookDiscardedField(Integer id, boolean discarded) {
+        logger.log(Level.SEVERE, "{0}: updateBookDiscardedField started", CLASS_NAME);
+
+        boolean updateSuccessful = false;
+
+        this.session = HibernateUtil.getSessionFactory().openSession();
+        Transaction transaction = this.session.beginTransaction();
+
+        try {
+            Book book = (Book) this.session.get(Book.class, id);
+            book.setDiscarded(discarded);
+            transaction.commit();
+            updateSuccessful = true;
+        } catch (HibernateException e) {
+            transaction.rollback();
+            logger.log(Level.SEVERE, e.getMessage());
+        } finally {
+            this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: updateBookDiscardedField finished", CLASS_NAME);
+        }
+
+        return updateSuccessful;
     }
 
 }

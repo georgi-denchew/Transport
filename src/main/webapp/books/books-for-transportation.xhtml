@@ -9,43 +9,89 @@
                 xmlns:f="http://xmlns.jcp.org/jsf/core">
 
     <ui:define name="title">
-        Книги за транспорт
+        Книги
     </ui:define>
 
     <ui:define name="body">
-        <h:form id="books-for-transport-form">
+        <h:form id="books-form">
+            <p:breadCrumb>
+                <p:menuitem url="/transports/all-transports" title="Всички транспорти" value="Всички транспорти"/>
+                <p:menuitem url="/books/books-for-transportation" title="Книги за транспорт"
+                            value='Книги за транспорт "#{booksForTransportationController.transportation.weekNumber}/#{booksForTransportationController.transportation.year}"'/>
+            </p:breadCrumb>
 
-            <h:panelGrid columns="4" styleClass="insert-form">
-
-                <f:facet name="header">
-                    <h2>Текущ транспорт</h2>
-                </f:facet>
-                <h:panelGrid styleClass="large-text" columns="4">
-                    <p:outputLabel value="Година:"/>
-                    <p:outputLabel styleClass="bold" value="#{booksForTransportationController.transportation.year}"/>
-
-                    <p:outputLabel value="Седмица:"/>
-                    <p:outputLabel styleClass="bold" value="#{booksForTransportationController.transportation.year}"/>
+            <h:panelGrid styleClass="insert-form">
+                <h:panelGrid columns="4" style="margin: 0 auto;">
+                    <f:facet name="header">
+                        <h2>Текущ Транспорт</h2>
+                    </f:facet>
+                    <h:panelGrid styleClass="large-text" columns="4">
+                        <p:outputLabel value="Година:"/>
+                        <p:outputLabel styleClass="bold" value="#{booksForTransportationController.transportation.year}"/>
+                        <p:outputLabel value="Седмица:"/>
+                        <p:outputLabel styleClass="bold" value="#{booksForTransportationController.transportation.weekNumber}"/>
+                    </h:panelGrid>
                 </h:panelGrid>
             </h:panelGrid>
+        </h:form>
 
-            <p:dataTable id="books-for-transport-datatable"
+        <h:form id="books-datatable-form">
+            <p:dataTable id="books-datatable"
                          value="#{booksForTransportationController.booksForTransportation}"
-                         var="book">
+                         rowStyleClass='#{book.discarded == true ? "book-discarded" : ""}'
+                         var="book"
+                         paginator="true" 
+                         rows="20"
+                         paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                         rowsPerPageTemplate="20,40 #{booksForTransportationController.booksForTransportation.size()}"
+                         
+                         >
 
-                <p:column headerText="Номер">
-                    <p:outputLabel value="#{book.bookNumber}"/>
+                <p:column headerText="Отпаднала" width="8%;">
+                    <p:selectBooleanCheckbox value="#{book.discarded}">
+                        <p:ajax update=":growls books-datatable" listener="#{booksForTransportationController.updateDiscardedField(book)}" />
+                    </p:selectBooleanCheckbox>
+                    <p:outputLabel style="float:right;" value='#{book.discarded == true ? "Да" : "Не"}'/>
                 </p:column>
-
+                
                 <p:column headerText="Заглавие">
-                    <p:outputLabel value="#{book.title}"/>       
+                    <p:outputLabel value="#{book.title}"/>     
                 </p:column>
 
-                <p:column headerText="Общ Брой">
-                    <p:outputLabel value="#{book.count}"/>      
+                <p:column headerText="Номер на пратка">
+                    <p:outputLabel value="#{book.bookspackageNumber}"/>          
                 </p:column>
+
+                <p:column sortBy="#{book.printingHouseName}"
+                          filterBy="#{book.printingHouseName}" 
+                          filterOptions="#{booksForTransportationController.printingHousesFilterSelectItems}"
+                          filterMatchMode="exact">
+
+                    <f:facet name="header">
+                        <h:outputText value="Печатница"/>
+                    </f:facet>
+                    <p:outputLabel value="#{book.printingHouseName}"/>
+                </p:column>
+
+                <p:column headerText="Брой Поръчани">
+                    <p:outputLabel value="#{book.count}"/>                
+                </p:column>
+
+                <p:column headerText="Тегло(кг) поръчани">
+                    <p:outputLabel value="#{book.weight}">
+                        <f:convertNumber pattern="#.##"/>
+                    </p:outputLabel>        
+                </p:column>
+
+                <p:column headerText="Тегло(кг) за бройка"> 
+                    <p:outputLabel value="#{book.weightPerBook}">
+                        <f:convertNumber pattern="#.##"/>
+                    </p:outputLabel>               
+                </p:column>
+
             </p:dataTable>
         </h:form>
+
     </ui:define>
 
 </ui:composition>

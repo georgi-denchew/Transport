@@ -10,13 +10,13 @@ package com.griffinslogistics.exceptions;
  *
  * @author Georgi
  */
-public class ExistingTransportationException extends Exception {
+public class ExistingEntityException extends Exception {
     
-    public ExistingTransportationException() {
+    public ExistingEntityException() {
         
     }
     
-    public ExistingTransportationException(String message) {
+    public ExistingEntityException(String message) {
         super(message);
     }
     

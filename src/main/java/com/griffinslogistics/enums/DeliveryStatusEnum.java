@@ -13,7 +13,7 @@ package com.griffinslogistics.enums;
  *
  * @author Georgi
  */
-public enum DeliveryStatus {
+public enum DeliveryStatusEnum {
 
     TO_LIFT("toLift", "За вдигане"),
     LIFTED("lifted", "Вдигнато"),
@@ -24,7 +24,7 @@ public enum DeliveryStatus {
     String value;
     String displayValue;
 
-    DeliveryStatus(String value, String displayValue) {
+    DeliveryStatusEnum(String value, String displayValue) {
         this.value = value;
         this.displayValue = displayValue;
     }
@@ -37,8 +37,8 @@ public enum DeliveryStatus {
         return this.displayValue;
     }
     
-    public static DeliveryStatus byValue(String value) {
-        for (DeliveryStatus deliveryStatus : DeliveryStatus.values()) {
+    public static DeliveryStatusEnum byValue(String value) {
+        for (DeliveryStatusEnum deliveryStatus : DeliveryStatusEnum.values()) {
             String statusValue = deliveryStatus.getValue();
             if (statusValue.equals(value)) {
                 return deliveryStatus;

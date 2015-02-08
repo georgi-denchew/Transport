@@ -69,23 +69,29 @@ insert into truckGroup(Name) values
 ('7'),
 ('8'),
 ('9'),
-('10')
+('10'),
+('11'),
+('12'),
+('13')
 ;
 
 create table bookspackage
 (
 Id int not null primary key auto_increment,
 PackageNumber varchar(20),
-Country varchar(25),
+Country varchar(50),
 PostalCode varchar(15),
-PhoneNumber varchar(15),
-Email varchar(50),
+PhoneNumber varchar(100),
+Email varchar(100),
 Merchant varchar(30),
-Client varchar(70),
+Client varchar(100),
+PricePerKilogram decimal(7,2) default 1,
+Priority varchar(30),
 DeliveryDate date,
-DeliveryAddress varchar(100),
-Remarks varchar(500),
-PrintDeliveryDay varchar(10),
+DeliveryAddress varchar(500),
+RemarksSales varchar(1000),
+RemarksLogistics varchar(1000),
+PrintDeliveryDay varchar(20),
 Version int default 1,
 TransportationId int,
 TruckGroupId int,
@@ -98,33 +104,44 @@ create table bookspackagehistory
 (
 Id int not null primary key auto_increment,
 LastModification timestamp not null,
-Country varchar(25),
+Country varchar(50),
 PostalCode varchar(15),
-PhoneNumber varchar(15),
-Email varchar(50),
+PhoneNumber varchar(100),
+Email varchar(100),
 Merchant varchar(30),
-Client varchar(70),
+Client varchar(100),
+PricePerKilogram decimal(7,2) default 1,
+Priority varchar(30),
 DeliveryDate date,
-DeliveryAddress varchar(100),
-Remarks varchar(500),
-PrintDeliveryDay varchar(10),
-TruckGroupName varchar(30),
+DeliveryAddress varchar(500),
+RemarksSales varchar(1000),
+RemarksLogistics varchar(1000),
+PrintDeliveryDay varchar(20),
+TruckGroupName varchar(100),
 PackageId int not null,
 foreign key (PackageId) references bookspackage(Id)
+) ENGINE=InnoDB;
+
+create table printinghouse(
+Id int not null primary key auto_increment,
+Name varchar(150)
 ) ENGINE=InnoDB;
 
 create table book
 (
 Id int not null primary key auto_increment,
 BookNumber int not null,
-Title varchar(50) ,
+Title varchar(200),
 `Count` int not null,
 Weight double not null,
 WeightPerBook double not null,
+Discarded bit not null default 0,
 PackageId int not null,
 TransportationId int not null,
+PrintingHouseId int,
 foreign key (PackageId) references bookspackage(Id),
-foreign key (TransportationId) references transportation(Id)
+foreign key (TransportationId) references transportation(Id),
+foreign key (PrintingHouseId) references printinghouse(Id)
 ) ENGINE=InnoDB;
 
 create table box 
@@ -147,19 +164,48 @@ Logo blob,
 Signature blob
 ) ENGINE=InnoDB;
 
-
 Insert into pulsiodetails (Contact1, Contact2, Password) values(
 '09 70 44 06 46', '09 70 40 75 02', 'm4r70');
 
-alter table bookspackage modify country varchar(50);
-alter table bookspackage modify phoneNumber varchar(100);
-alter table bookspackage modify email varchar(100);
-alter table bookspackage modify client varchar(100);
+create table additionalcost(
+Id int not null primary key auto_increment,
+PackageNumber varchar(20),
+Payer varchar(100),
+Price decimal (15,2),
+Description varchar(500),
+TransportationId int not null,
+foreign key (TransportationId) references transportation(Id)
+) ENGINE=InnoDB;
 
-alter table bookspackagehistory modify country varchar(50);
-alter table bookspackagehistory modify phoneNumber varchar(100);
-alter table bookspackagehistory modify email varchar(100);
-alter table bookspackagehistory modify client varchar(100);
-alter table bookspackagehistory modify truckGroupName varchar(100);
 
-alter table book modify title varchar(200);
+-- alter table bookspackage modify country varchar(50);
+-- alter table bookspackage modify phoneNumber varchar(100);
+-- alter table bookspackage modify email varchar(100);
+-- alter table bookspackage modify client varchar(100);
+-- 
+-- alter table bookspackagehistory modify country varchar(50);
+-- alter table bookspackagehistory modify phoneNumber varchar(100);
+-- alter table bookspackagehistory modify email varchar(100);
+-- alter table bookspackagehistory modify client varchar(100);
+-- alter table bookspackagehistory modify truckGroupName varchar(100);
+-- 
+-- alter table book modify title varchar(200);
+
+-- alter table bookspackage add Priority varchar(30);
+-- alter table bookspackagehistory add Priority varchar(30);
+-- alter table book add Discarded bit not null default 0;
+-- 
+-- 
+-- alter table bookspackage add RemarksSales varchar(1000);
+-- alter table bookspackagehistory add RemarksSales varchar(1000);
+-- 
+-- alter table bookspackage add RemarksLogistics varchar(1000);
+-- alter table bookspackagehistory add RemarksLogistics varchar(1000);
+-- 
+-- alter table book add PrintingHouseId int;
+-- alter table book add constraint foreign key (PrintingHouseId) references printinghouse(Id);
+-- 
+-- alter table bookspackage add PricePerKilogram decimal(7,2);
+-- alter table bookspackagehistory add PricePerKilogram decimal(7,2);
+-- 
+-- alter table additionalcosts add Description varchar(500);

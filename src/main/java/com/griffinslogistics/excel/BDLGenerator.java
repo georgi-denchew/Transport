@@ -43,7 +43,7 @@ public class BDLGenerator {
 
     public static final Logger logger = Logger.getLogger(BDLGenerator.class.getSimpleName());
 
-    public static void generateAll(OutputStream outputStream, Map<String, List<BookBoxModel>> bookBoxModelsForTransportation, Pulsiodetails pulsioDetails) {
+    public static void generateAll(OutputStream outputStream, Map<String, List<BookBoxModel>> bookBoxModelsForTransportation, Pulsiodetails pulsioDetails, String packageNumber) {
         try {
             Workbook workbook = new HSSFWorkbook();
             Map<String, CellStyle> styles = createStyles(workbook);
@@ -78,7 +78,9 @@ public class BDLGenerator {
                 List<BookBoxModel> bookBoxModels = bookBoxModelsForTransportation.get(bookspackageNumber);
                 int index = insertTableBody(sheet, styles.get("tableBodyLeft"), styles.get("tableBodyMiddle"), styles.get("tableBodyRight"), styles.get("tableFooters"), bookBoxModels);
 
-                insertFooter(sheet, styles.get("footer"), index);
+                String deliveryAddress = bookBoxModels.get(0).getDeliveryAddress();
+                String client = bookBoxModels.get(0).getClient();
+                insertFooter(sheet, styles.get("footer"), index, bookspackageNumber, deliveryAddress, client);
             }
 
             workbook.write(outputStream);
@@ -89,7 +91,7 @@ public class BDLGenerator {
         }
     }
 
-    public static OutputStream generateSingle(OutputStream outputStream, List<BookBoxModel> bookBoxModels, Pulsiodetails pulsiodetails) {
+    public static OutputStream generateSingle(OutputStream outputStream, List<BookBoxModel> bookBoxModels, Pulsiodetails pulsiodetails, String packageNumber) {
 
         try {
             Workbook workbook = new HSSFWorkbook();
@@ -131,7 +133,10 @@ public class BDLGenerator {
                     styles.get("tableFooters"),
                     bookBoxModels);
 
-            insertFooter(sheet, styles.get("footer"), index);
+            String deliveryAddress = bookBoxModels.get(0).getDeliveryAddress();
+            String client = bookBoxModels.get(0).getClient();
+
+            insertFooter(sheet, styles.get("footer"), index, packageNumber, deliveryAddress, client);
 
             workbook.write(outputStream);
         } catch (FileNotFoundException ex) {
@@ -380,7 +385,7 @@ public class BDLGenerator {
 
                 Row row = sheet.createRow(index);
 
-                if (currentBookNumber !=currentModel.getBookNumber()) {
+                if (currentBookNumber != currentModel.getBookNumber()) {
                     for (int j = 2; j <= 4; j++) {
                         row.createCell(j).setCellStyle(footerStyle);
                     }
@@ -554,34 +559,51 @@ public class BDLGenerator {
         rowsToSum.clear();
     }
 
-    private static void insertFooter(Sheet sheet, CellStyle footerStyle, int index) {
+    private static void insertFooter(Sheet sheet, CellStyle footerStyle, int index, String packageNumber, String deliveryAddress, String client) {
         String mergeString;
 
         index += 2;
         Row transportNumberRow = sheet.createRow(index);
         Cell transportNumberCell = transportNumberRow.createCell(1);
-        transportNumberCell.setCellValue("Num Tpt:");
+
+        transportNumberCell.setCellValue("Num Tpt: " + packageNumber);
         transportNumberCell.setCellStyle(footerStyle);
         mergeString = String.format("$B$%s:$C$%s", index + 1, index + 1);
         sheet.addMergedRegion(CellRangeAddress.valueOf(mergeString));
 
         index += 2;
-        Row deliverRow = sheet.createRow(index);
-        Cell deliverCell = deliverRow.createCell(1);
-        deliverCell.setCellValue("A livrer chez: ");
-        deliverCell.setCellStyle(footerStyle);
+        Row addressLabelRow = sheet.createRow(index);
+        Cell addressLabelCell = addressLabelRow.createCell(1);
+        addressLabelCell.setCellValue("A livrer chez: ");
+        addressLabelCell.setCellStyle(footerStyle);
         mergeString = String.format("$B$%s:$C$%s", index + 1, index + 1);
+        sheet.addMergedRegion(CellRangeAddress.valueOf(mergeString));
+
+        index += 1;
+        Row addressRow = sheet.createRow(index);
+        Cell addressCell = addressRow.createCell(1);
+        addressCell.setCellValue(deliveryAddress);
+        addressCell.setCellStyle(footerStyle);
+        mergeString = String.format("$B$%s:$I$%s", index + 1, index + 1);
+        sheet.addMergedRegion(CellRangeAddress.valueOf(mergeString));
+
+        index += 3;
+        Row clientLabelRow = sheet.createRow(index);
+        Cell clientLabelCell = clientLabelRow.createCell(1);
+        clientLabelCell.setCellValue("Pour le compte des Editions: ");
+        clientLabelCell.setCellStyle(footerStyle);
+        mergeString = String.format("$B$%s:$C$%s", index + 1, index + 1);
+        sheet.addMergedRegion(CellRangeAddress.valueOf(mergeString));
+
+        index += 1;
+        Row clientRow = sheet.createRow(index);
+        Cell clientCell = clientRow.createCell(1);
+        clientCell.setCellValue(client);
+        clientCell.setCellStyle(footerStyle);
+        mergeString = String.format("$B$%s:$I$%s", index + 1, index + 1);
         sheet.addMergedRegion(CellRangeAddress.valueOf(mergeString));
 
         index += 4;
-        Row publisherRow = sheet.createRow(index);
-        Cell publisherCell = publisherRow.createCell(1);
-        publisherCell.setCellValue("Pour le compte des Editions: ");
-        publisherCell.setCellStyle(footerStyle);
-        mergeString = String.format("$B$%s:$C$%s", index + 1, index + 1);
-        sheet.addMergedRegion(CellRangeAddress.valueOf(mergeString));
-
-        index += 5;
         Row dateRow = sheet.createRow(index);
         Cell dateCell = dateRow.createCell(1);
         dateCell.setCellValue("Date: ................");

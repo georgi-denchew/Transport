@@ -15,6 +15,7 @@ public class BookExtendedModel implements Serializable {
 
     private String title;
     private String bookNumber;
+    private String packageNumber;
     private Long count;
 
     public BookExtendedModel() {

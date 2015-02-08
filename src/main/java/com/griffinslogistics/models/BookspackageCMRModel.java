@@ -11,6 +11,7 @@ package com.griffinslogistics.models;
  * @author Georgi
  */
 public class BookspackageCMRModel {
+    private String deliveryAddress;
     private String packageNumber;
     private Double totalWeight;
     private Long totalBoxesCount;
@@ -32,7 +33,7 @@ public class BookspackageCMRModel {
         this.packageNumber = packageNumber;
     }
 
-    public double getTotalWeight() {
+    public Double getTotalWeight() {
         return totalWeight;
     }
 
@@ -47,6 +48,13 @@ public class BookspackageCMRModel {
     public void setTotalBoxesCount(Long totalBoxesCount) {
         this.totalBoxesCount = totalBoxesCount;
     }
-    
+
+    public String getDeliveryAddress() {
+        return deliveryAddress;
+    }
+
+    public void setDeliveryAddress(String deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
+    }
     
 }

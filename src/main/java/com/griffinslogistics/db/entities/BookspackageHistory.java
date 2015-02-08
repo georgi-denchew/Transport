@@ -23,16 +23,22 @@ public class BookspackageHistory implements Serializable {
     private String email;
     private String merchant;
     private String client;
+    private Double pricePerKilogram;
+    private String priority;
     private Date deliveryDate;
     private String deliveryAddress;
-    private String remarks;
+    private String remarksSales;
+    private String remarksLogistics;
     private String printDeliveryDay;
     private String truckGroupName;
     
     public BookspackageHistory() {
     }
 
-    public BookspackageHistory(Integer id, Bookspackage bookspackage, String truckGroupName, Date lastModification, String country, String postalCode, String phoneNumber, String email, String merchant, String client, Date deliveryDate, String deliveryAddress, String remarks, String printDeliveryDay) {
+    public BookspackageHistory(Integer id, Bookspackage bookspackage, String truckGroupName,
+            Date lastModification, String country,String postalCode, String phoneNumber, 
+            String email, String merchant, String client, Date deliveryDate, String deliveryAddress,
+            String remarks, String printDeliveryDay, String priority) {
         this.id = id;
         this.bookspackage = bookspackage;
         this.lastModification = lastModification;
@@ -44,10 +50,12 @@ public class BookspackageHistory implements Serializable {
         this.client = client;
         this.deliveryDate = deliveryDate;
         this.deliveryAddress = deliveryAddress;
-        this.remarks = remarks;
+        this.remarksSales = remarks;
         this.printDeliveryDay = printDeliveryDay;
         this.truckGroupName = truckGroupName;
+        this.priority = priority;
     }
+    
     
     public Integer getId() {
         return id;
@@ -129,12 +137,19 @@ public class BookspackageHistory implements Serializable {
         this.deliveryAddress = deliveryAddress;
     }
 
-    public String getRemarks() {
-        return remarks;
+    public String getRemarksSales() {
+        return remarksSales;
     }
 
-    public void setRemarks(String remarks) {
-        this.remarks = remarks;
+    public void setRemarksSales(String remarksSales) {
+        this.remarksSales = remarksSales;
+    }
+
+    public String getRemarksLogistics() {
+        return remarksLogistics;
+    }
+    public void setRemarksLogistics(String remarksLogstics) {
+        this.remarksLogistics = remarksLogstics;
     }
 
     public Date getLastModification() {
@@ -159,5 +174,21 @@ public class BookspackageHistory implements Serializable {
 
     public void setPrintDeliveryDay(String printDeliveryDay) {
         this.printDeliveryDay = printDeliveryDay;
+    }
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(String priority) {
+        this.priority = priority;
+    }
+
+    public Double getPricePerKilogram() {
+        return pricePerKilogram;
+    }
+
+    public void setPricePerKilogram(Double pricePerKilogram) {
+        this.pricePerKilogram = pricePerKilogram;
     }
 }

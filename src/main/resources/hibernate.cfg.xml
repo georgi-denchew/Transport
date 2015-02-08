@@ -6,24 +6,47 @@
         <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
         <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/transport?zeroDateTimeBehavior=convertToNull</property>
     
-<!--        <property name="hibernate.connection.username">griffins</property>
+        <property name="hibernate.connection.username">griffins</property>
         <property name="hibernate.connection.password">hIjmck</property>
-        -->
-            <property name="hibernate.connection.username">root</property>
-        <property name="hibernate.connection.password">1234</property>
     
         <property name="show_sql">true</property>
-        <property name="hibernate.connection.provider_class">
+        <!--<property name="hibernate.connection.provider_class">
             com.griffinslogistics.db.entities.DBCPConnectionProvider
-        </property>
-        <property name="hibernate.dbcp.initialSize">8</property>
+        </property> -->
         
-        <!-- !!!!!!!!!!!!!!!!!!!!!!!!!!! -->
-        <property name="hibernate.dbcp.maxActive">20</property>
-        <!-- !!!!!!!!!!!!!!!!!!!!!!!!!!! -->
-                
+<!--        <property name="hibernate.dbcp.initialSize">8</property>
+        <property name="hibernate.dbcp.maxActive">20</property>        
         <property name="hibernate.dbcp.maxIdle">20</property>
+        <property name="hibernate.dbcp.minIdle">0</property>-->
+        
+<!--                <property name="hibernate.dbcp.initialSize">34</property>
+        <property name="hibernate.dbcp.maxActive">377</property>
+        <property name="hibernate.dbcp.maxIdle">233</property>
+        <property name="hibernate.dbcp.minIdle">89</property>-->
+        
+<!--                        <property name="hibernate.dbcp.initialSize">8</property>
+        <property name="hibernate.dbcp.maxActive">40</property>
+        <property name="hibernate.dbcp.maxIdle">40</property>
         <property name="hibernate.dbcp.minIdle">0</property>
+
+        <property name="hibernate.dbcp.timeBetweenEvictionRunsMillis">34000</property>
+        <property name="hibernate.dbcp.minEvictableIdleTimeMillis">55000</property>
+        <property name="hibernate.dbcp.testOnBorrow">true</property>
+        <property name="hibernate.dbcp.removeAbandoned">true</property>
+        <property name="hibernate.dbcp.removeAbandonedTimeout">55</property>
+        <property name="hibernate.dbcp.validationQuery">SELECT 1</property>
+        <property name="hibernate.dbcp.validationInterval">34000</property>-->
+        
+        <property name="hibernate.
+connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
+        <property name="hibernate.c3p0.acquire_increment">1</property>
+        <property name="hibernate.c3p0.min_size">8</property>
+        <property name="hibernate.c3p0.max_size">40</property>
+        <property name="hibernate.c3p0.timeout">100</property>
+        <property name="hibernate.c3p0.max_statements">10</property>
+        <property name="hibernate.c3p0.idle_test_period">100</property>
+        <property name="hibernate.c3p0.validate">true</property>
+
         <mapping resource="com/griffinslogistics/db/entities/Book.hbm.xml"/>
         <mapping resource="com/griffinslogistics/db/entities/Transportation.hbm.xml"/>
         <mapping resource="com/griffinslogistics/db/entities/Attachment.hbm.xml"/>
@@ -34,5 +57,7 @@
         <mapping resource="com/griffinslogistics/db/entities/Delivery.hbm.xml"/>
         <mapping resource="com/griffinslogistics/db/entities/Pulsiodetails.hbm.xml"/>
         <mapping resource="com/griffinslogistics/db/entities/Truckgroup.hbm.xml"/>
+        <mapping resource="com/griffinslogistics/db/entities/Printinghouse.hbm.xml"/>
+        <mapping resource="com/griffinslogistics/db/entities/Additionalcost.hbm.xml"/>
     </session-factory>
 </hibernate-configuration>

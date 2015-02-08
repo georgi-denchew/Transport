@@ -15,12 +15,11 @@
     <ui:define name="body">
 
         <h:form id="insert-form">
-            <p:growl id="insert-transportation-growl"/>
-            
+
             <p:breadCrumb>
                 <p:menuitem title="Всички транспорти" value="Всички транспорти" url="/transports/all-transports"/>
             </p:breadCrumb>
-            
+
             <h:panelGrid id="new-delivery-grid" columns="2" cellspacing="5" styleClass="insert-form">
                 <f:facet name="header">
                     <h2>Нов Транспорт</h2>
@@ -39,31 +38,35 @@
                 <f:facet name="footer">
                     <p:commandButton id="show-new-delivery"  value="Добави"
                                      action="#{transportController.addTransport}"
-                                     update=":transportation-form @form" />
+                                     update=":transportation-form @form :growls" />
                 </f:facet>
-
             </h:panelGrid>
         </h:form>
 
-
         <h:form id="transportation-form">
-            <p:growl id="transportation-datatable-growl"/>
 
             <p:dataTable id="transportation-datatable" 
                          value="#{transportController.allTransportations}"
+                         paginator="true" 
+                         rows="20"
+                         currentPageReportTemplate="Страница {currentPage} от {totalPages}"
+                         paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                         rowsPerPageTemplate="20,40 #{transportController.allTransportations.size()}"
                          var="transport">
 
-                <p:column headerText="Навигация" width="10%;">
+                <p:column headerText="Навигация" width="20%;">
                     <p:commandButton value="Пратки" ajax="false" action="#{transportController.viewBookspackages(transport)}"/>
-                    <!-- not rendered! -->
-                    <p:commandButton rendered="false" value="Книги" ajax="false" action="#{transportController.viewBooks(transport)}"/>
+                    <p:commandButton title="Всички книги за транспорта" value="Всички Книги" ajax="false" action="#{transportController.viewBooks(transport)}"/>
+                    <p:commandButton title="Цена" value="Цена" action="#{transportController.setTransportationInSession(transport)}"
+                                     oncomplete="PF('priceDialog').show();"
+                                     update=":price-dialog"/>
+
                 </p:column>
 
-
                 <p:ajax event="rowEdit" async="false"  class="edit-button" 
-                        update="transportation-datatable @form:transportation-datatable-growl"  listener="#{transportController.onEdit}" />
+                        update="transportation-datatable :growls"  listener="#{transportController.onEdit}" />
                 <p:ajax immediate="true" event="rowEditCancel" listener="#{transportController.onCancelEdit}"
-                        update="transportation-datatable @form:transportation-datatable-growl" 
+                        update="transportation-datatable :growls" 
                         onstart="if(confirm('Откажи промените?')) return true;"/>
 
                 <p:column style="width: 2%;">
@@ -111,18 +114,37 @@
                     <f:facet name="footer">
                         <p:commandButton value="Изтрий" 
                                          actionListener="#{transportController.deleteTransportation}"
-                                         update=":growl-form :transportation-form"
+                                         update=":growls :transportation-form"
                                          onsuccess="PF('deleteDialog').hide(1000);"/>
                     </f:facet>
                 </h:panelGrid>    
             </h:form>
         </p:dialog>
 
+        <p:dialog id="price-dialog"
+                  header="Парола за Цена" 
+                  widgetVar="priceDialog" 
+                  closeOnEscape="true"
+                  showEffect="blind"                  
+                  hideEffect="blind"
+                  minHeight="40">
+            <h:form prependId="false">
+                <h:panelGrid style="width:500px;" columns="2">
+                    <p:outputLabel for="price-password" value="Парола за изтриване:"/>
+                    <p:password id="price-password" required="true" requiredMessage="Паролата е задължителна!">
+                        <f:validator validatorId="deleteDeliveryValidator"  />
+                    </p:password>
 
-        <h:form id="growl-form">
-
-            <p:growl id="messages" />
-        </h:form>
+                    <f:facet name="footer">
+                        <p:commandButton value="Влез" 
+                                         action="/admin/additional-costs?faces-redirect=true"
+                                         onsuccess="PF('priceDialog').hide(1000);"
+                                         update=":growls"
+                                         />
+                    </f:facet>
+                </h:panelGrid>    
+            </h:form>
+        </p:dialog>
 
     </ui:define>
 

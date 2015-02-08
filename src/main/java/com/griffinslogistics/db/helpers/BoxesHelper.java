@@ -26,18 +26,21 @@ import org.hibernate.criterion.Restrictions;
 public class BoxesHelper implements Serializable {
 
     private static final Logger logger = Logger.getLogger(BoxesHelper.class.getName());
-    
+    private static final String CLASS_NAME = BoxesHelper.class.getSimpleName();
+
     private Session session;
-    
-    public BoxesHelper(){
+
+    public BoxesHelper() {
     }
-    
+
     public List<Box> getBoxesByBook(Book book) {
+        logger.log(Level.SEVERE, "{0}: getBoxesByBook started", CLASS_NAME);
+
         this.session = HibernateUtil.getSessionFactory().openSession();
         Transaction transaction = this.session.beginTransaction();
-        
+
         List<Box> result = new ArrayList<Box>();
-        
+
         try {
             Criteria criteria = this.session.createCriteria(Box.class);
             criteria.add(Restrictions.eq("book", book));
@@ -46,19 +49,23 @@ public class BoxesHelper implements Serializable {
         } catch (HibernateException e) {
             transaction.rollback();
             logger.log(Level.SEVERE, e.getMessage());
-        }finally{
-        this.session.close();
+        } finally {
+            this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: getBoxesByBook finished", CLASS_NAME);
         }
-        
+
         return result;
     }
 
     public boolean updateBox(Box box) {
+        logger.log(Level.SEVERE, "{0}: updateBox started", CLASS_NAME);
+
         this.session = HibernateUtil.getSessionFactory().openSession();
         Transaction transaction = this.session.beginTransaction();
-        
+
         boolean updated = false;
-        
+
         try {
             this.session.saveOrUpdate(box);
             transaction.commit();
@@ -66,19 +73,23 @@ public class BoxesHelper implements Serializable {
         } catch (HibernateException e) {
             transaction.rollback();
             logger.log(Level.SEVERE, e.getMessage());
-        }finally{
-        this.session.close();
+        } finally {
+            this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: updateBox finished", CLASS_NAME);
         }
-        
+
         return updated;
     }
 
     public boolean deleteBox(Box box) {
+        logger.log(Level.SEVERE, "{0}: deleteBox started", CLASS_NAME);
+
         this.session = HibernateUtil.getSessionFactory().openSession();
         Transaction transaction = this.session.beginTransaction();
-        
+
         boolean updated = false;
-        
+
         try {
             this.session.delete(box);
             transaction.commit();
@@ -86,10 +97,12 @@ public class BoxesHelper implements Serializable {
         } catch (HibernateException e) {
             transaction.rollback();
             logger.log(Level.SEVERE, e.getMessage());
-        }finally{
-        this.session.close();
+        } finally {
+            this.session.close();
+
+            logger.log(Level.SEVERE, "{0}: deleteBox finished", CLASS_NAME);
         }
-        
+
         return updated;
     }
 }

@@ -36,7 +36,6 @@ import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.util.IOUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -59,9 +58,9 @@ public class CMRGenerator {
                 int currentRow = 2;
                 Row headerRow = sheet.createRow(currentRow);
 
-                generateHeaderRow(headerRow, styles);
+                generateHeaderRow(headerRow, styles, bookspackageCMRModel.getPackageNumber());
                 currentRow = generateSenderAndDriver(sheet, styles, currentRow);
-                currentRow = generatePoint2Till9(sheet, styles, currentRow);
+                currentRow = generatePoint2Till9(sheet, styles, currentRow, bookspackageCMRModel.getDeliveryAddress());
 
                 double weight = bookspackageCMRModel.getTotalWeight();
                 Long totalBoxesCount = bookspackageCMRModel.getTotalBoxesCount();
@@ -69,6 +68,8 @@ public class CMRGenerator {
                 currentRow = generatePoint15Till19(sheet, styles, currentRow);
                 currentRow = generatePoint20Till24(sheet, styles, currentRow, pulsioDetails);
 
+                sheet.autoSizeColumn(1, true);
+                sheet.autoSizeColumn(2, true);
             }
 
             workbook.write(outputStream);
@@ -91,9 +92,9 @@ public class CMRGenerator {
             int currentRow = 2;
             Row headerRow = sheet.createRow(currentRow);
 
-            generateHeaderRow(headerRow, styles);
+            generateHeaderRow(headerRow, styles, bookspackageCMRModel.getPackageNumber());
             currentRow = generateSenderAndDriver(sheet, styles, currentRow);
-            currentRow = generatePoint2Till9(sheet, styles, currentRow);
+            currentRow = generatePoint2Till9(sheet, styles, currentRow, bookspackageCMRModel.getDeliveryAddress());
 
             double weight = bookspackageCMRModel.getTotalWeight();
             Long totalBoxesCount = bookspackageCMRModel.getTotalBoxesCount();
@@ -233,7 +234,7 @@ public class CMRGenerator {
     private static final String CONTENT_MIDDLE_NO_BORDERS_STYLE = "contentMiddleNoBordersStyle";
     private static final String CONTENT_MIDDLE_ALLIGN_RIGHT_STYLE = "contentMiddleAllignRightStyle";
 
-    private static void generateHeaderRow(Row headerRow, Map<String, CellStyle> styles) {
+    private static void generateHeaderRow(Row headerRow, Map<String, CellStyle> styles, String packageNumber) {
         Cell headingCell = headerRow.createCell(2);
         headingCell.setCellValue(HEADING_INTERNATIONAL_BILL);
         headingCell.setCellStyle(styles.get(DEFAULT_STYLE));
@@ -251,13 +252,13 @@ public class CMRGenerator {
         countryHeadingCell.setCellStyle(styles.get(DEFAULT_STYLE));
 
         Cell numberHeadingCell = headerRow.createCell(10);
-        numberHeadingCell.setCellValue(HEADING_NUMBER);
+        numberHeadingCell.setCellValue(HEADING_NUMBER + packageNumber);
         numberHeadingCell.setCellStyle(styles.get(DEFAULT_STYLE));
     }
 
     private static void setDefaultSheetStyles(XSSFSheet sheet) {
-        sheet.setColumnWidth(1, 8000);
-        sheet.setColumnWidth(2, 8000);
+//        sheet.setColumnWidth(1, 8000);
+//        sheet.setColumnWidth(2, 8000);
     }
 
     private static int generateSenderAndDriver(XSSFSheet sheet, Map<String, CellStyle> styles, int currentRow) {
@@ -320,7 +321,7 @@ public class CMRGenerator {
         return currentRow;
     }
 
-    private static int generatePoint2Till9(XSSFSheet sheet, Map<String, CellStyle> styles, int currentRow) {
+    private static int generatePoint2Till9(XSSFSheet sheet, Map<String, CellStyle> styles, int currentRow, String deliveryAddress) {
         for (int i = 11; i < 27; i++) {
             sheet.addMergedRegion(CellRangeAddress.valueOf("$B$" + i + ":$C$" + i));
             sheet.addMergedRegion(CellRangeAddress.valueOf("$D$" + i + ":$I$" + i));
@@ -474,7 +475,7 @@ public class CMRGenerator {
         currentRow++;
         Row row26 = sheet.createRow(currentRow);
         Cell placeContentCell = row26.createCell(1);
-        placeContentCell.setCellValue("Editions Intervalles 80 Boulevard Haussmann 75008 Paris");
+        placeContentCell.setCellValue(deliveryAddress);
         placeContentCell.setCellStyle(styles.get(CONTENT_MIDDLE_STYLE));
         row26.createCell(2).setCellStyle(styles.get(CONTENT_MIDDLE_STYLE));
 
@@ -778,7 +779,7 @@ public class CMRGenerator {
     private static final String HEADING_INTERNATIONAL_BILL = "МЕЖДУНАРОДНА ТОВАРИТЕЛНИЦА";
     private static final String HEADING_CONSIGNMENT = "INTERNATIONAL CONSIGNMENT NOTE";
     private static final String HEADING_COUNTRY = ".......... Държава/Country";
-    private static final String HEADING_NUMBER = "No ..........";
+    private static final String HEADING_NUMBER = "No: ";
     private static final String HEADING_CMR = "CMR";
 
     private static final String LABEL_SENDER = "1 Изпращач (име, адрес, държава) Sender (name, address, country)";

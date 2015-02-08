@@ -145,15 +145,20 @@ public class TransportController implements Serializable {
     }
 
     public String viewBookspackages(Transportation transportation) {
-        Map<String, Object> session = FacesContext.getCurrentInstance().getExternalContext().getSessionMap();
-        session.put("transportation", transportation);
+        setTransportationInSession(transportation);
         return "/bookspackages/bookspackages?faces-redirect=true";
     }
-    
+
     public String viewBooks(Transportation transportation) {
-        Map<String, Object> session = FacesContext.getCurrentInstance().getExternalContext().getSessionMap();
-        session.put("transportationForBooks", transportation);
+        setTransportationInSession(transportation);
         return "/books/books-for-transportation?faces-redirect=true";
+    }
+
+
+
+    public void setTransportationInSession(Transportation transportation) {
+        Map<String, Object> session = FacesContext.getCurrentInstance().getExternalContext().getSessionMap();
+        session.put("transportation", transportation);
     }
 
     private void initWeekNumbers() {

@@ -17,7 +17,6 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -45,7 +44,8 @@ public class BookLabelGenerator {
         try {
             XSSFWorkbook workbook = new XSSFWorkbook();
             Map<String, CellStyle> styles = createStyles(workbook);
-
+            String title = bookLabelModel.getTitle().replace("/", "-");
+            bookLabelModel.setTitle(title);
             Sheet sheet = workbook.createSheet(bookLabelModel.getBookNumber() + " " + bookLabelModel.getTitle());
 
             for (int i = 0; i < 20; i++) {
@@ -72,6 +72,9 @@ public class BookLabelGenerator {
             generateCountPerBox(sheet, styles, bookLabelModel);
             generateCountPerAddress(sheet, styles, bookLabelModel);
 
+            sheet.autoSizeColumn(1);
+            sheet.autoSizeColumn(4);
+            
             workbook.write(outputStream);
         } catch (IOException ex) {
             Logger.getLogger(BookLabelGenerator.class.getName()).log(Level.SEVERE, null, ex);
@@ -274,7 +277,7 @@ public class BookLabelGenerator {
         a5.setCellStyle(styles.get(STYLE_LABEL));
 
         Cell b5 = row5.createCell(1);
-        b5.setCellValue(bookLabelModel.getTransportNumber());
+        b5.setCellValue(bookLabelModel.getPackageNumber());
         b5.setCellStyle(styles.get(STYLE_CONTENT));
 
         Cell d5 = row5.createCell(3);
@@ -282,7 +285,7 @@ public class BookLabelGenerator {
         d5.setCellStyle(styles.get(STYLE_LABEL));
 
         Cell e5 = row5.createCell(4);
-        e5.setCellValue(bookLabelModel.getTransportNumber());
+        e5.setCellValue(bookLabelModel.getPackageNumber());
         e5.setCellStyle(styles.get(STYLE_CONTENT));
 
         Row row15 = sheet.getRow(14);
@@ -292,7 +295,7 @@ public class BookLabelGenerator {
         a15.setCellStyle(styles.get(STYLE_LABEL));
 
         Cell b15 = row15.createCell(1);
-        b15.setCellValue(bookLabelModel.getTransportNumber());
+        b15.setCellValue(bookLabelModel.getPackageNumber());
         b15.setCellStyle(styles.get(STYLE_CONTENT));
 
         Cell d15 = row15.createCell(3);
@@ -300,7 +303,7 @@ public class BookLabelGenerator {
         d15.setCellStyle(styles.get(STYLE_LABEL));
 
         Cell e15 = row15.createCell(4);
-        e15.setCellValue(bookLabelModel.getTransportNumber());
+        e15.setCellValue(bookLabelModel.getPackageNumber());
         e15.setCellStyle(styles.get(STYLE_CONTENT));
     }
 

@@ -18,9 +18,9 @@ public class Transportation  implements java.io.Serializable {
      private int weekNumber;
      private int year;
      private Date startDate;
-     private List<Bookspackage> bookspackages = new ArrayList<Bookspackage>();
-//          private Set bookspackages = new HashSet(0);
-     private Set books = new HashSet(0);
+     private Set<Bookspackage> bookspackages = new HashSet<Bookspackage>();
+     private Set<Book> books = new HashSet<Book>();
+     private List<AdditionalCost> additionalCosts = new ArrayList<AdditionalCost>();
 
     public Transportation() {
     }
@@ -32,12 +32,14 @@ public class Transportation  implements java.io.Serializable {
         this.startDate = startDate;
     }
     
-    public Transportation(int weekNumber, int year, Date startDate, List<Bookspackage> bookspackages, Set books) {
+    public Transportation(int weekNumber, int year, Date startDate,
+            Set<Bookspackage> bookspackages, Set<Book> books, List<AdditionalCost> additionalCosts) {
        this.weekNumber = weekNumber;
        this.year = year;
        this.startDate = startDate;
        this.bookspackages = bookspackages;
        this.books = books;
+       this.additionalCosts = additionalCosts;
     }
    
     public Integer getId() {
@@ -68,18 +70,28 @@ public class Transportation  implements java.io.Serializable {
     public void setStartDate(Date startDate) {
         this.startDate = startDate;
     }
-    public List<Bookspackage> getBookspackages() {
+    
+    public Set<Bookspackage> getBookspackages() {
         return this.bookspackages;
     }
     
-    public void setBookspackages(List<Bookspackage> bookspackages) {
+    public void setBookspackages(Set<Bookspackage> bookspackages) {
         this.bookspackages = bookspackages;
     }
-    public Set getBooks() {
+    
+    public Set<Book> getBooks() {
         return this.books;
     }
     
-    public void setBooks(Set books) {
+    public void setBooks(Set<Book> books) {
         this.books = books;
+    }
+
+    public List<AdditionalCost> getAdditionalCosts() {
+        return additionalCosts;
+    }
+
+    public void setAdditionalCosts(List<AdditionalCost> additionalCosts) {
+        this.additionalCosts = additionalCosts;
     }
 }

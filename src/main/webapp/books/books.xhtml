@@ -14,9 +14,6 @@
 
     <ui:define name="body">
         <h:form id="books-form">
-             <p:growl id="messages" severity="info, warn" />
-            <p:growl id="error-messages" severity="error" sticky="true" />
-            
             <p:breadCrumb>
                 <p:menuitem url="/transports/all-transports" title="Всички транспорти" value="Всички транспорти"/>
                 <p:menuitem 
@@ -24,80 +21,91 @@
                 <p:menuitem value='Книги за пратка "#{booksController.bookspackage.packageNumber}"' url="/books/books"/>
             </p:breadCrumb>
 
-            <h:panelGrid styleClass="insert-form">
-                <h:panelGrid columns="4" style="margin: 0 auto;">
-                    <f:facet name="header">
-                        <h2>Текуща пратка</h2>
-                    </f:facet>
-                    <h:panelGrid styleClass="large-text" columns="4">
-                        <p:outputLabel value="Номер на пратка:"/>
-                        <p:outputLabel styleClass="bold" value="#{booksController.bookspackage.packageNumber}"/>
-                    </h:panelGrid>
-                </h:panelGrid>
+            <h:panelGrid rendered="#{!booksController.isForTransportation}" styleClass="insert-form">
+                <f:facet name="header">
+                    <h2>Добави книга за пратка "#{booksController.bookspackage.packageNumber}"</h2>
+                </f:facet>
+                <p:outputPanel>    
+                    <p:selectOneRadio  id="title-radios" layout="custom" value="#{booksController.isNewTitle}">
+                        <p:ajax update="@form" />
+                        <f:selectItem itemValue="true"/>
+                        <f:selectItem itemValue="false"/>
+                    </p:selectOneRadio>
 
-                <h:panelGrid>
-
-                    <f:facet name="header">
-                        <h2>Добави книга</h2>
-                    </f:facet>
-                    <p:outputPanel>    
-                        <p:selectOneRadio  id="title-radios" layout="custom" value="#{booksController.isNewTitle}">
-                            <p:ajax update="@form" />
-                            <f:selectItem itemValue="true"/>
-                            <f:selectItem itemValue="false"/>
-                        </p:selectOneRadio>
-                    </p:outputPanel>
-
-                    <h:panelGrid columns="2" cellspacing="5">
-                        <h:panelGroup>
-                            <p:radioButton id="title-radio-0" for="title-radios" itemIndex="0"/>
-                            <p:outputLabel style="vertical-align: 20%; margin-left: 2px;" for="title-radio-0" value="Ново Заглавие:"/>
-                        </h:panelGroup>
-
-                        <p:inputText disabled="#{!booksController.isNewTitle}" 
+                    <h:panelGrid columns="3" cellspacing="4px">
+                        <p:outputLabel styleClass="label-dropdown-bug-fix" for="title-radio-0" value="Ново Заглавие:"/>
+                        <p:radioButton id="title-radio-0" for="title-radios" itemIndex="0"/>
+                        <p:inputText size="50"  disabled="#{!booksController.isNewTitle}" 
                                      required="true" requiredMessage="Заглавието е задължително!" 
-                                     value="#{booksController.selectedBook.title}"/>
+                                     value="#{booksController.newBook.title}"/>
 
-                        <h:panelGroup>
-                            <p:radioButton id="title-radio-1" for="title-radios" itemIndex="1"/>
-                            <p:outputLabel style="vertical-align: 5%; margin-left: 2px;" for="title-radio-1" value="Съществуващо Заглавие:"/>
-                        </h:panelGroup>
+                        <p:outputLabel styleClass="label-dropdown-bug-fix" for="title-radio-1"  value="Съществуващо Заглавие:"/>
+                        <p:radioButton id="title-radio-1" for="title-radios" itemIndex="1"/>
 
                         <p:selectOneMenu disabled="#{booksController.isNewTitle}" style="width: 99%;" 
                                          required="true" requiredMessage="Заглавието е задължително!" 
                                          value="#{booksController.selectedBookModelBookNumber}">
                             <f:selectItems value="#{booksController.allBookModels}" var="bookModel" itemLabel="#{bookModel.title}" itemValue="#{bookModel.bookNumber}"/>
                         </p:selectOneMenu>
-
-                        <p:outputLabel value="Брой:"/>
-                        <p:inputText value="#{booksController.selectedBook.count}" converterMessage='Полето "Брой" трябва да е цяло число!'/>
-
-                        <p:outputLabel value="Тегло(кг):"/>
-                        <p:inputText value="#{booksController.selectedBook.weight}" converterMessage='Полето "Тегло(кг)" трябва да е число!'/>
-
-
-                        <f:facet name="footer">
-                            <p:commandButton value="Добави"
-                                             action="#{booksController.addBook}"
-                                             update="@form :books-datatable-form" />
-                        </f:facet>
                     </h:panelGrid>
+                </p:outputPanel>
+
+
+                <h:panelGrid columns="6" cellspacing="4px">
+
+                    <p:outputLabel for="count" value="Брой:"/>
+                    <p:inputText size="3" id="count" value="#{booksController.newBook.count}"
+                                 styleClass="add-book-last-row-input"
+                                 converterMessage='Полето "Брой" трябва да е цяло число!'/>
+
+                    <p:outputLabel for="weight" value="Тегло(кг):"/>
+                    <p:inputText size="3" id="weight" value="#{booksController.newBook.weight}" 
+                                 styleClass="add-book-last-row-input"
+                                 converterMessage='Полето "Тегло(кг)" трябва да е число!'/>
+
+                    <p:outputLabel for="printing-house" value="Печатница:"/>
+                    <p:selectOneMenu 
+                        styleClass="printing-house-drop-down add-book-last-row-label" id="printing-house" converter="#{printingHouseConverter}"
+                        value="#{booksController.newBook.printingHouse}">
+                        <f:selectItem itemLabel="Изберете Печатница" itemValue="#{null}"/>
+                        <f:selectItems value="#{booksController.allPrintingHouses}" var="printingHouse" itemLabel="#{printingHouse.name}" itemValue="#{printingHouse}"/>
+                    </p:selectOneMenu>
                 </h:panelGrid>
+
+                <f:facet name="footer">
+                    <p:commandButton value="Добави"
+                                     action="#{booksController.addBook}"
+                                     update="@form :books-datatable-form :growls" />
+                </f:facet>
             </h:panelGrid>
         </h:form>
         <h:form id="books-datatable-form">
-            <p:growl id="books-datatable-growl"/>
             <p:dataTable id="books-datatable"
                          value="#{booksController.books}"
                          editable="true"
+                         rowStyleClass='#{book.discarded == true ? "book-discarded" : ""}'
                          var="book"
+                         paginator="true" 
+                         rows="20"
+                         currentPageReportTemplate="Страница {currentPage} от {totalPages}"
+                         paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                         rowsPerPageTemplate="20,40 #{booksController.books.size()}"
+                         
                          >
 
-                <p:column exportable="false" style="min-width:60px;" headerText="Действия">
+                <p:column rendered="#{!booksController.isForTransportation}" exportable="false" width="10%;" headerText="Действия">
                     <p:splitButton 
                         value="Кашони" title="Кашони"
                         type="submit" ajax="false"
                         action="#{booksController.viewBoxes(book)}" >
+
+                        <p:menuitem 
+                            value="Пратки"
+                            title="Всички пратки в транспорта, съдържащи книгата"
+                            action="#{booksController.viewBookspackages}" ajax="false">
+                            <f:setPropertyActionListener target="#{booksController.selectedBook}"
+                                                         value="#{book}"/>
+                        </p:menuitem>
 
                         <p:menuitem icon="ui-icon-document" 
                                     value="Етикет"
@@ -121,21 +129,10 @@
                 </p:column>
 
                 <p:ajax event="rowEdit" async="false"  class="edit-button" 
-                        update="books-datatable @form:books-datatable-growl"  listener="#{booksController.onEdit}" />
+                        update="books-datatable :growls"  listener="#{booksController.onEdit}" />
                 <p:ajax immediate="true" event="rowEditCancel" listener="#{booksController.onCancelEdit}"
-                        update="books-datatable @form:books-datatable-growl" 
+                        update="books-datatable :growls" 
                         onstart="if(confirm('Откажи промените?')) return true;"/>
-
-                <!--                <p:column headerText="Номер">
-                                    <p:cellEditor>
-                                        <f:facet name="output">
-                                            <p:outputLabel value="#{book.bookNumber}"/>
-                                        </f:facet>
-                                        <f:facet name="input">
-                                            <p:outputLabel value="#{book.bookNumber}"/>
-                                        </f:facet>
-                                    </p:cellEditor>
-                                </p:column>-->
 
                 <p:column headerText="Заглавие">
                     <p:cellEditor>
@@ -144,6 +141,44 @@
                         </f:facet>
                         <f:facet name="input">
                             <p:outputLabel value="#{book.title}"/>
+                        </f:facet>
+                    </p:cellEditor>              
+                </p:column>
+
+                <p:column sortBy="#{book.printingHouse.name}"
+                          filterBy="#{book.printingHouse.id}" 
+                          filterOptions="#{booksController.printingHousesFilterSelectItems}"
+                          filterMatchMode="exact">
+
+                    <f:facet name="header">
+                        <h:outputText value="Печатница"/>
+                    </f:facet>
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{book.printingHouse == null ? null : book.printingHouse.name}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:selectOneMenu style="width: 99%;" converter="#{printingHouseConverter}"
+                                             value="#{book.printingHouse}">
+                                <f:selectItem itemLabel="Изберете" itemValue="#{null}"/>
+                                <f:selectItems value="#{booksController.allPrintingHouses}" 
+                                               var="printingHouse" itemLabel="#{printingHouse.name}" itemValue="#{printingHouse}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column headerText="Отпаднала">
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value='#{book.discarded == true ? "Да" : "Не"}'/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:selectOneMenu styleClass="book-discarded-dropdown" value="#{book.discarded}">
+                                <f:selectItem itemLabel="Не" itemValue="false"/>
+                                <f:selectItem itemLabel="Да" itemValue="true"/>
+
+                            </p:selectOneMenu>
                         </f:facet>
                     </p:cellEditor>              
                 </p:column>
@@ -173,7 +208,7 @@
                         </f:facet>
                     </p:cellEditor>                  
                 </p:column>
-                
+
                 <p:column headerText="Тегло(кг) за бройка">
                     <p:cellEditor>
                         <f:facet name="output">
@@ -188,7 +223,7 @@
                         </f:facet>
                     </p:cellEditor>                  
                 </p:column>
-                
+
                 <p:column headerText="Брой Пристигнали">
                     <p:cellEditor>
                         <f:facet name="output">
@@ -262,7 +297,7 @@
                     <f:facet name="footer">
                         <p:commandButton value="Изтрий" 
                                          actionListener="#{booksController.deleteBook}"
-                                         update=":books-form"
+                                         update=":books-form :growls"
                                          onsuccess="PF('deleteDialog').hide(1000);"/>
                     </f:facet>
                 </h:panelGrid>    

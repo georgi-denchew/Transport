@@ -50,7 +50,7 @@ public class TruckGroup implements Serializable {
 
     public void setBookspackages(List<Bookspackage> bookspackages) {
         this.bookspackages = bookspackages;
-    }     
+    }
     
     @Override
     public boolean equals(Object obj) {
@@ -60,6 +60,13 @@ public class TruckGroup implements Serializable {
 
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 59 * hash + (this.Id != null ? this.Id.hashCode() : 0);
+        return hash;
     }
      
 }

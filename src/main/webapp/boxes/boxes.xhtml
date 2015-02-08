@@ -13,7 +13,6 @@
 
     <ui:define name="body">
         <h:form id="boxes-form">
-            <p:growl id="boxes-growl"/>
 
             <p:breadCrumb>
                 <p:menuitem url="/transports/all-transports" value="Всички транспорти" title="Всички транспорти"/>
@@ -53,7 +52,7 @@
                         <f:facet name="footer">
                             <p:commandButton value="Добави"
                                              action="#{boxesController.addBox}"
-                                             update="@form" />
+                                             update="@form :growls" />
                         </f:facet>
                     </h:panelGrid>
                 </h:panelGrid>
@@ -62,12 +61,19 @@
             <p:dataTable id="boxes-datatable"
                          value="#{boxesController.boxes}"
                          editable="true"
-                         var="box">
+                         var="box"
+                         paginator="true" 
+                         rows="20"
+                         currentPageReportTemplate="Страница {currentPage} от {totalPages}"
+                         paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                         rowsPerPageTemplate="20,40 #{boxesController.boxes.size()}"
+                         
+                         >
 
                 <p:ajax event="rowEdit" async="false"  class="edit-button" 
-                        update="boxes-datatable @form:boxes-growl"  listener="#{boxesController.onEdit}" />
+                        update="boxes-datatable :growls"  listener="#{boxesController.onEdit}" />
                 <p:ajax immediate="true" event="rowEditCancel" listener="#{boxesController.onCancelEdit}"
-                        update="boxes-datatable @form:boxes-growl" 
+                        update="boxes-datatable :growls" 
                         onstart="if(confirm('Откажи промените?')) return true;"/>
 
                 <p:column width="2%;">
@@ -123,7 +129,7 @@
                     <f:facet name="footer">
                         <p:commandButton value="Изтрий" 
                                          actionListener="#{boxesController.deleteBox}"
-                                         update=":boxes-form"
+                                         update=":boxes-form :growls"
                                          onsuccess="PF('deleteDialog').hide(1000);"/>
                     </f:facet>
                 </h:panelGrid>    

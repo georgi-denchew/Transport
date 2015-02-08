@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated Jul 28, 2014 10:58:21 PM by Hibernate Tools 3.6.0 -->
+<hibernate-mapping>
+  <class catalog="transport" name="com.griffinslogistics.db.entities.AdditionalCost" table="additionalcost">
+    <id name="id" type="java.lang.Integer">
+      <column name="Id"/>
+      <generator class="identity"/>
+    </id>
+    <many-to-one class="com.griffinslogistics.db.entities.Transportation" fetch="select" name="transportation">
+      <column name="TransportationId" not-null="true"/>
+    </many-to-one>
+    <property insert="false" name="transportationId" type="int" update="false">
+      <column name="TransportationId" not-null="true"/>
+    </property>
+    <property name="packageNumber" type="string">
+      <column name="PackageNumber" not-null="true"/>
+    </property>
+    <property name="payer" type="string">
+      <column name="Payer" not-null="true"/>
+    </property>
+        <property name="description" type="string">
+      <column name="Description" not-null="true"/>
+    </property>
+    <property name="price" type="big_decimal">
+      <column name="Price" precision="15"/>
+    </property>
+  </class>
+</hibernate-mapping>
