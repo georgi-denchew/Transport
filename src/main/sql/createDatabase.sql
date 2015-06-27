@@ -93,6 +93,7 @@ DeliveryAddress varchar(500),
 RemarksSales varchar(1000),
 RemarksLogistics varchar(1000),
 PrintDeliveryDay varchar(20),
+LoadingDay varchar(20),
 Version int default 1,
 TransportationId int,
 TruckGroupId int,
@@ -118,6 +119,7 @@ DeliveryAddress varchar(500),
 RemarksSales varchar(1000),
 RemarksLogistics varchar(1000),
 PrintDeliveryDay varchar(20),
+LoadingDay varchar(20),
 TruckGroupName varchar(100),
 PackageId int not null,
 foreign key (PackageId) references bookspackage(Id)
@@ -213,3 +215,6 @@ foreign key (TransportationId) references transportation(Id)
 -- alter table additionalcosts add Description varchar(500);
 
 -- alter table book add DeliveryAddress varchar(500);
+
+-- alter table bookspackage add column LoadingDay varchar(20);
+-- alter table bookspackagehistory add column LoadingDay varchar(20);
