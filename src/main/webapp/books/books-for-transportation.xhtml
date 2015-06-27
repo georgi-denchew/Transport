@@ -6,10 +6,11 @@
                 template="./../index.xhtml"
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions" 
                 xmlns:f="http://xmlns.jcp.org/jsf/core">
 
     <ui:define name="title">
-        Книги
+        Книги за Транспорт #{booksForTransportationController.transportation.weekNumber}/#{booksForTransportationController.transportation.year}
     </ui:define>
 
     <ui:define name="body">
@@ -17,7 +18,7 @@
             <p:breadCrumb>
                 <p:menuitem url="/transports/all-transports" title="Всички транспорти" value="Всички транспорти"/>
                 <p:menuitem url="/books/books-for-transportation" title="Книги за транспорт"
-                            value='Книги за транспорт "#{booksForTransportationController.transportation.weekNumber}/#{booksForTransportationController.transportation.year}"'/>
+                            value='Книги за Транспорт "#{booksForTransportationController.transportation.weekNumber}/#{booksForTransportationController.transportation.year}"'/>
             </p:breadCrumb>
 
             <h:panelGrid styleClass="insert-form">
@@ -36,30 +37,70 @@
         </h:form>
 
         <h:form id="books-datatable-form">
+
+            <p:commandButton id="xls" ajax="false" value="Извлечи таблицата в Excel" icon="ui-icon-document">  
+                <pe:exporter type="xlsx" target="books-datatable" 
+                             postProcessor="#{booksForTransportationController.postProcessXLS}"
+                             fileName="Knigi Transport #{booksForTransportationController.transportation.weekNumber}/#{booksForTransportationController.transportation.year}"
+                             />  
+            </p:commandButton>  
+            <p:commandButton id="label-generator-button" value="Извлечи етикети" icon="ui-icon-document" action="#{booksForTransportationController.getLabel}" ajax="false"/>
+
             <p:dataTable id="books-datatable"
                          value="#{booksForTransportationController.booksForTransportation}"
                          rowStyleClass='#{book.discarded == true ? "book-discarded" : ""}'
                          var="book"
                          paginator="true" 
-                         rows="20"
-                         paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                         rows="#{booksForTransportationController.booksForTransportation.size()}" 
+                         paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}   Брой редове: {RowsPerPageDropdown}"
                          rowsPerPageTemplate="20,40 #{booksForTransportationController.booksForTransportation.size()}"
-                         
+                         selection="#{booksForTransportationController.selectedBooksForPrinting}" rowKey="#{book.id}"
                          >
+                <p:column headerText="Извлечи етикет" selectionMode="multiple" style="width:16px;text-align:center"/>
 
-                <p:column headerText="Отпаднала" width="8%;">
-                    <p:selectBooleanCheckbox value="#{book.discarded}">
+                <!-- facets are used instead of headerText for exported excel headers-->
+
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Отпаднала"/>
+                    </f:facet>
+                    <p:selectBooleanButton value="#{book.discarded}" onLabel="Да" offLabel="Не">
                         <p:ajax update=":growls books-datatable" listener="#{booksForTransportationController.updateDiscardedField(book)}" />
-                    </p:selectBooleanCheckbox>
-                    <p:outputLabel style="float:right;" value='#{book.discarded == true ? "Да" : "Не"}'/>
+                    </p:selectBooleanButton>                                      
                 </p:column>
-                
-                <p:column headerText="Заглавие">
+
+                <p:column 
+                    sortBy="#{book.title}"
+                    filterBy="#{book.title}"
+                    filterMatchMode="contains"
+                    filterStyle="display:block; width: 50%;">
+                    <f:facet name="header">
+                        <h:outputText value="Заглавие"/>
+                    </f:facet>
                     <p:outputLabel value="#{book.title}"/>     
                 </p:column>
 
-                <p:column headerText="Номер на пратка">
-                    <p:outputLabel value="#{book.bookspackageNumber}"/>          
+                <p:column 
+                    sortBy="#{book.bookspackageNumber}"
+                    filterBy="#{book.bookspackageNumber}"
+                    filterMatchMode="startsWith">
+
+                    <f:facet name="header">
+                        <h:outputText value="Номер на пратка"/>
+                    </f:facet>
+                    <p:outputLabel value="#{book.bookspackageNumber}"/>  
+                </p:column>
+ 
+                <p:column 
+                    sortBy="#{book.deliveryAddress}"
+                    filterBy="#{book.deliveryAddress}"
+                    filterMatchMode="contains">
+
+                    <f:facet name="header">
+                        <h:outputText value="Адрес на доставка"/>
+                    </f:facet>
+
+                    <p:outputLabel value="#{book.deliveryAddress}"/>  
                 </p:column>
 
                 <p:column sortBy="#{book.printingHouseName}"
@@ -73,17 +114,27 @@
                     <p:outputLabel value="#{book.printingHouseName}"/>
                 </p:column>
 
-                <p:column headerText="Брой Поръчани">
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Брой Поръчани"/>
+                    </f:facet>
                     <p:outputLabel value="#{book.count}"/>                
                 </p:column>
 
-                <p:column headerText="Тегло(кг) поръчани">
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Тегло(кг) поръчани"/>
+                    </f:facet>
                     <p:outputLabel value="#{book.weight}">
                         <f:convertNumber pattern="#.##"/>
                     </p:outputLabel>        
                 </p:column>
 
-                <p:column headerText="Тегло(кг) за бройка"> 
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Тегло(кг) за бройка"/>
+                    </f:facet>
+
                     <p:outputLabel value="#{book.weightPerBook}">
                         <f:convertNumber pattern="#.##"/>
                     </p:outputLabel>               

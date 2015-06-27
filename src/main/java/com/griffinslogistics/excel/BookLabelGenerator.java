@@ -12,12 +12,14 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.griffinslogistics.models.BookLabelModel;
+import java.util.List;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFPrintSetup;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
@@ -34,51 +36,63 @@ public class BookLabelGenerator {
     private static final String COUNT_PER_BOX = "Nbre ex./carton";
     private static final String COUNT_PER_ADDRESS = "Nbre ex./adresse";
     private static final String EX = "ex.";
-    
+
     private static final String STYLE_SMALL_FONT = "smallFont";
     private static final String STYLE_LABEL = "labelStyle";
     private static final String STYLE_CONTENT = "contentStyle";
-    
-    public static void generateLabel(OutputStream outputStream, BookLabelModel bookLabelModel) {
+
+    public static void generateLabels(OutputStream outputStream, List<BookLabelModel> bookLabelModelList) {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+
+        for (BookLabelModel bookLabelModel : bookLabelModelList) {
+            generate(workbook, bookLabelModel);
+        }
 
         try {
-            XSSFWorkbook workbook = new XSSFWorkbook();
-            Map<String, CellStyle> styles = createStyles(workbook);
-            String title = bookLabelModel.getTitle().replace("/", "-");
-            bookLabelModel.setTitle(title);
-            Sheet sheet = workbook.createSheet(bookLabelModel.getBookNumber() + " " + bookLabelModel.getTitle());
-
-            for (int i = 0; i < 20; i++) {
-                Row row = sheet.createRow(i);
-                if (i != 0 && i != 10) {
-                    row.setHeightInPoints(25);
-                } else {
-                    row.setHeightInPoints(12);
-                }
-            }
-
-            //column widths
-            sheet.setColumnWidth(0, 5000);
-            sheet.setColumnWidth(1, 10000);
-
-            sheet.setColumnWidth(3, 5000);
-            sheet.setColumnWidth(4, 10000);
-
-            generateHeaders(sheet, styles);
-            generateAddress(sheet, styles, bookLabelModel);
-            generateClient(sheet, styles, bookLabelModel);
-            generateTransportation(sheet, styles, bookLabelModel);
-            generateTitle(sheet, styles, bookLabelModel);
-            generateCountPerBox(sheet, styles, bookLabelModel);
-            generateCountPerAddress(sheet, styles, bookLabelModel);
-
-            sheet.autoSizeColumn(1);
-            sheet.autoSizeColumn(4);
-            
             workbook.write(outputStream);
+
         } catch (IOException ex) {
             Logger.getLogger(BookLabelGenerator.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    public static void generateLabel(OutputStream outputStream, BookLabelModel bookLabelModel) {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        generate(workbook, bookLabelModel);
+        try {
+            workbook.write(outputStream);
+
+        } catch (IOException ex) {
+            Logger.getLogger(BookLabelGenerator.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private static void generate(XSSFWorkbook workbook, BookLabelModel bookLabelModel) {
+        Map<String, CellStyle> styles = createStyles(workbook);
+        String title = bookLabelModel.getTitle().replace("/", "-");
+        bookLabelModel.setTitle(title);
+//        Sheet sheet = workbook.createSheet(bookLabelModel.getBookNumber() + " " + bookLabelModel.getTitle());
+        Sheet sheet = workbook.createSheet();
+
+        for (int i = 0; i < 20; i++) {
+            sheet.createRow(i);
+        }
+
+        generateHeaders(sheet, styles);
+        generateAddress(sheet, styles, bookLabelModel);
+        generateClient(sheet, styles, bookLabelModel);
+        generateTransportation(sheet, styles, bookLabelModel);
+        generateTitle(sheet, styles, bookLabelModel);
+        generateCountPerBox(sheet, styles, bookLabelModel);
+        generateCountPerAddress(sheet, styles, bookLabelModel);
+
+        sheet.setColumnWidth(1, 20000);
+        sheet.setColumnWidth(4, 20000);
+        sheet.autoSizeColumn(0, false);
+        sheet.autoSizeColumn(3, false);
+        sheet.getPrintSetup().setLandscape(true);
+        sheet.getPrintSetup().setPaperSize(XSSFPrintSetup.A4_PAPERSIZE);
+        sheet.setFitToPage(true);
     }
 
     private static Map<String, CellStyle> createStyles(XSSFWorkbook workbook) {
@@ -97,7 +111,7 @@ public class BookLabelGenerator {
 
         CellStyle labelStyle = workbook.createCellStyle();
         Font labelFont = workbook.createFont();
-        labelFont.setFontHeightInPoints((short) 13);
+        labelFont.setFontHeightInPoints((short) 20);
         labelStyle.setBorderBottom(CellStyle.BORDER_THIN);
         labelStyle.setBorderLeft(CellStyle.BORDER_MEDIUM);
         labelStyle.setBorderRight(CellStyle.BORDER_THIN);
@@ -105,11 +119,12 @@ public class BookLabelGenerator {
         labelStyle.setFont(labelFont);
         labelStyle.setAlignment(CellStyle.ALIGN_CENTER);
         labelStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+        labelStyle.setWrapText(true);
         styles.put(STYLE_LABEL, labelStyle);
 
         CellStyle contentStyle = workbook.createCellStyle();
         Font contentFont = workbook.createFont();
-        contentFont.setFontHeightInPoints((short) 15);
+        contentFont.setFontHeightInPoints((short) 25);
         contentFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
         contentStyle.setBorderBottom(CellStyle.BORDER_THIN);
         contentStyle.setBorderLeft(CellStyle.BORDER_THIN);
@@ -117,6 +132,7 @@ public class BookLabelGenerator {
         contentStyle.setBorderTop(CellStyle.BORDER_THIN);
         contentStyle.setFont(contentFont);
         contentStyle.setAlignment(CellStyle.ALIGN_CENTER);
+        contentStyle.setWrapText(true);
         contentStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
         styles.put(STYLE_CONTENT, contentStyle);
 
@@ -159,10 +175,7 @@ public class BookLabelGenerator {
         sheet.addMergedRegion(CellRangeAddress.valueOf("$D12:D13"));
 
         Row row2 = sheet.getRow(1);
-        row2.setHeightInPoints(25);
-
         Row row3 = sheet.getRow(2);
-        row3.setHeightInPoints(25);
 
         Cell a2 = row2.createCell(0);
         a2.setCellValue(ADDRESS);
@@ -195,10 +208,8 @@ public class BookLabelGenerator {
         e3.setCellStyle(styles.get(STYLE_CONTENT));
 
         Row row12 = sheet.getRow(11);
-        row12.setHeightInPoints(25);
 
         Row row13 = sheet.getRow(12);
-        row13.setHeightInPoints(25);
 
         Cell a12 = row12.createCell(0);
         a12.setCellValue(ADDRESS);
@@ -363,7 +374,7 @@ public class BookLabelGenerator {
         Cell b17 = row17.createCell(1);
         b17.setCellStyle(styles.get(STYLE_CONTENT));
         b17.setCellValue(bookLabelModel.getBookNumber());
-        
+
         Cell d16 = row16.createCell(3);
         d16.setCellStyle(styles.get(STYLE_LABEL));
         d16.setCellValue(TITLE);
@@ -382,37 +393,37 @@ public class BookLabelGenerator {
 
     private static void generateCountPerBox(Sheet sheet, Map<String, CellStyle> styles, BookLabelModel bookLabelModel) {
         Row row8 = sheet.getRow(7);
-        
+
         Cell a8 = row8.createCell(0);
         a8.setCellStyle(styles.get(STYLE_LABEL));
         a8.setCellValue(COUNT_PER_BOX);
-        
+
         Cell b8 = row8.createCell(1);
         b8.setCellStyle(styles.get(STYLE_CONTENT));
         b8.setCellValue(EX);
-        
+
         Cell d8 = row8.createCell(3);
         d8.setCellStyle(styles.get(STYLE_LABEL));
         d8.setCellValue(COUNT_PER_BOX);
-        
+
         Cell e8 = row8.createCell(4);
         e8.setCellStyle(styles.get(STYLE_CONTENT));
         e8.setCellValue(EX);
-        
+
         Row row18 = sheet.getRow(17);
-        
+
         Cell a18 = row18.createCell(0);
         a18.setCellStyle(styles.get(STYLE_LABEL));
         a18.setCellValue(COUNT_PER_BOX);
-        
+
         Cell b18 = row18.createCell(1);
         b18.setCellStyle(styles.get(STYLE_CONTENT));
         b18.setCellValue(EX);
-        
+
         Cell d18 = row18.createCell(3);
         d18.setCellStyle(styles.get(STYLE_LABEL));
         d18.setCellValue(COUNT_PER_BOX);
-        
+
         Cell e18 = row18.createCell(4);
         e18.setCellStyle(styles.get(STYLE_CONTENT));
         e18.setCellValue(EX);
@@ -420,39 +431,40 @@ public class BookLabelGenerator {
 
     private static void generateCountPerAddress(Sheet sheet, Map<String, CellStyle> styles, BookLabelModel bookLabelModel) {
         Row row9 = sheet.getRow(8);
-        
+
         Cell a9 = row9.createCell(0);
         a9.setCellStyle(styles.get(STYLE_LABEL));
         a9.setCellValue(COUNT_PER_ADDRESS);
-        
+
         Cell b9 = row9.createCell(1);
         b9.setCellStyle(styles.get(STYLE_CONTENT));
         b9.setCellValue(bookLabelModel.getCount().toString() + " " + EX);
-        
+
         Cell d9 = row9.createCell(3);
         d9.setCellStyle(styles.get(STYLE_LABEL));
         d9.setCellValue(COUNT_PER_ADDRESS);
-        
+
         Cell e9 = row9.createCell(4);
         e9.setCellStyle(styles.get(STYLE_CONTENT));
         e9.setCellValue(bookLabelModel.getCount().toString() + " " + EX);
-        
+
         Row row19 = sheet.getRow(18);
-        
+
         Cell a19 = row19.createCell(0);
         a19.setCellStyle(styles.get(STYLE_LABEL));
         a19.setCellValue(COUNT_PER_ADDRESS);
-        
+
         Cell b19 = row19.createCell(1);
         b19.setCellStyle(styles.get(STYLE_CONTENT));
         b19.setCellValue(bookLabelModel.getCount().toString() + " " + EX);
-        
+
         Cell d19 = row19.createCell(3);
         d19.setCellStyle(styles.get(STYLE_LABEL));
         d19.setCellValue(COUNT_PER_ADDRESS);
-        
+
         Cell e19 = row19.createCell(4);
         e19.setCellStyle(styles.get(STYLE_CONTENT));
         e19.setCellValue(bookLabelModel.getCount().toString() + " " + EX);
     }
+
 }

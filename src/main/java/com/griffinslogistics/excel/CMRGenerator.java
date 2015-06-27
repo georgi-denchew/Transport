@@ -5,26 +5,20 @@
  */
 package com.griffinslogistics.excel;
 
-import com.griffinslogistics.db.entities.Bookspackage;
 import com.griffinslogistics.db.entities.Pulsiodetails;
-import java.io.FileInputStream;
+import com.griffinslogistics.models.BookspackageCMRModel;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import com.griffinslogistics.models.BookspackageCMRModel;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -32,10 +26,10 @@ import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFPicture;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -43,33 +37,14 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  *
  * @author Georgi
  */
-public class CMRGenerator {
+public class CMRGenerator extends ExcelGenerator {
 
     public static void generateAll(OutputStream outputStream, List<BookspackageCMRModel> bookspackageCMRModels, Pulsiodetails pulsioDetails) {
         try {
             XSSFWorkbook workbook = new XSSFWorkbook();
 
             for (BookspackageCMRModel bookspackageCMRModel : bookspackageCMRModels) {
-
-                XSSFSheet sheet = workbook.createSheet(bookspackageCMRModel.getPackageNumber());
-                setDefaultSheetStyles(sheet);
-
-                Map<String, CellStyle> styles = createStyles(workbook);
-                int currentRow = 2;
-                Row headerRow = sheet.createRow(currentRow);
-
-                generateHeaderRow(headerRow, styles, bookspackageCMRModel.getPackageNumber());
-                currentRow = generateSenderAndDriver(sheet, styles, currentRow);
-                currentRow = generatePoint2Till9(sheet, styles, currentRow, bookspackageCMRModel.getDeliveryAddress());
-
-                double weight = bookspackageCMRModel.getTotalWeight();
-                Long totalBoxesCount = bookspackageCMRModel.getTotalBoxesCount();
-                currentRow = generatePoints10Till15(totalBoxesCount, weight, sheet, styles, currentRow);
-                currentRow = generatePoint15Till19(sheet, styles, currentRow);
-                currentRow = generatePoint20Till24(sheet, styles, currentRow, pulsioDetails);
-
-                sheet.autoSizeColumn(1, true);
-                sheet.autoSizeColumn(2, true);
+                generate(workbook, bookspackageCMRModel, pulsioDetails);
             }
 
             workbook.write(outputStream);
@@ -81,34 +56,41 @@ public class CMRGenerator {
     }
 
     public static void generateSingle(OutputStream outputStream, BookspackageCMRModel bookspackageCMRModel, Pulsiodetails pulsioDetails) {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        generate(workbook, bookspackageCMRModel, pulsioDetails);
+
         try {
-            XSSFWorkbook workbook = new XSSFWorkbook();
-
-            //Get first sheet from the workbook
-            XSSFSheet sheet = workbook.createSheet(bookspackageCMRModel.getPackageNumber());
-            setDefaultSheetStyles(sheet);
-
-            Map<String, CellStyle> styles = createStyles(workbook);
-            int currentRow = 2;
-            Row headerRow = sheet.createRow(currentRow);
-
-            generateHeaderRow(headerRow, styles, bookspackageCMRModel.getPackageNumber());
-            currentRow = generateSenderAndDriver(sheet, styles, currentRow);
-            currentRow = generatePoint2Till9(sheet, styles, currentRow, bookspackageCMRModel.getDeliveryAddress());
-
-            double weight = bookspackageCMRModel.getTotalWeight();
-            Long totalBoxesCount = bookspackageCMRModel.getTotalBoxesCount();
-            currentRow = generatePoints10Till15(totalBoxesCount, weight, sheet, styles, currentRow);
-            currentRow = generatePoint15Till19(sheet, styles, currentRow);
-            currentRow = generatePoint20Till24(sheet, styles, currentRow, pulsioDetails);
-
             workbook.write(outputStream);
-
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(CMRGenerator.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(CMRGenerator.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    private static void generate(XSSFWorkbook workbook, BookspackageCMRModel bookspackageCMRModel, Pulsiodetails pulsioDetails) {
+        //Get first sheet from the workbook
+        XSSFSheet sheet = workbook.createSheet(bookspackageCMRModel.getPackageNumber());
+        setDefaultSheetStyles(sheet);
+
+        Map<String, CellStyle> styles = createStyles(workbook);
+        int currentRow = 2;
+        Row headerRow = sheet.createRow(currentRow);
+
+        generateHeaderRow(headerRow, styles, bookspackageCMRModel.getPackageNumber());
+        currentRow = generateSenderAndDriver(sheet, styles, currentRow);
+        currentRow = generatePoint2Till9(sheet, styles, currentRow, bookspackageCMRModel.getDeliveryAddress());
+
+        double weight = bookspackageCMRModel.getTotalWeight();
+        Long totalBoxesCount = bookspackageCMRModel.getTotalBoxesCount();
+        currentRow = generatePoints10Till15(totalBoxesCount, weight, sheet, styles, currentRow);
+        currentRow = generatePoint15Till19(sheet, styles, currentRow);
+        currentRow = generatePoint20Till24(sheet, styles, currentRow, pulsioDetails);
+
+        sheet.autoSizeColumn(1, false);
+        sheet.autoSizeColumn(2, false);
+        sheet.autoSizeColumn(7, false);
+        sheet.autoSizeColumn(9, false);
+
+        sheet.setFitToPage(true);
     }
 
     private static Map<String, CellStyle> createStyles(Workbook workbook) {
@@ -235,23 +217,23 @@ public class CMRGenerator {
     private static final String CONTENT_MIDDLE_ALLIGN_RIGHT_STYLE = "contentMiddleAllignRightStyle";
 
     private static void generateHeaderRow(Row headerRow, Map<String, CellStyle> styles, String packageNumber) {
-        Cell headingCell = headerRow.createCell(2);
+        Cell headingCell = headerRow.createCell(1);
         headingCell.setCellValue(HEADING_INTERNATIONAL_BILL);
         headingCell.setCellStyle(styles.get(DEFAULT_STYLE));
 
-        Cell CMRCell = headerRow.createCell(3);
+        Cell CMRCell = headerRow.createCell(2);
         CMRCell.setCellValue(HEADING_CMR);
         CMRCell.setCellStyle(styles.get(DEFAULT_STYLE));
 
-        Cell internationalHeadingCell = headerRow.createCell(4);
+        Cell internationalHeadingCell = headerRow.createCell(3);
         internationalHeadingCell.setCellValue(HEADING_CONSIGNMENT);
         internationalHeadingCell.setCellStyle(styles.get(DEFAULT_STYLE));
 
-        Cell countryHeadingCell = headerRow.createCell(8);
+        Cell countryHeadingCell = headerRow.createCell(7);
         countryHeadingCell.setCellValue(HEADING_COUNTRY);
         countryHeadingCell.setCellStyle(styles.get(DEFAULT_STYLE));
 
-        Cell numberHeadingCell = headerRow.createCell(10);
+        Cell numberHeadingCell = headerRow.createCell(9);
         numberHeadingCell.setCellValue(HEADING_NUMBER + packageNumber);
         numberHeadingCell.setCellStyle(styles.get(DEFAULT_STYLE));
     }
@@ -474,6 +456,7 @@ public class CMRGenerator {
 
         currentRow++;
         Row row26 = sheet.createRow(currentRow);
+        row26.setHeight((short) 1500);
         Cell placeContentCell = row26.createCell(1);
         placeContentCell.setCellValue(deliveryAddress);
         placeContentCell.setCellStyle(styles.get(CONTENT_MIDDLE_STYLE));
@@ -925,17 +908,17 @@ public class CMRGenerator {
         // Insert signature picture
         Workbook workbook = sheet.getWorkbook();
         byte[] imageBytes = pulsiodetails.getSignature();
-        int pictureIdx = workbook.addPicture(imageBytes, Workbook.PICTURE_TYPE_JPEG);
+        int pictureIdx = workbook.addPicture(imageBytes, Workbook.PICTURE_TYPE_PNG);
         CreationHelper helper = workbook.getCreationHelper();
         Drawing drawing = sheet.createDrawingPatriarch();
-        ClientAnchor anchor = helper.createClientAnchor();
+         ClientAnchor anchor = helper.createClientAnchor();
 
         //set top-left corner for the image
         anchor.setCol1(1);
         anchor.setRow1(currentRow);
 
-        Picture pict = drawing.createPicture(anchor, pictureIdx);
-        pict.resize();
+        XSSFPicture pict = (XSSFPicture) drawing.createPicture(anchor, pictureIdx);
+        pict.resize(1.01, 5);
 
         currentRow += 4;
         Row row56 = sheet.getRow(currentRow);

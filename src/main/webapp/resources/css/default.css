@@ -396,3 +396,12 @@ a:link:hover, a:visited:hover  {
 #bookspackages-datatable-form\:bookspackages-datatable\:filter\:filter {
     width: 70px;
 }
+
+th[role="columnheader"] {
+    background-color: #D4D2D1 !important;
+}
+
+
+.filter-column-80-percent {
+    width: 80% !important;
+}

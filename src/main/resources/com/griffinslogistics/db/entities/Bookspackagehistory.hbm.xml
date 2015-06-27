@@ -52,6 +52,9 @@
         <property name="printDeliveryDay" type="string">
             <column length="20" name="PrintDeliveryDay"/>
         </property>
+        <property name="loadingDay" type="string">
+            <column length="20" name="LoadingDay"/>
+        </property>
         <property name="truckGroupName" type="string">
             <column length="100" name="TruckGroupName"/>
         </property>

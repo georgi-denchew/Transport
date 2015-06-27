@@ -22,9 +22,10 @@ public class BookForTransportationModel implements java.io.Serializable {
     private double weight;
     private double weightPerBook;
     private boolean discarded;
+    private String deliveryAddress;
 
-    public BookForTransportationModel(Integer id, String bookspackageNumber, String printingHouseName, int bookNumber, String title, int count, double weight, double weightPerBook, boolean discarded) {
-        this.id = id;
+    public BookForTransportationModel(Integer id, String bookspackageNumber, String printingHouseName, int bookNumber, String title, int count, double weight, double weightPerBook, boolean discarded, String deliveryAddress) {
+         this.id = id;
         this.bookspackageNumber = bookspackageNumber;
         this.printingHouseName = printingHouseName;
         this.bookNumber = bookNumber;
@@ -33,6 +34,7 @@ public class BookForTransportationModel implements java.io.Serializable {
         this.weight = weight;
         this.weightPerBook = weightPerBook;
         this.discarded = discarded;
+        this.deliveryAddress = deliveryAddress;
     }
 
     public static BookForTransportationModel fromBook(Book book) {
@@ -40,7 +42,7 @@ public class BookForTransportationModel implements java.io.Serializable {
                 = new BookForTransportationModel(book.getId(), book.getBookspackage().getPackageNumber(),
                         book.getPrintingHouse() != null ? book.getPrintingHouse().getName() : null,
                         book.getBookNumber(), book.getTitle(), book.getCount(), book.getWeight(),
-                        book.getWeightPerBook(), book.isDiscarded());
+                        book.getWeightPerBook(), book.isDiscarded(), book.getDeliveryAddress());
 
         return bookForTransportationModel;
     }
@@ -115,5 +117,13 @@ public class BookForTransportationModel implements java.io.Serializable {
 
     public void setDiscarded(boolean discarded) {
         this.discarded = discarded;
+    }
+
+    public String getDeliveryAddress() {
+        return deliveryAddress;
+    }
+
+    public void setDeliveryAddress(String deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
     }
 }

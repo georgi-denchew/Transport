@@ -30,6 +30,7 @@ public class BookspackageHistory implements Serializable {
     private String remarksSales;
     private String remarksLogistics;
     private String printDeliveryDay;
+    private String loadingDay;
     private String truckGroupName;
     
     public BookspackageHistory() {
@@ -38,7 +39,7 @@ public class BookspackageHistory implements Serializable {
     public BookspackageHistory(Integer id, Bookspackage bookspackage, String truckGroupName,
             Date lastModification, String country,String postalCode, String phoneNumber, 
             String email, String merchant, String client, Date deliveryDate, String deliveryAddress,
-            String remarks, String printDeliveryDay, String priority) {
+            String remarks, String printDeliveryDay, String priority, String loadingDay) {
         this.id = id;
         this.bookspackage = bookspackage;
         this.lastModification = lastModification;
@@ -54,6 +55,7 @@ public class BookspackageHistory implements Serializable {
         this.printDeliveryDay = printDeliveryDay;
         this.truckGroupName = truckGroupName;
         this.priority = priority;
+        this.loadingDay = loadingDay;
     }
     
     
@@ -190,5 +192,13 @@ public class BookspackageHistory implements Serializable {
 
     public void setPricePerKilogram(Double pricePerKilogram) {
         this.pricePerKilogram = pricePerKilogram;
+    }
+
+    public String getLoadingDay() {
+        return loadingDay;
+    }
+
+    public void setLoadingDay(String loadingDay) {
+        this.loadingDay = loadingDay;
     }
 }

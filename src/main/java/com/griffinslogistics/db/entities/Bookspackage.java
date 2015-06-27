@@ -32,6 +32,7 @@ public class Bookspackage implements java.io.Serializable {
     private String remarksSales;
     private String remarksLogistics;
     private String printDeliveryDay;
+    private String loadingDay;
     private Set<Book> books;
     private Set boxes = new HashSet(0);
     private List<BookspackageHistory> bookspackageHistories;
@@ -56,7 +57,7 @@ public class Bookspackage implements java.io.Serializable {
             String country, String postalCode, String phoneNumber, String email, 
             String packageNumber, String merchant, String client, Date deliveryDate,
             String deliveryAddress, String remarks, String printDeliveryDay, Integer totalBooksCount, Integer totalOrderedBooksCount,
-            Double totalBooksWeight, Double totalOrderedBooksWeight, String priority) {
+            Double totalBooksWeight, Double totalOrderedBooksWeight, String priority, String loadingDay) {
         this.id = id;
         this.version = version;
         this.transportation = transportation;
@@ -77,6 +78,7 @@ public class Bookspackage implements java.io.Serializable {
         this.totalBooksWeight = totalBooksWeight;
         this.totalOrderedBooksWeight = totalOrderedBooksWeight;
         this.priority = priority;
+        this.loadingDay = loadingDay;
     }
     
     public Bookspackage(Transportation transportation, String packageNumber, String merchant,
@@ -378,5 +380,13 @@ public class Bookspackage implements java.io.Serializable {
 
     public void setPricePerKilogram(Double pricePerKilogram) {
         this.pricePerKilogram = pricePerKilogram;
+    }
+
+    public String getLoadingDay() {
+        return loadingDay;
+    }
+
+    public void setLoadingDay(String loadingDay) {
+        this.loadingDay = loadingDay;
     }
 }

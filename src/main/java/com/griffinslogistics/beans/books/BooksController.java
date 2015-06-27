@@ -105,7 +105,8 @@ public class BooksController implements Serializable {
 
             String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             externalContext.setResponseContentType(contentType);
-            String responseHeaderValue = String.format("attachment; filename=\"Sticker Kniga %s Pratka %s \"", selectedBook.getBookNumber(), bookspackage.getPackageNumber());
+            String filename = String.format("\"Stiker Kniga %s Pratka %s\"",selectedBook.getBookNumber(), bookspackage.getPackageNumber());
+            String responseHeaderValue = ("attachment; filename=" + filename + ".xlsx");
             externalContext.setResponseHeader("Content-Disposition", responseHeaderValue);
             outputStream = externalContext.getResponseOutputStream();
 
@@ -128,8 +129,8 @@ public class BooksController implements Serializable {
     }
 
     public void addBook() {
-
         newBook.setBookspackage(this.bookspackage);
+        newBook.setDeliveryAddress(this.bookspackage.getDeliveryAddress());
         calculateWeightPerBook(newBook);
         Transportation currentTransportation = this.bookspackage.getTransportation();
         newBook.setTransportation(currentTransportation);

@@ -48,7 +48,7 @@
             <column length="10" name="DeliveryDate"/>
         </property>
         <property name="deliveryAddress" type="string">
-            <column length="100" name="DeliveryAddress"/>
+            <column length="500" name="DeliveryAddress"/>
         </property>
         <property name="remarksSales" type="string">
             <column length="1000" name="RemarksSales"/>
@@ -59,6 +59,11 @@
         <property name="printDeliveryDay" type="string">
             <column length="20" name="PrintDeliveryDay"/>
         </property>
+        
+        <property name="loadingDay" type="string">
+            <column length="20" name="LoadingDay"/>
+        </property>
+        
         <bag cascade="delete" fetch="select" inverse="true" lazy="true" name="bookspackageHistories" table="bookspackagehistory">
             <key>
                 <column name="PackageId" not-null="true"/>

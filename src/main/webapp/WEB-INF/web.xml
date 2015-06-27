@@ -10,9 +10,9 @@
     </context-param>
     
     <context-param>
-    <param-name>org.omnifaces.FACES_VIEWS_SCAN_PATHS</param-name>
-    <param-value>/*.xhtml</param-value>
-</context-param>
+        <param-name>org.omnifaces.FACES_VIEWS_SCAN_PATHS</param-name>
+        <param-value>/*.xhtml</param-value>
+    </context-param>
 
     <servlet>
         <servlet-name>Faces Servlet</servlet-name>
@@ -22,7 +22,7 @@
     
     <session-config>
         <session-timeout>
-            30
+            60
         </session-timeout>
     </session-config>
     <welcome-file-list>
@@ -44,5 +44,8 @@
         <realm-name>YourAppsRealm</realm-name>
     </login-config>
     
-    
+    <error-page>
+        <exception-type>javax.faces.FacesException</exception-type>
+        <location>/session-expired.xhtml</location>
+    </error-page>
 </web-app>

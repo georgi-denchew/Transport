@@ -1,3 +1,4 @@
+
 Drop database if exists transport;
 
 CREATE DATABASE transport;
@@ -135,6 +136,7 @@ Title varchar(200),
 `Count` int not null,
 Weight double not null,
 WeightPerBook double not null,
+DeliveryAddress varchar(500),
 Discarded bit not null default 0,
 PackageId int not null,
 TransportationId int not null,
@@ -209,3 +211,5 @@ foreign key (TransportationId) references transportation(Id)
 -- alter table bookspackagehistory add PricePerKilogram decimal(7,2);
 -- 
 -- alter table additionalcosts add Description varchar(500);
+
+-- alter table book add DeliveryAddress varchar(500);

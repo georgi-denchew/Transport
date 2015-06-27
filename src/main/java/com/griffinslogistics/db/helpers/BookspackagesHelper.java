@@ -219,7 +219,7 @@ public class BookspackagesHelper implements Serializable {
         this.session = HibernateUtil.getSessionFactory().openSession();
         Transaction transaction = this.session.beginTransaction();
 
-        String transportationString = String.format("РўСЂР°РЅСЃРїРѕСЂС‚ %s/%s", transportation.getWeekNumber(), transportation.getYear());
+        String transportationString = String.format("Транспорт‚ %s/%s", transportation.getWeekNumber(), transportation.getYear());
 
         try {
             transportation = (Transportation) this.session.get(Transportation.class, transportation.getId());
@@ -370,7 +370,7 @@ public class BookspackagesHelper implements Serializable {
                 history.setRemarksLogistics(bookspackage.getRemarksLogistics());
                 history.setPrintDeliveryDay(bookspackage.getPrintDeliveryDay());
                 history.setPricePerKilogram(bookspackage.getPricePerKilogram());
-
+                history.setLoadingDay(bookspackage.getLoadingDay());
                 if (bookspackage.getTruckGroup() != null && bookspackage.getTruckGroup().getId() > 0) {
                     history.setTruckGroupName(bookspackage.getTruckGroup().getName());
                 }

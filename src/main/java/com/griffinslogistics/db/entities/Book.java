@@ -20,6 +20,7 @@ public class Book implements java.io.Serializable {
     private double weightPerBook;
     private Set boxes = new HashSet(0);
     private boolean discarded;
+    private String deliveryAddress;
 
     private Long totalBooksCount;
     private Double totalBooksWeight;
@@ -158,5 +159,13 @@ public class Book implements java.io.Serializable {
 
     public void setPrintingHouse(PrintingHouse printingHouse) {
         this.printingHouse = printingHouse;
+    }
+
+    public String getDeliveryAddress() {
+        return deliveryAddress;
+    }
+
+    public void setDeliveryAddress(String deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
     }
 }

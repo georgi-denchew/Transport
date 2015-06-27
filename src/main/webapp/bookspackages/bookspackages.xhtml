@@ -7,7 +7,8 @@
                 xmlns:h="http://xmlns.jcp.org/jsf/html"
                 xmlns:p="http://primefaces.org/ui"
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
-                xmlns:pe="http://primefaces.org/ui/extensions" >
+                xmlns:pe="http://primefaces.org/ui/extensions" 
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
 
     <ui:define name="title">
         Пратки
@@ -23,11 +24,13 @@
             </p:breadCrumb>
 
             <h:panelGrid  styleClass="insert-form">
+                <f:facet name="header">
+                    <h2>Добави пратка за Транспорт "#{bookspackageController.transportationForBookspackage.weekNumber}/#{bookspackageController.transportationForBookspackage.year}"</h2>
+                </f:facet>
+
+                <p:commandButton action="#{bookspackageController.pasteBookspackage}" value="Постави" title="Постави" icon="ui-icon-copy" update="@form" />
 
                 <h:panelGrid columns="6" style="margin: 0 auto;" cellspacing="4px">
-                    <f:facet name="header">
-                        <h2>Добави пратка за Транспорт "#{bookspackageController.transportationForBookspackage.weekNumber}/#{bookspackageController.transportationForBookspackage.year}"</h2>
-                    </f:facet>
 
                     <p:outputLabel value="Клиент:" for="client" />
                     <p:inputText size="30"
@@ -74,6 +77,13 @@
                                  value="#{bookspackageController.newBookspackage.printDeliveryDay}">
                         <f:validateLength maximum="20"/>
                     </p:inputText>
+                    
+                     <p:outputLabel for="loading-day" value="Ден на товарене:" styleClass="label-dropdown-bug-fix" />
+                    <p:inputText size="30" id="loading-day" 
+                                 validatorMessage='Полето "Ден на товарене" може да съдържа най-много 20 символа'
+                                 value="#{bookspackageController.newBookspackage.loadingDay}">
+                        <f:validateLength maximum="20"/>
+                    </p:inputText>
 
                     <p:outputLabel for="merchant" value="Търговец:" />
                     <p:inputText size="30" id="merchant" 
@@ -116,24 +126,27 @@
             </h:panelGrid>
 
             <h:panelGroup layout="span" id="totals" styleClass="totals">
-                <h3 style="font-style: italic;">
-                    Общо килограми: 
-                    <h:outputLabel 
-                        value="#{bookspackageController.totalWeights.get(bookspackageController.totalWeightsKeys.get(bookspackageController.totalWeightsKeys.size() - 1))}"
-                        >
-                        <f:convertNumber pattern="#.##"/> кг
-                    </h:outputLabel>
-                </h3>
-                <h:panelGroup layout="span" rendered="#{bookspackageController.totalWeights.size() == 0}">няма стойности за изчисление</h:panelGroup>
-                <ui:repeat value="#{bookspackageController.totalWeightsKeys.subList(0, bookspackageController.totalWeightsKeys.size() - 1)}" var="key">
-                    <span class="truck-group">
-                        <h:outputLabel style="font-weight: bold;" value="#{key}: "/>
-                        <h:outputLabel value="#{bookspackageController.totalWeights.get(key)}">
+                <c:if test="#{bookspackageController.totalWeights.size() > 0}">
+                    <h3 style="font-style: italic;">
+                        Общо килограми: 
+
+                        <h:outputLabel 
+                            value="#{bookspackageController.totalWeights.get(bookspackageController.totalWeightsKeys.get(bookspackageController.totalWeightsKeys.size() - 1))}"
+                            >
                             <f:convertNumber pattern="#.##"/> кг
                         </h:outputLabel>
-                    </span>
-                    |
-                </ui:repeat>
+                    </h3>
+                    <ui:repeat value="#{bookspackageController.totalWeightsKeys.subList(0, bookspackageController.totalWeightsKeys.size() - 1)}" var="key">
+                        <span class="truck-group">
+                            <h:outputLabel style="font-weight: bold;" value="#{key}: "/>
+                            <h:outputLabel value="#{bookspackageController.totalWeights.get(key)}">
+                                <f:convertNumber pattern="#.##"/> кг
+                            </h:outputLabel>
+                        </span>
+                        |
+                    </ui:repeat>
+                </c:if>
+                <h:panelGroup layout="span" rendered="#{bookspackageController.totalWeights.size() == 0}">няма стойности за изчисление</h:panelGroup>
             </h:panelGroup>
 
         </h:form>
@@ -284,7 +297,11 @@
                     </p:cellEditor>
                 </p:column>
 
-                <p:column>
+                <p:column
+                    filterBy="#{bookspackage.packageNumber}"
+                    filterMatchMode="contains"
+                    filterStyleClass="filter-column-80-percent"
+                    >
                     <f:facet name="header">
                         <h:outputText value="Пратка №"/>
                     </f:facet>
@@ -298,7 +315,11 @@
                     </p:cellEditor>
                 </p:column>
 
-                <p:column>
+                <p:column
+                    filterBy="#{bookspackage.postalCode}"
+                    filterMatchMode="contains"
+                    filterStyleClass="filter-column-80-percent"
+                    >
                     <f:facet name="header">
                         <h:outputText value="Пощенски Код"/>
                     </f:facet>
@@ -357,8 +378,10 @@
                         <h:outputText value="Доставка най-късно"/>
                     </f:facet>
                     <p:cellEditor>
-                        <f:facet name="output">
-                            <p:outputLabel value="#{bookspackage.deliveryDate}">
+                        <f:facet
+                            name="output">
+                            <p:outputLabel
+                                value="#{bookspackage.deliveryDate}">
                                 <f:convertDateTime pattern="dd.MM.yyyy"/>
                             </p:outputLabel>
                         </f:facet>
@@ -368,7 +391,7 @@
                     </p:cellEditor>
                 </p:column>
 
-                <p:column>
+                <p:column styleClass="#{bookspackage.priority}">
                     <f:facet name="header">
                         <h:outputText value="Особености Търговци"/>
                     </f:facet>
@@ -397,6 +420,23 @@
                         <f:facet name="input">
                             <p:inputText value="#{bookspackage.printDeliveryDay}"
                                          validatorMessage='Полето "Ден доставка от печат" може да съдържа най-много 20 символа'>
+                                <f:validateLength maximum="20"/>
+                            </p:inputText>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+                
+                <p:column>
+                    <f:facet name="header">
+                        <h:outputText value="Ден товарене"/>
+                    </f:facet>
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{bookspackage.loadingDay}"/>
+                        </f:facet>
+                        <f:facet name="input">
+                            <p:inputText value="#{bookspackage.loadingDay}"
+                                         validatorMessage='Полето "Ден на товарене" може да съдържа най-много 20 символа'>
                                 <f:validateLength maximum="20"/>
                             </p:inputText>
                         </f:facet>

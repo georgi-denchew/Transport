@@ -34,6 +34,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  *
@@ -45,42 +46,43 @@ public class BDLGenerator {
 
     public static void generateAll(OutputStream outputStream, Map<String, List<BookBoxModel>> bookBoxModelsForTransportation, Pulsiodetails pulsioDetails, String packageNumber) {
         try {
-            Workbook workbook = new HSSFWorkbook();
-            Map<String, CellStyle> styles = createStyles(workbook);
+            Workbook workbook = new XSSFWorkbook();
 
             for (String bookspackageNumber : bookBoxModelsForTransportation.keySet()) {
-
-                Sheet sheet = workbook.createSheet(bookspackageNumber);
-
-                //Default sheet styles
-                sheet.setDisplayGridlines(false);
-                sheet.setPrintGridlines(false);
-                sheet.getPrintSetup().setLandscape(true);
-                sheet.setFitToPage(true);
-                sheet.setHorizontallyCenter(true);
-                sheet.setDefaultRowHeight((short) 300);
-                sheet.setDefaultColumnWidth(15);
-
-                sheet.setColumnWidth(1, 6000);
-                sheet.setColumnWidth(5, 3000);
-                sheet.setColumnWidth(6, 3000);
-                sheet.setColumnWidth(7, 3000);
-                sheet.setColumnWidth(8, 3000);
-
-                // Generate header part
-                insertPulsioImage(workbook, sheet, pulsioDetails);
-                insertDate(sheet, styles.get("title"));
-                insertContacts(sheet, styles.get("pulsioName"), styles.get("contacts"), pulsioDetails);
-                insertTitle(sheet, styles.get("title"));
-
-                // Generate table part
-                insertTableHeaders(sheet, styles.get("tableHeadersLeft"), styles.get("tableHeadersMiddle"), styles.get("tableHeadersRight"));
                 List<BookBoxModel> bookBoxModels = bookBoxModelsForTransportation.get(bookspackageNumber);
-                int index = insertTableBody(sheet, styles.get("tableBodyLeft"), styles.get("tableBodyMiddle"), styles.get("tableBodyRight"), styles.get("tableFooters"), bookBoxModels);
 
-                String deliveryAddress = bookBoxModels.get(0).getDeliveryAddress();
-                String client = bookBoxModels.get(0).getClient();
-                insertFooter(sheet, styles.get("footer"), index, bookspackageNumber, deliveryAddress, client);
+                generate(workbook, bookBoxModels, pulsioDetails, bookspackageNumber);
+
+//                Sheet sheet = workbook.createSheet(bookspackageNumber);
+//
+//                //Default sheet styles
+//                sheet.setDisplayGridlines(false);
+//                sheet.setPrintGridlines(false);
+//                sheet.getPrintSetup().setLandscape(true);
+//                sheet.setFitToPage(true);
+//                sheet.setHorizontallyCenter(true);
+//                sheet.setDefaultRowHeight((short) 300);
+//                sheet.setDefaultColumnWidth(15);
+//
+//                sheet.setColumnWidth(1, 6000);
+//                sheet.setColumnWidth(5, 3000);
+//                sheet.setColumnWidth(6, 3000);
+//                sheet.setColumnWidth(7, 3000);
+//                sheet.setColumnWidth(8, 3000);
+//
+//                // Generate header part
+//                insertPulsioImage(workbook, sheet, pulsioDetails);
+//                insertDate(sheet, styles.get("title"));
+//                insertContacts(sheet, styles.get("pulsioName"), styles.get("contacts"), pulsioDetails);
+//                insertTitle(sheet, styles.get("title"));
+//
+//                // Generate table part
+//                insertTableHeaders(sheet, styles.get("tableHeadersLeft"), styles.get("tableHeadersMiddle"), styles.get("tableHeadersRight"));
+//                int index = insertTableBody(sheet, styles.get("tableBodyLeft"), styles.get("tableBodyMiddle"), styles.get("tableBodyRight"), styles.get("tableFooters"), bookBoxModels);
+//
+//                String deliveryAddress = bookBoxModels.get(0).getDeliveryAddress();
+//                String client = bookBoxModels.get(0).getClient();
+//                insertFooter(sheet, styles.get("footer"), index, bookspackageNumber, deliveryAddress, client);
             }
 
             workbook.write(outputStream);
@@ -91,61 +93,51 @@ public class BDLGenerator {
         }
     }
 
-    public static OutputStream generateSingle(OutputStream outputStream, List<BookBoxModel> bookBoxModels, Pulsiodetails pulsiodetails, String packageNumber) {
+    private static void generate(Workbook workbook, List<BookBoxModel> bookBoxModels, Pulsiodetails pulsiodetails, String packageNumber) {
+
+        Map<String, CellStyle> styles = createStyles(workbook);
+
+        Sheet sheet = workbook.createSheet(packageNumber);
+
+        // Generate header part
+        insertPulsioImage(workbook, sheet, pulsiodetails);
+        insertDate(sheet, styles.get("title"));
+        insertContacts(sheet, styles.get("pulsioName"), styles.get("contacts"), pulsiodetails);
+        insertTitle(sheet, styles.get("title"));
+        // Generate table part
+        insertTableHeaders(sheet, styles.get("tableHeadersLeft"), styles.get("tableHeadersMiddle"), styles.get("tableHeadersRight"));
+        int index = insertTableBody(sheet, styles.get("tableBodyLeft"), styles.get("tableBodyMiddle"), styles.get("tableBodyRight"), styles.get("tableFooters"), bookBoxModels);
+
+        String deliveryAddress = bookBoxModels.get(0).getDeliveryAddress();
+        String client = bookBoxModels.get(0).getClient();
+
+        insertFooter(sheet, styles.get("footer"), index, packageNumber, deliveryAddress, client);
+
+//        Default sheet styles
+        sheet.setDisplayGridlines(false);
+        sheet.setPrintGridlines(false);
+
+        sheet.autoSizeColumn(1, true);
+        sheet.autoSizeColumn(2, false);
+        sheet.autoSizeColumn(5, false);
+        sheet.autoSizeColumn(6, false);
+        sheet.autoSizeColumn(7, false);
+        sheet.autoSizeColumn(8, false);
+
+        sheet.setFitToPage(true);
+    }
+
+    public static void generateSingle(OutputStream outputStream, List<BookBoxModel> bookBoxModels, Pulsiodetails pulsiodetails, String packageNumber) {
 
         try {
-            Workbook workbook = new HSSFWorkbook();
-            Map<String, CellStyle> styles = createStyles(workbook);
-            Sheet sheet = workbook.createSheet("Bon de livraison");
-
-            //Default sheet styles
-            sheet.setDisplayGridlines(false);
-            sheet.setPrintGridlines(false);
-            sheet.getPrintSetup().setLandscape(true);
-            sheet.setFitToPage(true);
-            sheet.setHorizontallyCenter(true);
-            sheet.setDefaultRowHeight((short) 300);
-            sheet.setDefaultColumnWidth(15);
-
-            sheet.setColumnWidth(1, 6000);
-            sheet.setColumnWidth(5, 3000);
-            sheet.setColumnWidth(6, 3000);
-            sheet.setColumnWidth(7, 3000);
-            sheet.setColumnWidth(8, 3000);
-
-            // Generate header part
-            insertPulsioImage(workbook, sheet, pulsiodetails);
-            insertDate(sheet, styles.get("title"));
-            insertContacts(sheet, styles.get("pulsioName"), styles.get("contacts"), pulsiodetails);
-            insertTitle(sheet, styles.get("title"));
-
-            // Generate table part
-            insertTableHeaders(
-                    sheet,
-                    styles.get("tableHeadersLeft"),
-                    styles.get("tableHeadersMiddle"),
-                    styles.get("tableHeadersRight"));
-            int index = insertTableBody(
-                    sheet,
-                    styles.get("tableBodyLeft"),
-                    styles.get("tableBodyMiddle"),
-                    styles.get("tableBodyRight"),
-                    styles.get("tableFooters"),
-                    bookBoxModels);
-
-            String deliveryAddress = bookBoxModels.get(0).getDeliveryAddress();
-            String client = bookBoxModels.get(0).getClient();
-
-            insertFooter(sheet, styles.get("footer"), index, packageNumber, deliveryAddress, client);
-
+            Workbook workbook = new XSSFWorkbook();
+            generate(workbook, bookBoxModels, pulsiodetails, packageNumber);
             workbook.write(outputStream);
         } catch (FileNotFoundException ex) {
             logger.log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             logger.log(Level.SEVERE, null, ex);
         }
-
-        return outputStream;
     }
 
     private static void insertPulsioImage(Workbook workbook, Sheet sheet, Pulsiodetails pulsiodetails) {
@@ -160,7 +152,7 @@ public class BDLGenerator {
         ClientAnchor anchor = helper.createClientAnchor();
 
         //set top-left corner for the image
-        anchor.setCol1(8);
+        anchor.setCol1(7);
         anchor.setRow1(0);
 
         Picture pict = drawing.createPicture(anchor, pictureIdx);
@@ -218,13 +210,13 @@ public class BDLGenerator {
         style.setWrapText(true);
 
         // Override 25% grey to lighter grey
-        HSSFWorkbook hssfWorkbook = (HSSFWorkbook) workbook;
-        HSSFPalette palette = hssfWorkbook.getCustomPalette();
-        palette.setColorAtIndex(HSSFColor.GREY_25_PERCENT.index,
-                (byte) 242, //RGB red (0-255)
-                (byte) 242, //RGB green
-                (byte) 242 //RGB blue
-        );
+        XSSFWorkbook hssfWorkbook = (XSSFWorkbook) workbook;
+//        SSFPalette palette = hssfWorkbook.getCustomPalette();
+//        palette.setColorAtIndex(HSSFColor.GREY_25_PERCENT.index,
+//                (byte) 242, //RGB red (0-255)
+//                (byte) 242, //RGB green
+//                (byte) 242 //RGB blue
+//        );
 
         style.setFillForegroundColor(HSSFColor.GREY_25_PERCENT.index);
         style.setFillPattern(CellStyle.SOLID_FOREGROUND);
@@ -611,7 +603,7 @@ public class BDLGenerator {
         mergeString = String.format("$B$%s:$C$%s", index + 1, index + 1);
         sheet.addMergedRegion(CellRangeAddress.valueOf(mergeString));
 
-        index += 5;
+        index += 3;
         Row signatureRow = sheet.createRow(index);
         Cell signatureCell = signatureRow.createCell(1);
         signatureCell.setCellValue("Signature et tampon: ...................");

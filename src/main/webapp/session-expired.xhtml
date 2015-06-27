@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <h:outputStylesheet name="./css/default.css"/>
+        <h:outputStylesheet name="./css/cssLayout.css"/>
+        <title>
+            <ui:insert name="title">Default Title</ui:insert>
+        </title>
+    </h:head>
+
+    <h:body>
+        <div id="header">
+            <ui:insert name="header">
+                <h:form prependId="false">
+                    <p:menubar id="menubar">
+                        <p:submenu label="Админ">
+                            <p:menuitem value="Доставки" oncomplete="PF('deliveryDialog').show();"  />
+                            <p:menuitem value="Печатници" oncomplete="PF('printingHouseDialog').show();"  />
+                        </p:submenu>
+                        <p:menuitem value="Транспорт" outcome="/transports/all-transports"  />
+                    </p:menubar>
+                </h:form>
+            </ui:insert>
+        </div>
+
+        <div id="body">
+            <ui:insert name="body">
+                <p:panel>
+                    <h1 style="width: 360px;  margin: 0 auto;">
+                        Сесията е изтекла - моля започнете наново.
+                    </h1>
+                </p:panel>
+            </ui:insert>
+            <h:outputScript name="./js/script.js"/>
+        </div>
+
+        <br />
+    </h:body>
+
+</html>

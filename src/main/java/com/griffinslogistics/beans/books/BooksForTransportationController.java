@@ -5,22 +5,30 @@
  */
 package com.griffinslogistics.beans.books;
 
-import com.griffinslogistics.db.entities.Book;
 import com.griffinslogistics.db.entities.PrintingHouse;
 import com.griffinslogistics.db.entities.Transportation;
 import com.griffinslogistics.db.helpers.TransportDbHelper;
+import com.griffinslogistics.excel.BookLabelGenerator;
 import com.griffinslogistics.models.BookForTransportationModel;
+import com.griffinslogistics.models.BookLabelModel;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.*;
 
 /**
  *
@@ -30,11 +38,12 @@ import javax.faces.model.SelectItem;
 @ViewScoped
 public class BooksForTransportationController implements Serializable {
 
+    private static final Logger logger = Logger.getLogger(BooksController.class.getName());
+
     private final TransportDbHelper dbHelper;
     private Transportation transportation;
-
     List<BookForTransportationModel> booksForTransportation;
-
+    List<BookForTransportationModel> selectedBooksForPrinting;
     private List<SelectItem> printingHousesFilterSelectItems;
     private List<PrintingHouse> allPrintingHouses;
 
@@ -81,6 +90,75 @@ public class BooksForTransportationController implements Serializable {
             message = new FacesMessage(FacesMessage.SEVERITY_ERROR, messageString, null);
         }
         FacesContext.getCurrentInstance().addMessage(null, message);
+    }
+
+    public void getLabel() {
+        OutputStream outputStream = null;
+
+        try {
+            
+            List<Integer> selectedBookIds = new ArrayList<Integer>();
+             for (BookForTransportationModel bookForTransportationModel : selectedBooksForPrinting) {
+                selectedBookIds.add(bookForTransportationModel.getId());
+            }
+             
+            List<BookLabelModel> bookLabelModelList = this.dbHelper.books.getLabelInfoForBooks(selectedBookIds);
+
+            ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
+            externalContext.responseReset();
+
+            String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            externalContext.setResponseContentType(contentType);
+            String filename = String.format("\"Stikeri Knigi za Transport %s\\%s\"", transportation.getYear(), transportation.getWeekNumber());
+            String responseHeaderValue = ("attachment; filename=" + filename + ".xlsx");
+            externalContext.setResponseHeader("Content-Disposition", responseHeaderValue);
+            outputStream = externalContext.getResponseOutputStream();
+
+            BookLabelGenerator.generateLabels(outputStream, bookLabelModelList);
+            FacesContext.getCurrentInstance().responseComplete();
+
+        } catch (FileNotFoundException ex) {
+            logger.log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, null, ex);
+
+        } finally {
+            try {
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+            } catch (IOException ex) {
+                logger.log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    public void postProcessXLS(Object document) {
+        XSSFWorkbook wb = (XSSFWorkbook) document;
+
+        try {
+            XSSFSheet sheet = wb.getSheetAt(0);
+
+            for (int i = 2; i <= sheet.getPhysicalNumberOfRows(); i++) {
+                Row row = sheet.getRow(i);
+                row.setHeightInPoints(30);
+
+                XSSFCell cell = sheet.getRow(i).getCell(0);
+                String text = cell.getStringCellValue();
+                boolean value = Boolean.parseBoolean(text);
+
+                if (value) {
+                    cell.setCellValue("Да");
+                } else {
+                    cell.setCellValue("Не");
+                }
+            }
+        } catch (Exception e) {
+            String message = e.getMessage();
+            e.printStackTrace();
+        }
     }
 
     private void initTransporation() {
@@ -130,5 +208,13 @@ public class BooksForTransportationController implements Serializable {
 
     public void setPrintingHousesFilterSelectItems(List<SelectItem> printingHousesFilterSelectItems) {
         this.printingHousesFilterSelectItems = printingHousesFilterSelectItems;
+    }
+
+    public List<BookForTransportationModel> getSelectedBooksForPrinting() {
+        return selectedBooksForPrinting;
+    }
+
+    public void setSelectedBooksForPrinting(List<BookForTransportationModel> selectedBooksForPrinting) {
+        this.selectedBooksForPrinting = selectedBooksForPrinting;
     }
 }

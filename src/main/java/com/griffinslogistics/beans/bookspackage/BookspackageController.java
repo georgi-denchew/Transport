@@ -183,7 +183,29 @@ public class BookspackageController implements Serializable {
     }
 
     public void copyBookspackage(Bookspackage bookspackage) {
-        this.newBookspackage = bookspackage.makeDeepCopy();
+        Map<String, Object> session = FacesContext.getCurrentInstance().getExternalContext().getSessionMap();
+        Bookspackage copiedBookspackage = bookspackage.makeDeepCopy();
+        session.put("copiedBookspackage", copiedBookspackage);
+        FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_INFO, "Пратка с номер " + bookspackage.getPackageNumber() + " е копирана!", "");
+        FacesContext.getCurrentInstance().addMessage(null, message);
+//        this.newBookspackage = bookspackage.makeDeepCopy();
+
+    }
+
+    public void pasteBookspackage() {
+        Map<String, Object> session = FacesContext.getCurrentInstance().getExternalContext().getSessionMap();
+        Bookspackage copiedBookspackage = (Bookspackage) session.get("copiedBookspackage");
+
+        FacesMessage message;
+        if (copiedBookspackage == null) {
+            message = new FacesMessage(FacesMessage.SEVERITY_WARN, "Няма копирана пратка!", "");
+        } else {
+            this.newBookspackage = copiedBookspackage;
+            message = new FacesMessage(FacesMessage.SEVERITY_INFO, "Пратката е поставена!", "");
+        }
+        
+        FacesContext.getCurrentInstance().addMessage(null, message);
+
     }
 
     public void addBookspackage() {
@@ -234,10 +256,12 @@ public class BookspackageController implements Serializable {
             ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
             externalContext.responseReset();
 
-            String contentType = "application/vnd.ms-excel";
+            String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            
+//            String contentType = "application/vnd.ms-excel";
             externalContext.setResponseContentType(contentType);
             String transportNumber = this.transportationForBookspackage.getWeekNumber() + "/" + this.transportationForBookspackage.getYear();
-            String responseHeaderValue = String.format("attachment; filename=\"BDL Transport %s\"", transportNumber);
+            String responseHeaderValue = String.format("attachment; filename=\"BDL Transport %s.xlsx\"", transportNumber);
             externalContext.setResponseHeader("Content-Disposition", responseHeaderValue);
             outputStream = externalContext.getResponseOutputStream();
 
@@ -277,10 +301,12 @@ public class BookspackageController implements Serializable {
             ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
             externalContext.responseReset();
 
-            String contentType = "application/vnd.ms-excel";
+            String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            
+//            String contentType = "application/vnd.ms-excel";
             externalContext.setResponseContentType(contentType);
             String packageNumber = selectedBookspackage.getPackageNumber();
-            String responseHeaderValue = String.format("attachment; filename=\"BDL %s\"", packageNumber);
+            String responseHeaderValue = String.format("attachment; filename=\"BDL %s.xlsx\"", packageNumber);
             externalContext.setResponseHeader("Content-Disposition", responseHeaderValue);
             outputStream = externalContext.getResponseOutputStream();
 
@@ -322,14 +348,14 @@ public class BookspackageController implements Serializable {
 
             String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             externalContext.setResponseContentType(contentType);
-            String responseHeaderValue = String.format("attachment; filename=\"CMR Transport %s\"", this.transportationForBookspackage.getWeekNumber() + "/" + this.transportationForBookspackage.getYear());
+            String responseHeaderValue = String.format("attachment; filename=\"CMR Transport %s.xlsx\"", this.transportationForBookspackage.getWeekNumber() + "/" + this.transportationForBookspackage.getYear());
             externalContext.setResponseHeader("Content-Disposition", responseHeaderValue);
             outputStream = externalContext.getResponseOutputStream();
 
             Pulsiodetails pulsioDetails = this.dbHelper.pulsio.getDetails();
 
             CMRGenerator.generateAll(outputStream, bookspackageCMRModels, pulsioDetails);
-            
+
             FacesContext.getCurrentInstance().responseComplete();
 
         } catch (FileNotFoundException ex) {
@@ -367,7 +393,7 @@ public class BookspackageController implements Serializable {
 
             String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             externalContext.setResponseContentType(contentType);
-            String responseHeaderValue = String.format("attachment; filename=\"CMR %s\"", selectedBookspackage.getPackageNumber());
+            String responseHeaderValue = String.format("attachment; filename=\"CMR %s.xlsx\"", selectedBookspackage.getPackageNumber());
             externalContext.setResponseHeader("Content-Disposition", responseHeaderValue);
             outputStream = externalContext.getResponseOutputStream();
 
