@@ -95,13 +95,18 @@ public class BooksForTransportationController implements Serializable {
     public void getLabel() {
         OutputStream outputStream = null;
 
+        if (selectedBooksForPrinting == null || selectedBooksForPrinting.isEmpty()) {
+            FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Няма избрани или налични книги", null);
+            FacesContext.getCurrentInstance().addMessage(null, message);
+            return;
+        }
+
         try {
-            
             List<Integer> selectedBookIds = new ArrayList<Integer>();
-             for (BookForTransportationModel bookForTransportationModel : selectedBooksForPrinting) {
+            for (BookForTransportationModel bookForTransportationModel : selectedBooksForPrinting) {
                 selectedBookIds.add(bookForTransportationModel.getId());
             }
-             
+
             List<BookLabelModel> bookLabelModelList = this.dbHelper.books.getLabelInfoForBooks(selectedBookIds);
 
             ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();

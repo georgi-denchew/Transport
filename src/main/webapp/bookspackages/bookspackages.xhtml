@@ -77,8 +77,8 @@
                                  value="#{bookspackageController.newBookspackage.printDeliveryDay}">
                         <f:validateLength maximum="20"/>
                     </p:inputText>
-                    
-                     <p:outputLabel for="loading-day" value="Ден на товарене:" styleClass="label-dropdown-bug-fix" />
+
+                    <p:outputLabel for="loading-day" value="Ден на товарене:" styleClass="label-dropdown-bug-fix" />
                     <p:inputText size="30" id="loading-day" 
                                  validatorMessage='Полето "Ден на товарене" може да съдържа най-много 20 символа'
                                  value="#{bookspackageController.newBookspackage.loadingDay}">
@@ -95,7 +95,12 @@
                     <p:outputLabel for="priority" value="Приоритет:"/>
                     <p:selectOneMenu var="priority" id="priority" styleClass="dropdown" value="#{bookspackageController.newBookspackage.priority}">
                         <f:selectItems var="pr"  value="#{bookspackageController.bookspackagePrioritySelectItems}"/>
-                    </p:selectOneMenu>    
+                    </p:selectOneMenu> 
+
+                    <p:outputLabel for="state" value="Статут:"/>
+                    <p:selectOneMenu var="state" id="state" styleClass="dropdown" value="#{bookspackageController.newBookspackage.state}">
+                        <f:selectItems var="st"  value="#{bookspackageController.bookspackageStateSelectItems}"/>
+                    </p:selectOneMenu> 
 
                     <p:outputLabel for="delivery-address" value="Адрес на доставка:" />
                     <p:inputTextarea styleClass="text-area-insert-width" id="delivery-address" 
@@ -263,7 +268,10 @@
                     </p:cellEditor>
                 </p:column>
 
-                <p:column>
+                <p:column
+                    filterBy="#{bookspackage.client}" 
+                    filterMatchMode="contains"
+                    >
                     <f:facet name="header">
                         <h:outputText value="Клиент"/>
                     </f:facet>
@@ -356,6 +364,23 @@
                     </p:cellEditor>
                 </p:column>
 
+                <p:column styleClass='#{bookspackage.state}'>    
+                    <f:facet name="header">
+                        <h:outputText value="Статут"/>
+                    </f:facet>
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <p:outputLabel value="#{bookspackage.state}"/>
+                        </f:facet>
+                        <f:facet name="input">
+
+                            <p:selectOneMenu style="width: 100px !important;" styleClass="state-row" value="#{bookspackage.state}">
+                                <f:selectItems value="#{bookspackageController.bookspackageStateSelectItems}"/>
+                            </p:selectOneMenu>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
                 <p:column>    
                     <f:facet name="header">
                         <h:outputText value="Приоритет"/>
@@ -425,7 +450,7 @@
                         </f:facet>
                     </p:cellEditor>
                 </p:column>
-                
+
                 <p:column>
                     <f:facet name="header">
                         <h:outputText value="Ден товарене"/>
@@ -560,7 +585,10 @@
                     </p:cellEditor>
                 </p:column>
 
-                <p:column>
+                <p:column
+                    filterBy="#{bookspackage.country}"
+                    filterMatchMode="contains"
+                    >
                     <f:facet name="header">
                         <h:outputText value="Държава"/>
                     </f:facet>

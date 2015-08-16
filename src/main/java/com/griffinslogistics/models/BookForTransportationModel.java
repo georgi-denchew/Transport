@@ -23,9 +23,13 @@ public class BookForTransportationModel implements java.io.Serializable {
     private double weightPerBook;
     private boolean discarded;
     private String deliveryAddress;
+    private String client;
+    private String merchant;
 
-    public BookForTransportationModel(Integer id, String bookspackageNumber, String printingHouseName, int bookNumber, String title, int count, double weight, double weightPerBook, boolean discarded, String deliveryAddress) {
-         this.id = id;
+    public BookForTransportationModel(Integer id, String bookspackageNumber, String printingHouseName,
+            int bookNumber, String title, int count, double weight, double weightPerBook, boolean discarded,
+            String deliveryAddress, String client, String merchant) {
+        this.id = id;
         this.bookspackageNumber = bookspackageNumber;
         this.printingHouseName = printingHouseName;
         this.bookNumber = bookNumber;
@@ -35,6 +39,8 @@ public class BookForTransportationModel implements java.io.Serializable {
         this.weightPerBook = weightPerBook;
         this.discarded = discarded;
         this.deliveryAddress = deliveryAddress;
+        this.client = client;
+        this.merchant = merchant;
     }
 
     public static BookForTransportationModel fromBook(Book book) {
@@ -42,7 +48,8 @@ public class BookForTransportationModel implements java.io.Serializable {
                 = new BookForTransportationModel(book.getId(), book.getBookspackage().getPackageNumber(),
                         book.getPrintingHouse() != null ? book.getPrintingHouse().getName() : null,
                         book.getBookNumber(), book.getTitle(), book.getCount(), book.getWeight(),
-                        book.getWeightPerBook(), book.isDiscarded(), book.getDeliveryAddress());
+                        book.getWeightPerBook(), book.isDiscarded(), book.getDeliveryAddress(),
+                        book.getBookspackage().getClient(), book.getBookspackage().getMerchant());
 
         return bookForTransportationModel;
     }
@@ -125,5 +132,21 @@ public class BookForTransportationModel implements java.io.Serializable {
 
     public void setDeliveryAddress(String deliveryAddress) {
         this.deliveryAddress = deliveryAddress;
+    }
+
+    public String getClient() {
+        return client;
+    }
+
+    public void setClient(String client) {
+        this.client = client;
+    }
+
+    public String getMerchant() {
+        return merchant;
+    }
+
+    public void setMerchant(String merchant) {
+        this.merchant = merchant;
     }
 }

@@ -370,7 +370,7 @@ a:link:hover, a:visited:hover  {
 
 #export-pane{
     margin-bottom: 5px;
-    
+
 }
 
 #export-pane > button {
@@ -404,4 +404,16 @@ th[role="columnheader"] {
 
 .filter-column-80-percent {
     width: 80% !important;
+}
+
+.TNT {
+    background-color:#FFFF5C !important;
+}
+
+.Финансов.Отдел {
+    background-color:#FF7777 !important;
+}
+
+.За.Вторник {
+    background-color:#109FFF !important;
 }

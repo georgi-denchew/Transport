@@ -90,7 +90,7 @@
                     </f:facet>
                     <p:outputLabel value="#{book.bookspackageNumber}"/>  
                 </p:column>
- 
+
                 <p:column 
                     sortBy="#{book.deliveryAddress}"
                     filterBy="#{book.deliveryAddress}"
@@ -112,6 +112,26 @@
                         <h:outputText value="Печатница"/>
                     </f:facet>
                     <p:outputLabel value="#{book.printingHouseName}"/>
+                </p:column>
+
+                <p:column sortBy="#{book.client}"
+                          filterBy="#{book.client}" 
+                          filterMatchMode="contains">
+
+                    <f:facet name="header">
+                        <h:outputText value="Клиент"/>
+                    </f:facet>
+                    <p:outputLabel value="#{book.client}"/>
+                </p:column>
+
+                <p:column sortBy="#{book.merchant}"
+                          filterBy="#{book.merchant}" 
+                          filterMatchMode="contains">
+
+                    <f:facet name="header">
+                        <h:outputText value="Търговец"/>
+                    </f:facet>
+                    <p:outputLabel value="#{book.merchant}"/>
                 </p:column>
 
                 <p:column>

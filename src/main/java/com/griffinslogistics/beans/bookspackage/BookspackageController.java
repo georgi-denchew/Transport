@@ -13,6 +13,7 @@ import com.griffinslogistics.db.entities.Transportation;
 import com.griffinslogistics.db.entities.TruckGroup;
 import com.griffinslogistics.db.helpers.TransportDbHelper;
 import com.griffinslogistics.enums.BookspackagePriorityEnum;
+import com.griffinslogistics.enums.BookspackageStateEnum;
 import com.griffinslogistics.excel.BDLGenerator;
 import com.griffinslogistics.excel.CMRGenerator;
 import com.griffinslogistics.exceptions.ConcurentUpdateException;
@@ -73,6 +74,9 @@ public class BookspackageController implements Serializable {
 
     private List<BookspackageHistory> bookspackageHistories;
 
+    private SelectItem[] bookspackageStateSelectItems;
+    private SelectItem[] bookspackageStateFilterSelectItems;
+
     private SelectItem[] bookspackagePrioritySelectItems;
     private SelectItem[] bookspackagePriorityFilterSelectItems;
 
@@ -107,6 +111,8 @@ public class BookspackageController implements Serializable {
         initTruckGroups();
         initTotals();
         generateBookspackagePrioritySelectItems();
+        generateBookspackageStateSelectItems();
+
     }
 
     public void onEdit(RowEditEvent event) {
@@ -203,7 +209,7 @@ public class BookspackageController implements Serializable {
             this.newBookspackage = copiedBookspackage;
             message = new FacesMessage(FacesMessage.SEVERITY_INFO, "Пратката е поставена!", "");
         }
-        
+
         FacesContext.getCurrentInstance().addMessage(null, message);
 
     }
@@ -257,7 +263,7 @@ public class BookspackageController implements Serializable {
             externalContext.responseReset();
 
             String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            
+
 //            String contentType = "application/vnd.ms-excel";
             externalContext.setResponseContentType(contentType);
             String transportNumber = this.transportationForBookspackage.getWeekNumber() + "/" + this.transportationForBookspackage.getYear();
@@ -302,7 +308,7 @@ public class BookspackageController implements Serializable {
             externalContext.responseReset();
 
             String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            
+
 //            String contentType = "application/vnd.ms-excel";
             externalContext.setResponseContentType(contentType);
             String packageNumber = selectedBookspackage.getPackageNumber();
@@ -482,6 +488,19 @@ public class BookspackageController implements Serializable {
         }
     }
 
+    private void generateBookspackageStateSelectItems() {
+        BookspackageStateEnum[] states = BookspackageStateEnum.values();
+
+        this.bookspackageStateSelectItems = new SelectItem[states.length];
+        this.bookspackageStateFilterSelectItems = new SelectItem[states.length + 1];
+        this.bookspackageStateFilterSelectItems[0] = new SelectItem("", "Всички");
+
+        for (int i = 0; i < states.length; i++) {
+            this.bookspackageStateSelectItems[i] = new SelectItem(states[i].getValue(), states[i].getDisplayValue());
+            this.bookspackageStateFilterSelectItems[i + 1] = new SelectItem(states[i].getValue(), states[i].getDisplayValue());
+        }
+    }
+
     private void generateBookspackagePrioritySelectItems() {
         BookspackagePriorityEnum[] priorities = BookspackagePriorityEnum.values();
 
@@ -653,4 +672,21 @@ public class BookspackageController implements Serializable {
     public void setHasBookFilter(boolean hasBookFilter) {
         this.hasBookFilter = hasBookFilter;
     }
+
+    public SelectItem[] getBookspackageStateSelectItems() {
+        return bookspackageStateSelectItems;
+    }
+
+    public void setBookspackageStateSelectItems(SelectItem[] bookspackageStateSelectItems) {
+        this.bookspackageStateSelectItems = bookspackageStateSelectItems;
+    }
+
+    public SelectItem[] getBookspackageStateFilterSelectItems() {
+        return bookspackageStateFilterSelectItems;
+    }
+
+    public void setBookspackageStateFilterSelectItems(SelectItem[] bookspackageStateFilterSelectItems) {
+        this.bookspackageStateFilterSelectItems = bookspackageStateFilterSelectItems;
+    }
+
 }

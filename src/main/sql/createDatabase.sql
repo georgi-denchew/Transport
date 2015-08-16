@@ -182,39 +182,5 @@ foreign key (TransportationId) references transportation(Id)
 ) ENGINE=InnoDB;
 
 
--- alter table bookspackage modify country varchar(50);
--- alter table bookspackage modify phoneNumber varchar(100);
--- alter table bookspackage modify email varchar(100);
--- alter table bookspackage modify client varchar(100);
--- 
--- alter table bookspackagehistory modify country varchar(50);
--- alter table bookspackagehistory modify phoneNumber varchar(100);
--- alter table bookspackagehistory modify email varchar(100);
--- alter table bookspackagehistory modify client varchar(100);
--- alter table bookspackagehistory modify truckGroupName varchar(100);
--- 
--- alter table book modify title varchar(200);
 
--- alter table bookspackage add Priority varchar(30);
--- alter table bookspackagehistory add Priority varchar(30);
--- alter table book add Discarded bit not null default 0;
--- 
--- 
--- alter table bookspackage add RemarksSales varchar(1000);
--- alter table bookspackagehistory add RemarksSales varchar(1000);
--- 
--- alter table bookspackage add RemarksLogistics varchar(1000);
--- alter table bookspackagehistory add RemarksLogistics varchar(1000);
--- 
--- alter table book add PrintingHouseId int;
--- alter table book add constraint foreign key (PrintingHouseId) references printinghouse(Id);
--- 
--- alter table bookspackage add PricePerKilogram decimal(7,2);
--- alter table bookspackagehistory add PricePerKilogram decimal(7,2);
--- 
--- alter table additionalcosts add Description varchar(500);
-
--- alter table book add DeliveryAddress varchar(500);
-
--- alter table bookspackage add column LoadingDay varchar(20);
--- alter table bookspackagehistory add column LoadingDay varchar(20);
+alter table bookspackage add State varchar(100);

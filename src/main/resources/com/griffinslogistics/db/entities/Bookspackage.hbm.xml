@@ -64,6 +64,10 @@
             <column length="20" name="LoadingDay"/>
         </property>
         
+        <property name="state" type="string">
+            <column length="100" name="State"/>
+        </property>
+        
         <bag cascade="delete" fetch="select" inverse="true" lazy="true" name="bookspackageHistories" table="bookspackagehistory">
             <key>
                 <column name="PackageId" not-null="true"/>
